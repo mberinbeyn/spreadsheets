@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spreadsheet Prototype Layout</title>
+  <style>
+    /* ============================================================
+       DESIGN TOKENS
+       Change these variables to adapt the layout to your design.
+       ============================================================ */
+    :root {
+      /* Structural dimensions */
+      --header-height:      122px;
+      --formula-bar-height:  32px;
+      --sheets-bar-height:   28px;
+      --sidebar-width:      320px;
+      --sidebar-min-width:  160px;
+      --sidebar-max-width:  600px;
+      --resize-handle-size:   4px;
+
+      /* Placeholder colors — replace with real design tokens */
+      --color-header:       #FF6B81;
+      --color-formula-bar:  #4ECDC4;
+      --color-grid:         #FF7043;
+      --color-sidebar:      #FFE600;
+      --color-sheets-bar:   #C77DFF;
+      --color-resize-hover: rgba(0, 0, 0, 0.12);
+    }
+
+
+    /* ============================================================
+       RESET
+       ============================================================ */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      height: 100%;
+      overflow: hidden;
+      font-family: Arial, sans-serif;
+    }
+
+
+    /* ============================================================
+       APP SHELL  —  CSS Grid
+       ┌───────────────────────────┐
+       │         HEADER            │  row 1  full width
+       ├──────────────┬────────────┤
+       │  WORKSPACE   │  SIDEBAR   │  row 2  1fr | sidebar-width
+       ├──────────────┴────────────┤
+       │         SHEETS BAR        │  row 3  full width
+       └───────────────────────────┘
+       ============================================================ */
+    .app {
+      display: grid;
+      grid-template-columns: 1fr var(--sidebar-width);
+      grid-template-rows:
+        var(--header-height)
+        1fr
+        var(--sheets-bar-height);
+      height: 100vh;
+      width: 100%;
+      transition: grid-template-columns 0.2s ease;
+    }
+
+    /* Sidebar hidden: collapse to zero width */
+    .app.sidebar-hidden {
+      grid-template-columns: 1fr 0;
+    }
+
+
+    /* ============================================================
+       HEADER
+       Spans all columns. Fixed — does not scroll.
+       ============================================================ */
+    .app-header {
+      grid-column: 1 / -1;
+      grid-row: 1;
+      background-color: var(--color-header);
+      overflow: hidden;
+      /* Content: toolbar, menus, title bar… */
+    }
+
+
+    /* ============================================================
+       WORKSPACE  —  Flexbox column
+       Contains formula bar + grid, fills the left column.
+       ============================================================ */
+    .app-workspace {
+      grid-column: 1;
+      grid-row: 2;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-width: 0; /* prevent grid blowout on narrow viewports */
+    }
+
+    /* -- Formula Bar -------------------------------------------- */
+    .formula-bar {
+      flex: 0 0 var(--formula-bar-height);
+      background-color: var(--color-formula-bar);
+      overflow: hidden;
+      /* Content: cell address box, fx label, formula input… */
+    }
+
+    /* -- Grid Area ---------------------------------------------- */
+    .grid-area {
+      flex: 1;
+      overflow: auto;
+      background-color: var(--color-grid);
+      /* Content: row/column headers + cell canvas */
+    }
+
+
+    /* ============================================================
+       SIDEBAR
+       Right panel. Width is controlled via --sidebar-width.
+       ============================================================ */
+    .app-sidebar {
+      grid-column: 2;
+      grid-row: 2;
+      position: relative;
+      overflow: hidden;
+      background-color: var(--color-sidebar);
+      /* Content: property panels, charts, formatting… */
+    }
+
+    /* Resize handle — sits on the left edge of the sidebar */
+    .sidebar-resize-handle {
+      position: absolute;
+      inset: 0 auto 0 0; /* top:0 right:auto bottom:0 left:0 */
+      width: var(--resize-handle-size);
+      cursor: col-resize;
+      z-index: 10;
+      transition: background-color 0.15s;
+    }
+
+    .sidebar-resize-handle:hover,
+    .sidebar-resize-handle.is-dragging {
+      background-color: var(--color-resize-hover);
+    }
+
+    /* Hide resize affordance when sidebar is collapsed */
+    .app.sidebar-hidden .sidebar-resize-handle {
+      display: none;
+    }
+
+
+    /* ============================================================
+       SHEETS BAR
+       Spans all columns. Fixed — does not scroll.
+       ============================================================ */
+    .sheets-bar {
+      grid-column: 1 / -1;
+      grid-row: 3;
+      background-color: var(--color-sheets-bar);
+      overflow: hidden;
+      /* Content: sheet tabs, add-sheet button… */
+    }
+  </style>
+</head>
+<body>
+
+<div class="app" id="app">
+
+  <!-- =====================================================
+       HEADER
+       Toolbar rows, menu bar, window controls, etc.
+       ===================================================== -->
+  <header class="app-header" id="appHeader">
+    <!-- SLOT: header content -->
+  </header>
+
+  <!-- =====================================================
+       WORKSPACE
+       Formula bar stacked above the scrollable grid.
+       ===================================================== -->
+  <div class="app-workspace" id="appWorkspace">
+
+    <div class="formula-bar" id="formulaBar">
+      <!-- SLOT: formula bar content -->
+    </div>
+
+    <div class="grid-area" id="gridArea">
+      <!-- SLOT: grid / spreadsheet canvas -->
+    </div>
+
+  </div>
+
+  <!-- =====================================================
+       SIDEBAR
+       Right-side panel. Resizable via drag handle.
+       Toggle visibility with layout.toggleSidebar().
+       ===================================================== -->
+  <aside class="app-sidebar" id="appSidebar">
+    <div class="sidebar-resize-handle" id="sidebarResizeHandle"></div>
+    <!-- SLOT: sidebar content -->
+  </aside>
+
+  <!-- =====================================================
+       SHEETS BAR
+       Sheet tabs, navigation controls.
+       ===================================================== -->
+  <div class="sheets-bar" id="sheetsBar">
+    <!-- SLOT: sheet tab list -->
+  </div>
+
+</div><!-- /.app -->
+
+
+<script>
+  /**
+   * Spreadsheet Layout Controller
+   *
+   * Public API (accessible as window.layout):
+   *   layout.toggleSidebar()         — show / hide sidebar
+   *   layout.setSidebarWidth(px)     — set sidebar width programmatically
+   *   layout.getSidebarWidth()       — returns current sidebar width in px
+   *
+   * Sidebar is resizable by dragging its left edge.
+   */
+  (() => {
+    'use strict';
+
+    const app           = document.getElementById('app');
+    const resizeHandle  = document.getElementById('sidebarResizeHandle');
+    const root          = document.documentElement;
+
+    // ── Helpers ──────────────────────────────────────────────────────────
+    const getCSSPx = (prop) =>
+      parseInt(getComputedStyle(root).getPropertyValue(prop).trim(), 10);
+
+    const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
+
+
+    // ── Sidebar resize by drag ────────────────────────────────────────────
+    let dragging   = false;
+    let dragStartX = 0;
+    let dragStartW = 0;
+
+    resizeHandle.addEventListener('mousedown', (e) => {
+      dragging   = true;
+      dragStartX = e.clientX;
+      dragStartW = getCSSPx('--sidebar-width');
+
+      resizeHandle.classList.add('is-dragging');
+      document.body.style.cursor     = 'col-resize';
+      document.body.style.userSelect = 'none';
+
+      e.preventDefault();
+    });
+
+    document.addEventListener('mousemove', (e) => {
+      if (!dragging) return;
+
+      // Dragging LEFT  → delta > 0 → sidebar widens
+      // Dragging RIGHT → delta < 0 → sidebar narrows
+      const delta    = dragStartX - e.clientX;
+      const minWidth = getCSSPx('--sidebar-min-width');
+      const maxWidth = getCSSPx('--sidebar-max-width');
+      const newWidth = clamp(dragStartW + delta, minWidth, maxWidth);
+
+      root.style.setProperty('--sidebar-width', `${newWidth}px`);
+    });
+
+    document.addEventListener('mouseup', () => {
+      if (!dragging) return;
+      dragging = false;
+
+      resizeHandle.classList.remove('is-dragging');
+      document.body.style.cursor     = '';
+      document.body.style.userSelect = '';
+    });
+
+
+    // ── Public API ────────────────────────────────────────────────────────
+    window.layout = {
+      /**
+       * Toggle sidebar visibility.
+       * @param {boolean} [force] — pass true/false to set explicitly
+       */
+      toggleSidebar(force) {
+        if (typeof force === 'boolean') {
+          app.classList.toggle('sidebar-hidden', !force);
+        } else {
+          app.classList.toggle('sidebar-hidden');
+        }
+      },
+
+      /** Set sidebar width in pixels. Respects min/max constraints. */
+      setSidebarWidth(px) {
+        const minWidth = getCSSPx('--sidebar-min-width');
+        const maxWidth = getCSSPx('--sidebar-max-width');
+        root.style.setProperty('--sidebar-width', `${clamp(px, minWidth, maxWidth)}px`);
+      },
+
+      /** Returns the current sidebar width in pixels. */
+      getSidebarWidth() {
+        return getCSSPx('--sidebar-width');
+      },
+    };
+  })();
+</script>
+
+</body>
+</html>
