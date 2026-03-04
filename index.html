@@ -376,22 +376,31 @@
       pointer-events: none;
       z-index: 6;
       display: none;
-      background: rgba(76, 175, 80, 0.10);
-      border: 1.5px solid rgba(76, 175, 80, 0.45);
-      box-shadow: inset 0 0 0 1px rgba(76,175,80,0.12)
+      background: rgba(33, 150, 243, 0.10);
+      border: 1.5px solid rgba(33, 150, 243, 0.45);
+      box-shadow: inset 0 0 0 1px rgba(33, 150, 243, 0.12)
+    }
+
+    #pv-placeholder-border {
+      position: fixed;
+      pointer-events: none;
+      z-index: 5;
+      display: none;
+      border: 2px solid #4caf50;
+      border-radius: 1px;
     }
     /* Case 2 — insert between data: new column squeezes between existing ones */
     #zone-area-hint.hint-insert-col {
-      background: rgba(76, 175, 80, 0.06);
-      border: 1.5px dashed rgba(76, 175, 80, 0.60);
-      border-left: 3px solid rgba(76, 175, 80, 0.90);
+      background: rgba(33, 150, 243, 0.06);
+      border: 1.5px dashed rgba(33, 150, 243, 0.60);
+      border-left: 3px solid rgba(33, 150, 243, 0.90);
       box-shadow: none
     }
     /* Case 2 — insert between data: new row squeezes between existing ones */
     #zone-area-hint.hint-insert-row {
-      background: rgba(76, 175, 80, 0.06);
-      border: 1.5px dashed rgba(76, 175, 80, 0.60);
-      border-top: 3px solid rgba(76, 175, 80, 0.90);
+      background: rgba(33, 150, 243, 0.06);
+      border: 1.5px dashed rgba(33, 150, 243, 0.60);
+      border-top: 3px solid rgba(33, 150, 243, 0.90);
       box-shadow: none
     }
     /* Case 3 — meta/filter: field goes to filter layer, not into pivot data */
@@ -401,11 +410,30 @@
       box-shadow: inset 0 0 0 1px rgba(96, 125, 139, 0.11)
     }
 
+    /* ===== Pivot row group toggle ===== */
+    .pv-toggle {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 14px;
+      height: 14px;
+      font-size: 9px;
+      color: #2e7d32;
+      cursor: pointer;
+      user-select: none;
+      margin-right: 3px;
+      border: 1px solid #a5d6a7;
+      border-radius: 2px;
+      vertical-align: middle;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+    .pv-toggle:hover { background: #e8f5e9; }
+
     /* ===== Cell selection ===== */
     .grid td.selected {
       outline: 2px solid #4caf50;
       outline-offset: -2px;
-      background: transparent !important
     }
     .grid thead th.col-highlight {
       background: #e8f5e9 !important;
@@ -559,7 +587,7 @@
 
     .grid {
       border-collapse: collapse;
-      font-size: 13px;
+      font-size: 12px;
       table-layout: fixed
     }
 
@@ -621,6 +649,25 @@
     .pivot-sheet .grid td.pv-total {
       background: #f0f7f0;
       font-weight: 700
+    }
+
+    /* ===== Pivot empty-state placeholder ===== */
+    .pivot-sheet .grid td.pv-ph-corner {
+      background: #f0f7f0;
+    }
+    .pivot-sheet .grid td.pv-ph-col-header {
+      background: #f0f7f0;
+      font-weight: 700;
+      color: #2e7d32;
+      text-align: center;
+    }
+    .pivot-sheet .grid td.pv-ph-row-header {
+      background: #f0f7f0;
+      font-weight: 700;
+      color: #2e7d32;
+    }
+    .pivot-sheet .grid td.pv-ph-values {
+      color: #555;
     }
 
     /* ===== Sheets bar ===== */
@@ -769,17 +816,22 @@
     .sidebar-scroll {
       flex: 1;
       overflow-y: auto;
-      padding-bottom: 20px
+      overflow-x: hidden;
+      padding-bottom: 20px;
+      min-width: 0;
     }
 
     .sidebar-body {
       display: flex;
       gap: 0;
-      min-height: 0
+      min-height: 0;
+      min-width: 0;
     }
 
     .zones-col {
       flex: 1.1;
+      min-width: 0;
+      overflow: hidden;
       padding: 8px 14px 8px 20px;
       display: flex;
       flex-direction: column;
@@ -788,6 +840,8 @@
 
     .fields-col {
       flex: 0.9;
+      min-width: 0;
+      overflow: hidden;
       padding: 8px 16px 8px 0
     }
 
@@ -1585,6 +1639,7 @@
 <body>
   <div id="toast-container"></div>
   <div id="zone-area-hint"></div>
+  <div id="pv-placeholder-border"></div>
   <div class="app sidebar-hidden" id="app">
 
     <!-- HEADER -->
@@ -1612,7 +1667,7 @@
       <div class="sidebar-scroll">
         <div class="data-range">
           <div class="data-range-label">Область данных</div>
-          <div class="data-range-box"><span>'Лист 1'!A1:I21</span><span>⊞</span></div>
+          <div class="data-range-box"><span>'Лист 1'!A1:I101</span><span>⊞</span></div>
         </div>
         <div class="validation-banner" id="validation-banner">
           <span class="vb-icon">⚠️</span>
@@ -1663,28 +1718,118 @@
 
   <script>
     const DATA = [
-      ['Дата', 'Заказчик', 'Город', 'Регион', 'Категория', 'Товар', 'Цена за штуку', 'Количество', 'Выручка'],
-      ['01.01.2024', 'Иванов', 'Москва', 'Центр', 'Электроника', 'Ноутбук', 45000, 2, 90000],
-      ['08.01.2024', 'Петрова', 'Санкт-Петербург', 'Север', 'Одежда', 'Куртка', 8500, 3, 25500],
-      ['12.01.2024', 'Сидоров', 'Казань', 'Волга', 'Электроника', 'Смартфон', 32000, 1, 32000],
-      ['15.01.2024', 'Козлова', 'Новосибирск', 'Сибирь', 'Продукты', 'Кофе', 1200, 10, 12000],
-      ['20.01.2024', 'Иванов', 'Москва', 'Центр', 'Продукты', 'Чай', 800, 15, 12000],
-      ['01.02.2024', 'Морозова', 'Екатеринбург', 'Урал', 'Одежда', 'Платье', 6200, 2, 12400],
-      ['05.02.2024', 'Волков', 'Москва', 'Центр', 'Электроника', 'Наушники', 3500, 5, 17500],
-      ['10.02.2024', 'Петрова', 'Санкт-Петербург', 'Север', 'Продукты', 'Молоко', 90, 20, 1800],
-      ['14.02.2024', 'Новикова', 'Ростов-на-Дону', 'Юг', 'Электроника', 'Планшет', 28000, 1, 28000],
-      ['18.02.2024', 'Сидоров', 'Казань', 'Волга', 'Одежда', 'Джинсы', 4500, 4, 18000],
-      ['01.03.2024', 'Козлова', 'Новосибирск', 'Сибирь', 'Электроника', 'Смартфон', 35000, 2, 70000],
-      ['05.03.2024', 'Иванов', 'Москва', 'Центр', 'Одежда', 'Рубашка', 3200, 3, 9600],
-      ['10.03.2024', 'Морозова', 'Екатеринбург', 'Урал', 'Продукты', 'Кофе', 1300, 8, 10400],
-      ['15.03.2024', 'Волков', 'Москва', 'Центр', 'Продукты', 'Сок', 150, 12, 1800],
-      ['20.03.2024', 'Новикова', 'Ростов-на-Дону', 'Юг', 'Одежда', 'Куртка', 9000, 1, 9000],
-      ['02.04.2024', 'Петрова', 'Санкт-Петербург', 'Север', 'Электроника', 'Ноутбук', 52000, 1, 52000],
-      ['08.04.2024', 'Сидоров', 'Казань', 'Волга', 'Продукты', 'Чай', 750, 20, 15000],
-      ['14.04.2024', 'Козлова', 'Новосибирск', 'Сибирь', 'Одежда', 'Платье', 7000, 2, 14000],
-      ['20.04.2024', 'Иванов', 'Москва', 'Центр', 'Электроника', 'Наушники', 4000, 4, 16000],
-      ['25.04.2024', 'Морозова', 'Екатеринбург', 'Урал', 'Электроника', 'Планшет', 30000, 1, 30000],
+      ["Дата", "Заказчик", "Город", "Регион", "Категория", "Товар", "Цена за штуку", "Количество", "Выручка"],
+      ["1/1/2021", "Sweetables", "Гамбург", "Север", "Крупы", "Гречка", 89, 216, 19224],
+      ["1/1/2021", "Sweetables", "Гамбург", "Север", "Сухофрукты", "Изюм", 195, 127, 24765],
+      ["1/1/2021", "Gold Food", "Штутгарт", "Юг", "Масла", "Подсолнечное масло", 149, 270, 40230],
+      ["1/1/2021", "NutriFix", "Штутгарт", "Юг", "Напитки", "Зеленый чай", 189, 196, 37044],
+      ["1/1/2021", "NutriFix", "Штутгарт", "Юг", "Сухофрукты", "Сушеные яблоки", 175, 108, 18900],
+      ["1/1/2021", "NutriFix", "Штутгарт", "Юг", "Масла", "Подсолнечное масло", 149, 222, 33078],
+      ["1/2/2021", "Organica", "Гамбург", "Север", "Консервы", "Говядина тушеная", 285, 75, 21375],
+      ["1/2/2021", "Go Bio", "Франкфурт", "Запад", "Напитки", "Кофе", 549, 29, 15921],
+      ["1/2/2021", "Cooking Corner", "Штутгарт", "Юг", "Крупы", "Рис", 79, 604, 47716],
+      ["1/2/2021", "Cooking Corner", "Штутгарт", "Юг", "Крупы", "Гречка", 89, 234, 20826],
+      ["1/2/2021", "Go Bio", "Дрезден", "Восток", "Масла", "Сливочное масло", 199, 57, 11343],
+      ["1/3/2021", "NutriFix", "Гамбург", "Север", "Консервы", "Шпроты", 149, 76, 11324],
+      ["1/3/2021", "Organica", "Гамбург", "Север", "Масла", "Сливочное масло", 199, 311, 61889],
+      ["1/3/2021", "Organica", "Гамбург", "Север", "Консервы", "Шпроты", 149, 51, 7599],
+      ["1/3/2021", "Sweetables", "Мюнхен", "Юг", "Напитки", "Зеленый чай", 189, 139, 26271],
+      ["1/3/2021", "Go Bio", "Франкфурт", "Запад", "Консервы", "Килька в томате", 75, 31, 2325],
+      ["1/3/2021", "Cooking Corner", "Штутгарт", "Юг", "Масла", "Подсолнечное масло", 149, 594, 88506],
+      ["1/3/2021", "Organica", "Штутгарт", "Юг", "Сыры", "Гауда", 520, 220, 114400],
+      ["1/4/2021", "Sweetables", "Мюнхен", "Юг", "Сыры", "Гауда", 520, 523, 271960],
+      ["1/4/2021", "Gold Food", "Кёльн", "Запад", "Масла", "Сливочное масло", 199, 191, 38009],
+      ["1/4/2021", "Go Bio", "Франкфурт", "Запад", "Сыры", "Моцарелла", 310, 82, 25420],
+      ["1/4/2021", "Cooking Corner", "Гамбург", "Север", "Сухофрукты", "Изюм", 195, 224, 43680],
+      ["1/4/2021", "mymeal", "Гамбург", "Север", "Сыры", "Гауда", 520, 610, 317200],
+      ["1/4/2021", "mymeal", "Гамбург", "Север", "Консервы", "Килька в томате", 75, 131, 9825],
+      ["1/5/2021", "Sweetables", "Мюнхен", "Юг", "Напитки", "Зеленый чай", 189, 334, 63126],
+      ["1/5/2021", "Go Bio", "Кёльн", "Запад", "Консервы", "Говядина тушеная", 285, 46, 13110],
+      ["1/5/2021", "Go Bio", "Кёльн", "Запад", "Крупы", "Гречка", 89, 117, 10413],
+      ["1/5/2021", "Organica", "Дрезден", "Восток", "Сладости", "Зефир", 155, 15, 2325],
+      ["1/5/2021", "Organica", "Дрезден", "Восток", "Консервы", "Шпроты", 149, 24, 3576],
+      ["1/5/2021", "Cooking Corner", "Гамбург", "Север", "Сухофрукты", "Курага", 269, 228, 61332],
+      ["1/6/2021", "Cooking Corner", "Бремен", "Север", "Сухофрукты", "Сушеные яблоки", 175, 69, 12075],
+      ["1/6/2021", "Organica", "Дрезден", "Восток", "Консервы", "Говядина тушеная", 285, 12, 3420],
+      ["1/6/2021", "foodbite", "Берлин", "Восток", "Сыры", "Гауда", 520, 1525, 793000],
+      ["1/6/2021", "Cooking Corner", "Гамбург", "Север", "Консервы", "Говядина тушеная", 285, 82, 23370],
+      ["1/6/2021", "Gold Food", "Гамбург", "Север", "Сухофрукты", "Курага", 269, 156, 41964],
+      ["1/7/2021", "mymeal", "Мюнхен", "Юг", "Сухофрукты", "Курага", 269, 101, 27169],
+      ["1/7/2021", "Organica", "Мюнхен", "Юг", "Крупы", "Перловка", 69, 201, 13869],
+      ["1/7/2021", "Organica", "Мюнхен", "Юг", "Сладости", "Шоколад", 99, 414, 40986],
+      ["1/7/2021", "foodbite", "Берлин", "Восток", "Сладости", "Зефир", 155, 246, 38130],
+      ["1/7/2021", "Gold Food", "Берлин", "Восток", "Сухофрукты", "Сушеные яблоки", 175, 177, 30975],
+      ["1/7/2021", "Gold Food", "Берлин", "Восток", "Масла", "Оливковое масло", 650, 154, 100100],
+      ["1/7/2021", "Gold Food", "Берлин", "Восток", "Сухофрукты", "Изюм", 195, 180, 35100],
+      ["1/7/2021", "Sweetables", "Гамбург", "Север", "Сладости", "Мармелад", 129, 182, 23478],
+      ["1/7/2021", "Gold Food", "Гамбург", "Север", "Напитки", "Зеленый чай", 189, 340, 64260],
+      ["1/7/2021", "Gold Food", "Гамбург", "Север", "Сухофрукты", "Курага", 269, 141, 37929],
+      ["1/8/2021", "foodbite", "Бремен", "Север", "Крупы", "Рис", 79, 273, 21567],
+      ["1/8/2021", "foodbite", "Бремен", "Север", "Напитки", "Черный чай", 159, 246, 39114],
+      ["1/8/2021", "mymeal", "Бремен", "Север", "Сыры", "Филадельфия", 380, 64, 24320],
+      ["1/8/2021", "Cooking Corner", "Берлин", "Восток", "Сладости", "Мармелад", 129, 509, 65661],
+      ["1/8/2021", "Cooking Corner", "Берлин", "Восток", "Напитки", "Кофе", 549, 561, 308109],
+      ["1/8/2021", "Organica", "Гамбург", "Север", "Масла", "Подсолнечное масло", 149, 398, 59302],
+      ["1/9/2021", "foodbite", "Бремен", "Север", "Сухофрукты", "Изюм", 195, 63, 12285],
+      ["1/9/2021", "mymeal", "Бремен", "Север", "Крупы", "Рис", 79, 207, 16353],
+      ["1/9/2021", "Cooking Corner", "Берлин", "Восток", "Крупы", "Гречка", 89, 762, 67818],
+      ["1/9/2021", "Organica", "Гамбург", "Север", "Крупы", "Рис", 79, 374, 29546],
+      ["1/10/2021", "foodbite", "Дрезден", "Восток", "Масла", "Сливочное масло", 199, 177, 35223],
+      ["1/10/2021", "foodbite", "Дрезден", "Восток", "Напитки", "Кофе", 549, 41, 22509],
+      ["1/11/2021", "Organica", "Бремен", "Север", "Напитки", "Кофе", 549, 27, 14823],
+      ["1/11/2021", "Go Bio", "Бремен", "Север", "Сыры", "Филадельфия", 380, 28, 10640],
+      ["1/11/2021", "foodbite", "Дрезден", "Восток", "Масла", "Оливковое масло", 650, 57, 37050],
+      ["1/11/2021", "Go Bio", "Гамбург", "Север", "Сухофрукты", "Курага", 269, 84, 22596],
+      ["1/11/2021", "Cooking Corner", "Мюнхен", "Юг", "Крупы", "Перловка", 69, 452, 31188],
+      ["1/11/2021", "Cooking Corner", "Мюнхен", "Юг", "Крупы", "Гречка", 89, 302, 26878],
+      ["1/12/2021", "Organica", "Бремен", "Север", "Напитки", "Зеленый чай", 189, 35, 6615],
+      ["1/12/2021", "Go Bio", "Гамбург", "Север", "Крупы", "Гречка", 89, 134, 11926],
+      ["1/12/2021", "Sweetables", "Мюнхен", "Юг", "Сыры", "Гауда", 520, 408, 212160],
+      ["1/12/2021", "Sweetables", "Мюнхен", "Юг", "Сухофрукты", "Сушеные яблоки", 175, 101, 17675],
+      ["1/13/2021", "Organica", "Бремен", "Север", "Напитки", "Черный чай", 159, 94, 14946],
+      ["1/13/2021", "Sweetables", "Мюнхен", "Юг", "Крупы", "Гречка", 89, 166, 14774],
+      ["1/15/2021", "Organica", "Франкфурт", "Запад", "Сухофрукты", "Курага", 269, 34, 9146],
+      ["1/16/2021", "Organica", "Франкфурт", "Запад", "Сухофрукты", "Изюм", 195, 29, 5655],
+      ["1/16/2021", "Organica", "Франкфурт", "Запад", "Сладости", "Мармелад", 129, 49, 6321],
+      ["1/17/2021", "Gold Food", "Кёльн", "Запад", "Масла", "Подсолнечное масло", 149, 188, 28012],
+      ["1/17/2021", "Cooking Corner", "Штутгарт", "Юг", "Масла", "Оливковое масло", 650, 126, 81900],
+      ["1/18/2021", "Gold Food", "Кёльн", "Запад", "Сыры", "Филадельфия", 380, 71, 26980],
+      ["1/18/2021", "Cooking Corner", "Штутгарт", "Юг", "Крупы", "Перловка", 69, 518, 35742],
+      ["1/19/2021", "Cooking Corner", "Кёльн", "Запад", "Крупы", "Рис", 79, 644, 50876],
+      ["1/19/2021", "foodbite", "Кёльн", "Запад", "Сухофрукты", "Курага", 269, 168, 45192],
+      ["1/19/2021", "Go Bio", "Кёльн", "Запад", "Специи", "Базилик", 65, 35, 2275],
+      ["1/19/2021", "Cooking Corner", "Штутгарт", "Юг", "Консервы", "Килька в томате", 75, 272, 20400],
+      ["1/19/2021", "NutriFix", "Дрезден", "Восток", "Специи", "Базилик", 65, 21, 1365],
+      ["1/20/2021", "Cooking Corner", "Кёльн", "Запад", "Сладости", "Шоколад", 99, 582, 57618],
+      ["1/20/2021", "foodbite", "Кёльн", "Запад", "Масла", "Подсолнечное масло", 149, 372, 55428],
+      ["1/20/2021", "mymeal", "Штутгарт", "Юг", "Напитки", "Кофе", 549, 92, 50508],
+      ["1/20/2021", "foodbite", "Бремен", "Север", "Специи", "Базилик", 65, 53, 3445],
+      ["1/20/2021", "foodbite", "Дрезден", "Восток", "Крупы", "Перловка", 69, 165, 11385],
+      ["1/20/2021", "foodbite", "Дрезден", "Восток", "Сладости", "Мармелад", 129, 63, 8127],
+      ["1/20/2021", "NutriFix", "Дрезден", "Восток", "Сладости", "Шоколад", 99, 80, 7920],
+      ["1/20/2021", "NutriFix", "Дрезден", "Восток", "Крупы", "Рис", 79, 109, 8611],
+      ["1/21/2021", "Cooking Corner", "Бремен", "Север", "Консервы", "Шпроты", 149, 63, 9387],
+      ["1/21/2021", "Cooking Corner", "Бремен", "Север", "Сухофрукты", "Изюм", 195, 77, 15015],
+      ["1/21/2021", "NutriFix", "Бремен", "Север", "Специи", "Кориандр", 55, 10, 550],
+      ["1/21/2021", "Organica", "Бремен", "Север", "Напитки", "Кофе", 549, 28, 15372],
+      ["1/21/2021", "foodbite", "Дрезден", "Восток", "Напитки", "Кофе", 549, 78, 42822],
+      ["1/21/2021", "Organica", "Берлин", "Восток", "Консервы", "Говядина тушеная", 285, 96, 27360],
+      ["1/21/2021", "Organica", "Берлин", "Восток", "Специи", "Кориандр", 55, 59, 3245],
+      ["1/21/2021", "Sweetables", "Мюнхен", "Юг", "Сыры", "Моцарелла", 310, 223, 69130],
+      ["1/22/2021", "Sweetables", "Бремен", "Север", "Масла", "Подсолнечное масло", 149, 146, 21754],
+      ["1/22/2021", "Sweetables", "Бремен", "Север", "Крупы", "Рис", 79, 210, 16590],
+      ["1/22/2021", "Organica", "Бремен", "Север", "Сладости", "Зефир", 155, 16, 2480],
     ];
+
+    // Format dates M/D/YYYY → DD.MM.YYYY
+    DATA.slice(1).forEach(r => {
+      if (typeof r[0] === 'string' && r[0].includes('/')) {
+        const p = r[0].split('/');
+        r[0] = String(p[1]).padStart(2,'0') + '.' + String(p[0]).padStart(2,'0') + '.' + p[2];
+      }
+    });
+    // Capitalize Заказчик (col 1)
+    DATA.slice(1).forEach(r => { if (typeof r[1] === 'string' && r[1]) r[1] = r[1][0].toUpperCase() + r[1].slice(1); });
 
     const FIELDS = [
       { id: 'f0', name: 'Дата', col: 0, type: 'date', color: '#ef9a9a' },
@@ -1751,6 +1896,8 @@
     const zones = { rows: [], columns: [], values: [], filters: [] };
     let activeSheet = 'source';
     let pivotGrid = null;
+    const collapsedGroups = new Set(); // group keys (first row-field value) that are collapsed
+    let _hintPinnedZone = null; // zone whose hint is pinned while ctx-menu is open
 
     // Count how many times each field is used across all zones (multi-use allowed)
     function fieldUsageCounts() {
@@ -1777,6 +1924,8 @@
         dragStartX = e.clientX;
         dragStartW = getCSSPx('--sidebar-width');
         resizeHandle.classList.add('is-dragging');
+        // Disable CSS transition during drag to prevent lag
+        app.style.transition = 'none';
         document.body.style.cursor     = 'col-resize';
         document.body.style.userSelect = 'none';
         e.preventDefault();
@@ -1784,15 +1933,24 @@
 
       document.addEventListener('mousemove', e => {
         if (!dragging) return;
-        const delta    = dragStartX - e.clientX;
-        const newWidth = clamp(dragStartW + delta, getCSSPx('--sidebar-min-width'), getCSSPx('--sidebar-max-width'));
+        const delta  = dragStartX - e.clientX;
+        // Max = min of CSS max and (viewport - 400px minimum workspace)
+        const maxW   = Math.min(getCSSPx('--sidebar-max-width'), window.innerWidth - 400);
+        const newWidth = clamp(dragStartW + delta, getCSSPx('--sidebar-min-width'), Math.max(maxW, getCSSPx('--sidebar-min-width')));
         root.style.setProperty('--sidebar-width', `${newWidth}px`);
+        // Keep fixed-position overlays in sync during drag
+        if (typeof positionPlaceholderBorder === 'function' && activeSheet === 'pivot') {
+          const sc = document.getElementById('grid-scroll');
+          requestAnimationFrame(() => positionPlaceholderBorder(sc, pivotGrid));
+        }
       });
 
       document.addEventListener('mouseup', () => {
         if (!dragging) return;
         dragging = false;
         resizeHandle.classList.remove('is-dragging');
+        // Restore transition after drag ends
+        app.style.transition = '';
         document.body.style.cursor = document.body.style.userSelect = '';
       });
 
@@ -1823,7 +1981,10 @@
     /* ====== RENDER SHEET ====== */
     function renderSheet() {
       const sc = document.getElementById('grid-scroll');
-      if (activeSheet === 'source') renderSourceGrid(sc); else renderPivotGrid(sc);
+      if (activeSheet === 'source') {
+        renderSourceGrid(sc);
+        document.getElementById('pv-placeholder-border').style.display = 'none';
+      } else renderPivotGrid(sc);
       selectedCell = null;
       requestAnimationFrame(selectDefaultCell);
     }
@@ -1845,6 +2006,24 @@
       h += '</tbody></table>'; c.innerHTML = h; c.classList.remove('pivot-sheet');
     }
 
+    // Placeholder data for pivot empty state: A1:E10
+    // Row 0 (row 1): [empty, "Columns", "", "", ""]  — header row
+    // Row 1 (row 2): ["Rows", "Values", "", "", ""]
+    // Rows 2-9: all empty
+    const PIVOT_PLACEHOLDER = (() => {
+      const PH_ROWS = 10, PH_COLS = 5; // A1:E10
+      const cells = [];
+      for (let r = 0; r < PH_ROWS; r++) {
+        const row = Array(PH_COLS).fill(null);
+        row._meta = Array(PH_COLS).fill('');
+        if (r === 0) { row[1] = 'Столбцы'; row._meta[0] = 'ph-corner'; row._meta[1] = 'ph-col-header'; row._meta[2] = 'ph-col-header'; row._meta[3] = 'ph-col-header'; row._meta[4] = 'ph-col-header'; }
+        else if (r === 1) { row[0] = 'Строки'; row[1] = 'Значения'; row._meta[0] = 'ph-row-header'; row._meta[1] = 'ph-values'; }
+        else { row._meta[0] = 'ph-row-header'; }
+        cells.push(row);
+      }
+      return cells;
+    })();
+
     function renderPivotGrid(c) {
       computePivot();
       const g = pivotGrid;
@@ -1853,17 +2032,72 @@
       let h = '<table class="grid"><thead><tr><th class="rn"></th>';
       for (let i = 0; i < nc; i++) h += `<th>${COLS[i] || ''}</th>`;
       h += '</tr></thead><tbody>';
+      let rowNum = 0;
       for (let r = 0; r < tr; r++) {
-        h += '<tr>'; h += `<td class="rn">${r + 1}</td>`;
+        const row = g && g[r] ? g[r] : null;
+        const rm = row ? row._rowMeta : null;
+        // Skip collapsed child rows
+        if (rm && !rm.isFirst && collapsedGroups.has(rm.gk)) continue;
+        rowNum++;
+        h += `<tr><td class="rn">${rowNum}</td>`;
         for (let i = 0; i < nc; i++) {
-          const v = g && g[r] ? g[r][i] : ''; const m = g && g[r] && g[r]._meta ? g[r]._meta[i] : '';
+          const ph = !g && r < PIVOT_PLACEHOLDER.length && i < 5 ? PIVOT_PLACEHOLDER[r] : null;
+          const v = ph ? ph[i] : (row ? row[i] : '');
+          const m = ph ? ph._meta[i] : (row && row._meta ? row._meta[i] : '');
           const isN = typeof v === 'number';
-          let cls = isN ? 'num' : ''; if (m === 'header') cls += ' pv-header'; if (m === 'total') cls += ' pv-total';
-          h += `<td class="${cls}">${v === '' || v === undefined ? '' : (isN ? v.toLocaleString('ru-RU') : v)}</td>`;
+          let cls = isN ? 'num' : '';
+          if (m === 'header') cls += ' pv-header';
+          if (m === 'total') cls += ' pv-total';
+          if (m === 'ph-corner') cls += ' pv-ph-corner';
+          if (m === 'ph-col-header') cls += ' pv-ph-col-header';
+          if (m === 'ph-row-header') cls += ' pv-ph-row-header';
+          if (m === 'ph-values') cls += ' pv-ph-values';
+          let content = v === null || v === '' || v === undefined ? '' : (isN ? v.toLocaleString('ru-RU') : v);
+          // Add toggle button to first cell of group header rows
+          if (rm && rm.isFirst && i === 0) {
+            const icon = collapsedGroups.has(rm.gk) ? '▶' : '▼';
+            const gkEsc = rm.gk.replace(/"/g, '&quot;');
+            content = `<span class="pv-toggle" data-gk="${gkEsc}">${icon}</span>${content}`;
+          }
+          h += `<td class="${cls.trim()}">${content}</td>`;
         }
         h += '</tr>';
       }
       h += '</tbody></table>'; c.innerHTML = h; c.className = 'grid-scroll pivot-sheet';
+      // Toggle click handlers
+      c.querySelectorAll('.pv-toggle').forEach(btn => {
+        btn.addEventListener('click', e => {
+          e.stopPropagation();
+          const gk = btn.dataset.gk;
+          if (collapsedGroups.has(gk)) collapsedGroups.delete(gk); else collapsedGroups.add(gk);
+          renderPivotGrid(c);
+        });
+      });
+      requestAnimationFrame(() => positionPlaceholderBorder(c, g));
+    }
+
+    function positionPlaceholderBorder(scrollEl, g) {
+      const border = document.getElementById('pv-placeholder-border');
+      if (g) { border.style.display = 'none'; return; }
+      const table = scrollEl.querySelector('table');
+      if (!table) { border.style.display = 'none'; return; }
+      const ths = [...table.querySelectorAll('thead tr th')];
+      const tbodyRows = [...table.querySelectorAll('tbody tr')];
+      const gridRect = scrollEl.getBoundingClientRect();
+      const thA = ths[1]?.getBoundingClientRect();
+      const thE = ths[5]?.getBoundingClientRect();
+      const row1 = tbodyRows[0]?.getBoundingClientRect();
+      const row10 = tbodyRows[9]?.getBoundingClientRect();
+      if (!thA || !thE || !row1 || !row10) { border.style.display = 'none'; return; }
+      const left   = Math.max(thA.left,   gridRect.left);
+      const top    = Math.max(row1.top,   gridRect.top);
+      const right  = Math.min(thE.right,  gridRect.right);
+      const bottom = Math.min(row10.bottom, gridRect.bottom);
+      border.style.left   = left + 'px';
+      border.style.top    = top + 'px';
+      border.style.width  = (right - left) + 'px';
+      border.style.height = (bottom - top) + 'px';
+      border.style.display = 'block';
     }
 
     /* ====== PIVOT ====== */
@@ -1970,18 +2204,35 @@
       const lr = []; lr._meta = [];
       rF.forEach(f => { lr.push(f.name); lr._meta.push('header') }); if (!rF.length) { lr.push(''); lr._meta.push('header') }
       const colsI = cKeys.length ? cKeys : [''];
-      colsI.forEach(() => { vE.forEach(ve => { const f = FIELDS.find(x => x.id === ve.fid); const a = ve.agg || (f && f.type === 'number' ? 'СУММ' : 'СЧЁТ'); lr.push(`${f ? f.name : '?'} (${AGG_REV[a] || a})`); lr._meta.push('header') }) });
-      if (!vE.length && !cKeys.length) { lr.push(''); lr._meta.push('header') }
+      colsI.forEach(() => {
+        if (vE.length) { vE.forEach(ve => { const f = FIELDS.find(x => x.id === ve.fid); const a = ve.agg || (f && f.type === 'number' ? 'СУММ' : 'СЧЁТ'); lr.push(`${f ? f.name : '?'} (${AGG_REV[a] || a})`); lr._meta.push('header') }); }
+        else { lr.push(''); lr._meta.push('header'); }
+      });
       grid.push(lr);
+      let prevFirstKey = '\x00'; // sentinel
       sortedRKeys.forEach((rk, ri) => {
         const dr = []; dr._meta = []; const rl = sortedRLabels[ri];
-        for (let i = 0; i < rhc; i++) { dr.push(rl && i < rl.length ? rl[i] : ''); dr._meta.push('') }
+        const firstKey = rl && rl.length > 0 ? String(rl[0]) : '';
+        const isFirst = rF.length < 2 || firstKey !== prevFirstKey;
+        if (isFirst) prevFirstKey = firstKey;
+        for (let i = 0; i < rhc; i++) {
+          // In nested mode (rF >= 2): hide group label on non-first rows of the group
+          const showVal = rF.length < 2 || i > 0 || isFirst;
+          dr.push(showVal && rl && i < rl.length ? rl[i] : ''); dr._meta.push('');
+        }
+        if (rF.length >= 2) dr._rowMeta = { gk: firstKey, isFirst };
         colsI.forEach(ck => { vE.forEach((ve, vi) => { const f = FIELDS.find(x => x.id === ve.fid); const a = ve.agg || (f && f.type === 'number' ? 'СУММ' : 'СЧЁТ'); dr.push(gv(agg2[rk] && agg2[rk][ck] ? agg2[rk][ck][vi] : null, a)); dr._meta.push('') }) }); grid.push(dr)
       });
-      if (showTotal && sortedRKeys.length > 1 && vE.length) {
+      if (showTotal && rF.length > 0 && sortedRKeys.length >= 1) {
         const tr = []; tr._meta = [];
         for (let i = 0; i < rhc; i++) { tr.push(i === 0 ? 'Итого' : ''); tr._meta.push('total') }
-        colsI.forEach(ck => { vE.forEach((ve, vi) => { const f = FIELDS.find(x => x.id === ve.fid); const a = ve.agg || (f && f.type === 'number' ? 'СУММ' : 'СЧЁТ'); let t = 0; sortedRKeys.forEach(rk => { t += gv(agg2[rk] && agg2[rk][ck] ? agg2[rk][ck][vi] : null, a) }); tr.push(t); tr._meta.push('total') }) }); grid.push(tr)
+        if (vE.length) {
+          colsI.forEach(ck => { vE.forEach((ve, vi) => { const f = FIELDS.find(x => x.id === ve.fid); const a = ve.agg || (f && f.type === 'number' ? 'СУММ' : 'СЧЁТ'); let t = 0; sortedRKeys.forEach(rk => { t += gv(agg2[rk] && agg2[rk][ck] ? agg2[rk][ck][vi] : null, a) }); tr.push(t); tr._meta.push('total') }) });
+        } else {
+          // No value fields — extend total row to full pivot width with empty styled cells
+          colsI.forEach(() => { tr.push(''); tr._meta.push('total'); });
+        }
+        grid.push(tr);
       }
       pivotGrid = grid;
     }
@@ -2019,8 +2270,24 @@
       document.body.appendChild(menu);
       requestAnimationFrame(() => { const mr = menu.getBoundingClientRect(); if (mr.bottom > window.innerHeight) menu.style.top = (rect.top - mr.height - 4) + 'px'; if (mr.right > window.innerWidth) menu.style.left = (window.innerWidth - mr.width - 8) + 'px' });
     }
-    function closeCtxMenu() { document.querySelectorAll('.ctx-menu,.ctx-overlay,.filter-popup,.pill-settings').forEach(el => el.remove()) }
-    function initZoneAddButtons() { document.querySelectorAll('.zone-add').forEach(b => { const nb = b.cloneNode(true); b.parentNode.replaceChild(nb, b); nb.addEventListener('click', e => { e.stopPropagation(); showCtxMenu(nb.dataset.zone, nb) }); }); }
+    function closeCtxMenu() {
+      document.querySelectorAll('.ctx-menu,.ctx-overlay,.filter-popup,.pill-settings').forEach(el => el.remove());
+      if (_hintPinnedZone) { _hintPinnedZone = null; clearZoneHint(); }
+    }
+    function initZoneAddButtons() {
+      document.querySelectorAll('.zone-add').forEach(b => {
+        const nb = b.cloneNode(true);
+        b.parentNode.replaceChild(nb, b);
+        nb.addEventListener('click', e => {
+          e.stopPropagation();
+          _hintPinnedZone = nb.dataset.zone;
+          _placeAreaHint(nb.dataset.zone);
+          showCtxMenu(nb.dataset.zone, nb);
+        });
+        nb.addEventListener('mouseenter', () => { _placeAreaHint(nb.dataset.zone); });
+        nb.addEventListener('mouseleave', () => { if (_hintPinnedZone !== nb.dataset.zone) clearZoneHint(); });
+      });
+    }
 
     /* ====== REORDER within zone ====== */
     function clearReorderIndicators() {
@@ -2144,8 +2411,8 @@
             p.querySelector('.fp-chevron').addEventListener('click', e => { e.stopPropagation(); showFilterPopup(i, e.target); });
             p.querySelector('.fp-name').addEventListener('click', e => { e.stopPropagation(); showFilterPopup(i, e.target); });
             p.querySelector('.fp-rm').addEventListener('click', e => { e.stopPropagation(); zones.filters.splice(i, 1); renderAll(); });
-            p.addEventListener('dragstart', e => { e.dataTransfer.setData('text/plain', JSON.stringify({ fid: entry.fid, src: 'zone', sz: 'filters', si: i })); e.dataTransfer.effectAllowed = 'move'; p.classList.add('dragging'); mkGhost(e, f.name); });
-            p.addEventListener('dragend', () => p.classList.remove('dragging'));
+            p.addEventListener('dragstart', e => { const d = { fid: entry.fid, src: 'zone', sz: 'filters', si: i }; e.dataTransfer.setData('text/plain', JSON.stringify(d)); e.dataTransfer.effectAllowed = 'move'; p.classList.add('dragging'); window._currentDragData = d; mkGhost(e, f.name); });
+            p.addEventListener('dragend', () => { p.classList.remove('dragging'); window._currentDragData = null; });
             fdrop.appendChild(p);
           });
         }
@@ -2259,6 +2526,8 @@
         chk.className = 'f-check' + (isActive ? ' active' : '');
         chk.innerHTML = isActive ? '✓' : '';
         chk.addEventListener('click', e => { e.stopPropagation(); toggleFieldByCheckbox(f); });
+        chk.addEventListener('mouseenter', () => { _placeAreaHint(defaultZoneForField(f)); });
+        chk.addEventListener('mouseleave', () => { clearZoneHint(); });
 
         // Handle (drag-only)
         const handle = document.createElement('span');
@@ -2287,8 +2556,6 @@
 
         // Drag only from handle
         handle.addEventListener('mousedown', () => { el.draggable = true; });
-        el.addEventListener('mouseenter', () => { if (!_isDraggingField && !isActive) showZoneHint(defaultZoneForField(f)); });
-        el.addEventListener('mouseleave', () => { if (!_isDraggingField) clearZoneHint(); });
         el.addEventListener('dragstart', e => {
           _isDraggingField = true;
           showZoneHint(defaultZoneForField(f));
@@ -2480,53 +2747,78 @@
       const gridEl = document.getElementById('grid-scroll');
       const gridRect = gridEl.getBoundingClientRect();
       const ths = [...table.querySelectorAll('thead tr th')];
+      const tbodyRows = [...table.querySelectorAll('tbody tr')];
       if (!ths.length) return;
 
-      let left, right = gridRect.right, top, bottom = gridRect.bottom;
+      // Compute bounds of the pivot table itself (not the full grid)
+      function getPivotBounds() {
+        if (pivotGrid && pivotGrid.length) {
+          const lastCol = pivotGrid[0].length; // column count of header row
+          return {
+            left:   (ths[1] || ths[0]).getBoundingClientRect().left,
+            right:  ths[Math.min(lastCol, ths.length - 1)].getBoundingClientRect().right,
+            top:    tbodyRows[0]?.getBoundingClientRect().top    ?? gridRect.top,
+            bottom: tbodyRows[pivotGrid.length - 1]?.getBoundingClientRect().bottom ?? gridRect.bottom,
+          };
+        }
+        // Empty state: placeholder lives in A1:E10 (tbody rows 0–9, th indices 1–5)
+        return {
+          left:   (ths[1] || ths[0]).getBoundingClientRect().left,
+          right:  (ths[5] || ths[ths.length - 1]).getBoundingClientRect().right,
+          top:    tbodyRows[0]?.getBoundingClientRect().top    ?? gridRect.top,
+          bottom: tbodyRows[9]?.getBoundingClientRect().bottom ?? gridRect.bottom,
+        };
+      }
+
+      let left, right, top, bottom;
+      const bounds = getPivotBounds();
 
       if (zoneName === 'rows') {
-        // Column highlight — full grid height
+        // Column highlight — clipped to pivot table height
         const colIdx = Math.min(1 + zones.rows.length, ths.length - 1);
         const r = ths[colIdx].getBoundingClientRect();
-        left = r.left; right = r.right; top = gridRect.top;
+        left = r.left; right = r.right;
+        top = bounds.top; bottom = bounds.bottom;
         if (zones.values.length > 0 || zones.columns.length > 0) hint.classList.add('hint-insert-col');
 
       } else if (zoneName === 'values') {
         const rhc = Math.max(zones.rows.length, 1);
         const V   = zones.values.length;
 
-        if (zones.columns.length > 0 && pivotGrid && pivotGrid.length) {
-          // With column groups: span the entire value rectangle (all groups × new value count)
-          // pivotGrid[0] is the column-header row; its length = rhc + N * max(V,1)
+        if (!pivotGrid) {
+          // Empty state: highlight the full values area B2:E10 (skip row 1 = Columns header)
+          left   = ths[Math.min(rhc + 1, ths.length - 1)].getBoundingClientRect().left;
+          right  = bounds.right;
+          top    = tbodyRows[1]?.getBoundingClientRect().top ?? bounds.top;
+          bottom = bounds.bottom;
+        } else if (zones.columns.length > 0 && pivotGrid.length) {
           const numColGroups = Math.round((pivotGrid[0].length - rhc) / Math.max(V, 1));
-          left  = ths[Math.min(rhc + 1,                        ths.length - 1)].getBoundingClientRect().left;
-          right = ths[Math.min(rhc + numColGroups * (V + 1),   ths.length - 1)].getBoundingClientRect().right;
-          if (V > 0) hint.classList.add('hint-insert-col'); // inserting into existing value area
+          left  = ths[Math.min(rhc + 1,                      ths.length - 1)].getBoundingClientRect().left;
+          right = ths[Math.min(rhc + numColGroups * (V + 1), ths.length - 1)].getBoundingClientRect().right;
+          if (V > 0) hint.classList.add('hint-insert-col');
+          const firstDataIdx = pivotGrid.findIndex(row => row._meta && row._meta[0] !== 'header');
+          const lastDataIdx  = pivotGrid.reduce((acc, row, i) => row._meta && row._meta[0] === 'total' ? acc : i, firstDataIdx >= 0 ? firstDataIdx : 0);
+          top    = tbodyRows[firstDataIdx >= 0 ? firstDataIdx : 0]?.getBoundingClientRect().top ?? bounds.top;
+          bottom = tbodyRows[lastDataIdx]?.getBoundingClientRect().bottom ?? bounds.bottom;
         } else {
-          // No column groups: single new column
-          const colIdx = Math.min(rhc + V + 1, ths.length - 1);
-          const r = ths[colIdx].getBoundingClientRect();
-          left = r.left; right = r.right;
+          // Pivot exists, no column groups: span all value columns
+          left  = ths[Math.min(rhc + 1, ths.length - 1)].getBoundingClientRect().left;
+          right = ths[Math.min(rhc + V + 1, ths.length - 1)].getBoundingClientRect().right;
+          if (V > 0) hint.classList.add('hint-insert-col');
+          const firstDataIdx = pivotGrid.findIndex(row => row._meta && row._meta[0] !== 'header');
+          const lastDataIdx  = pivotGrid.reduce((acc, row, i) => row._meta && row._meta[0] === 'total' ? acc : i, firstDataIdx >= 0 ? firstDataIdx : 0);
+          top    = tbodyRows[firstDataIdx >= 0 ? firstDataIdx : 0]?.getBoundingClientRect().top ?? bounds.top;
+          bottom = tbodyRows[lastDataIdx]?.getBoundingClientRect().bottom ?? bounds.bottom;
         }
 
-        // Clip height to actual data rows — skip header rows at top, empty padding at bottom
-        if (pivotGrid && pivotGrid.length) {
-          const firstDataIdx = pivotGrid.findIndex(row => row._meta && row._meta[0] !== 'header');
-          if (firstDataIdx >= 0) {
-            const tbodyRows = [...table.querySelectorAll('tbody tr')];
-            top    = tbodyRows[firstDataIdx]?.getBoundingClientRect().top    ?? gridRect.top;
-            bottom = tbodyRows[pivotGrid.length - 1]?.getBoundingClientRect().bottom ?? gridRect.bottom;
-          } else { top = gridRect.top; bottom = gridRect.bottom; }
-        } else { top = gridRect.top; bottom = gridRect.bottom; }
-
       } else {
-        // Row highlight — full grid width from col A
+        // Row highlight — clipped to pivot table width
         const rowEl = zoneName === 'columns'
           ? table.querySelector('tbody tr')
           : table.querySelector('thead tr');
         if (!rowEl) return;
         const r = rowEl.getBoundingClientRect();
-        left = (ths[1] || ths[0]).getBoundingClientRect().left;
+        left = bounds.left; right = bounds.right;
         top = r.top; bottom = r.bottom;
         hint.classList.add(zoneName === 'filters' ? 'hint-meta' : 'hint-insert-row');
       }
@@ -2697,6 +2989,20 @@
 
     /* ====== INIT ====== */
     renderFields(); renderZones(); initDrop(); initZoneHighlight(); renderSheet(); initZoneAddButtons();
+
+    // Reposition placeholder border on resize/scroll
+    window.addEventListener('resize', () => {
+      if (activeSheet === 'pivot') {
+        const sc = document.getElementById('grid-scroll');
+        positionPlaceholderBorder(sc, pivotGrid);
+      }
+    });
+    document.getElementById('grid-scroll').addEventListener('scroll', () => {
+      if (activeSheet === 'pivot') {
+        const sc = document.getElementById('grid-scroll');
+        positionPlaceholderBorder(sc, pivotGrid);
+      }
+    });
   </script>
 </body>
 
