@@ -33,9 +33,9 @@
       --header-height:      122px;
       --formula-bar-height:  28px;
       --sheets-bar-height:   30px;
-      --sidebar-width:       420px;
-      --sidebar-min-width:   300px;
-      --sidebar-max-width:   640px;
+      --sidebar-width:       512px;
+      --sidebar-min-width:   512px;
+      --sidebar-max-width:   700px;
       --resize-handle-size:    4px;
 
       /* Orb design tokens */
@@ -790,26 +790,32 @@
     }
 
     .data-range {
-      padding: 10px 20px 12px
+      padding: 0 0 12px
     }
 
     .data-range-label {
-      font-size: 13px;
-      font-weight: 700;
+      font-size: 14px;
+      font-weight: 550;
       color: #333;
       margin-bottom: 6px
     }
 
     .data-range-box {
       background: #f7f7f7;
-      border: 1px solid #ddd;
-      border-radius: 6px;
-      padding: 8px 12px;
+      border: none;
+      border-radius: 12px;
+      height: 36px;
+      padding: 0 12px;
       font-size: 13px;
       color: #555;
       display: flex;
       align-items: center;
-      justify-content: space-between
+      justify-content: space-between;
+      transition: background .15s
+    }
+
+    .data-range-box:hover {
+      background: #efefef
     }
 
     /* ===== Sidebar body (zones left, fields right) ===== */
@@ -826,6 +832,7 @@
       gap: 0;
       min-height: 0;
       min-width: 0;
+      align-items: flex-start;
     }
 
     .zones-col {
@@ -854,9 +861,19 @@
     }
 
     .zone-title {
+      display: flex;
+      align-items: center;
+      gap: 7px;
       font-size: 14px;
       font-weight: 700;
       color: #222
+    }
+
+    .zone-icon {
+      display: flex;
+      align-items: center;
+      color: #555;
+      flex-shrink: 0
     }
 
     .zone-add {
@@ -897,29 +914,16 @@
 
     .zone-empty {
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 12px 10px;
+      padding: 14px 10px;
       color: #bbb;
       text-align: center
     }
 
-    .zone-empty-icon {
-      width: 48px;
-      height: 48px;
-      margin-bottom: 6px;
-      opacity: .25
-    }
-
-    .zone-empty-icon svg {
-      width: 100%;
-      height: 100%
-    }
-
     .zone-empty-text {
       font-size: 12px;
-      line-height: 1.4;
+      line-height: 1.5;
       color: #bbb
     }
 
@@ -1289,25 +1293,37 @@
     /* ===== Available fields ===== */
     .fields-title {
       font-size: 14px;
-      font-weight: 700;
+      font-weight: 550;
       color: #222;
-      padding: 0 0 8px
+      padding: 0 0 6px
     }
 
-    .fields-search {
+    .fields-search-row {
       display: flex;
       align-items: center;
       gap: 6px;
-      margin: 0 0 8px;
+      margin: 0 0 20px
+    }
+
+    .fields-search {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 6px;
       background: #f7f7f7;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      padding: 6px 10px;
-      transition: border-color .15s
+      border: none;
+      border-radius: 12px;
+      height: 36px;
+      padding: 0 10px;
+      transition: background .15s
+    }
+
+    .fields-search:hover {
+      background: #efefef
     }
 
     .fields-search:focus-within {
-      border-color: #4caf50
+      background: #efefef
     }
 
     .fields-search input {
@@ -1324,7 +1340,33 @@
       display: flex;
       align-items: center;
       color: #bbb;
+      flex-shrink: 0
+    }
+
+    .fields-sort-btn {
+      width: 36px;
+      height: 36px;
+      background: #f7f7f7;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       flex-shrink: 0;
+      color: #777;
+      transition: all .15s
+    }
+
+    .fields-sort-btn:hover {
+      background: #efefef;
+      color: #333
+    }
+
+    .fields-sort-btn.active {
+      background: #e8f5e9;
+      border-color: #4caf50;
+      color: #2e7d32
     }
 
     #field-list {
@@ -1340,7 +1382,7 @@
       padding: 6px 8px;
       border-radius: 6px;
       cursor: default;
-      font-size: 13px;
+      font-size: 14px;
       color: #333;
       user-select: none;
       transition: background .1s
@@ -1374,10 +1416,10 @@
     }
 
     .field-item .f-check {
-      width: 16px;
-      height: 16px;
-      border-radius: 3px;
-      border: 1.5px solid #ccc;
+      width: 18px;
+      height: 18px;
+      border-radius: 5px;
+      border: 1.5px solid #c8c8c8;
       flex-shrink: 0;
       display: flex;
       align-items: center;
@@ -1406,9 +1448,12 @@
 
     .field-item .f-type {
       font-size: 11px;
-      color: #aaa;
+      color: #666;
+      background: #efefef;
+      border-radius: 4px;
+      padding: 2px 7px;
       flex-shrink: 0;
-      font-weight: 700
+      font-weight: 500
     }
 
     .sidebar-scroll::-webkit-scrollbar {
@@ -1665,41 +1710,68 @@
         <button class="sidebar-close" title="Закрыть">✕</button>
       </div>
       <div class="sidebar-scroll">
-        <div class="data-range">
-          <div class="data-range-label">Область данных</div>
-          <div class="data-range-box"><span>'Лист 1'!A1:I101</span><span>⊞</span></div>
-        </div>
-        <div class="validation-banner" id="validation-banner">
-          <span class="vb-icon">⚠️</span>
-          <span class="vb-text" id="validation-text"></span>
-          <button class="vb-close" onclick="document.getElementById('validation-banner').classList.remove('visible')">✕</button>
-        </div>
         <div class="sidebar-body">
           <div class="zones-col">
+            <div class="data-range">
+              <div class="data-range-label">Область данных</div>
+              <div class="data-range-box"><span>'Лист 1'!A1:I101</span><span>⊞</span></div>
+            </div>
+            <div class="validation-banner" id="validation-banner">
+              <span class="vb-icon">⚠️</span>
+              <span class="vb-text" id="validation-text"></span>
+              <button class="vb-close" onclick="document.getElementById('validation-banner').classList.remove('visible')">✕</button>
+            </div>
             <!-- Строки -->
             <div class="zone-block">
-              <div class="zone-header"><span class="zone-title">Строки</span><button class="zone-add" data-zone="rows">＋</button></div>
+              <div class="zone-header">
+                <span class="zone-title">
+                  <span class="zone-icon"><svg width="15" height="14" viewBox="0 0 15 14" fill="none"><rect x="1" y="1.5" width="13" height="3" rx="1" fill="currentColor" opacity=".4"/><rect x="1" y="5.5" width="13" height="3" rx="1" fill="currentColor"/><rect x="1" y="9.5" width="13" height="3" rx="1" fill="currentColor" opacity=".4"/></svg></span>
+                  Строки
+                </span>
+                <button class="zone-add" data-zone="rows">＋</button>
+              </div>
               <div class="zone-drop" data-zone="rows" id="drop-rows"></div>
             </div>
             <!-- Столбцы -->
             <div class="zone-block">
-              <div class="zone-header"><span class="zone-title">Столбцы</span><button class="zone-add" data-zone="columns">＋</button></div>
+              <div class="zone-header">
+                <span class="zone-title">
+                  <span class="zone-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="1" width="3" height="12" rx="1" fill="currentColor" opacity=".4"/><rect x="5.5" y="1" width="3" height="12" rx="1" fill="currentColor"/><rect x="10" y="1" width="3" height="12" rx="1" fill="currentColor" opacity=".4"/></svg></span>
+                  Столбцы
+                </span>
+                <button class="zone-add" data-zone="columns">＋</button>
+              </div>
               <div class="zone-drop" data-zone="columns" id="drop-columns"></div>
             </div>
             <!-- Значения -->
             <div class="zone-block">
-              <div class="zone-header"><span class="zone-title">Значения</span><button class="zone-add" data-zone="values">＋</button></div>
+              <div class="zone-header">
+                <span class="zone-title">
+                  <span class="zone-icon" style="font-size:15px;font-weight:400;line-height:1">Σ</span>
+                  Значения
+                </span>
+                <button class="zone-add" data-zone="values">＋</button>
+              </div>
               <div class="zone-drop" data-zone="values" id="drop-values"></div>
             </div>
             <!-- Фильтры -->
             <div class="zone-block">
-              <div class="zone-header"><span class="zone-title">Фильтры</span><button class="zone-add" data-zone="filters">＋</button></div>
+              <div class="zone-header">
+                <span class="zone-title">
+                  <span class="zone-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 3.5h12M3.5 7h7M6 10.5h2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+                  Фильтры
+                </span>
+                <button class="zone-add" data-zone="filters">＋</button>
+              </div>
               <div class="zone-drop" data-zone="filters" id="drop-filters"></div>
             </div>
           </div>
           <div class="fields-col">
             <div class="fields-title">Доступные поля</div>
-            <div class="fields-search"><span class="s-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="12" height="12" viewBox="0 0 16 16"><path fill="currentColor" fill-rule="evenodd" d="M11.536 12.596a6.5 6.5 0 1 1 1.06-1.06l2.935 2.934-1.06 1.06zM12.5 7.5a5 5 0 1 1-10 0 5 5 0 0 1 10 0" clip-rule="evenodd"></path></svg></span><input type="text" id="search-input" placeholder="Поиск"></div>
+            <div class="fields-search-row">
+              <div class="fields-search"><span class="s-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="12" height="12" viewBox="0 0 16 16"><path fill="currentColor" fill-rule="evenodd" d="M11.536 12.596a6.5 6.5 0 1 1 1.06-1.06l2.935 2.934-1.06 1.06zM12.5 7.5a5 5 0 1 1-10 0 5 5 0 0 1 10 0" clip-rule="evenodd"></path></svg></span><input type="text" id="search-input" placeholder="Поиск"></div>
+              <button class="fields-sort-btn" id="fields-sort-btn" title="Сортировка А–Я"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1.5 3.5h7M1.5 7h5M1.5 10.5h3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M11.5 2.5v9M11.5 11.5l-2-2M11.5 11.5l2-2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+            </div>
             <div id="field-list"></div>
           </div>
         </div>
@@ -1842,7 +1914,7 @@
       { id: 'f7', name: 'Количество', col: 7, type: 'number', color: '#80cbc4' },
       { id: 'f8', name: 'Выручка', col: 8, type: 'number', color: '#f48fb1' },
     ];
-    const TYPE_ICON = { date: '📅', text: 'Аа', number: '#', mixed: '⚠' };
+    const TYPE_ICON = { date: 'Даты', text: 'Текст', number: 'Числа', mixed: '⚠' };
     const TYPE_BADGE = { date: 't-date', text: 't-text', number: 't-number', mixed: 't-text' };
     const COLS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     const AGG_OPTIONS = ['Сумма', 'Количество', 'Среднее', 'Макс', 'Мин'];
@@ -2337,7 +2409,7 @@
     }
 
     /* ====== RENDER ZONES ====== */
-    const ZONE_HINT = { rows: 'Перетащите поле сюда, чтобы добавить строки', columns: 'Перетащите поле сюда, чтобы добавить столбцы', values: 'Перетащите поле сюда, чтобы добавить значения', filters: 'Перетащите поле для фильтрации' };
+    const ZONE_HINT = { rows: 'Перетащите поля для добавления строк', columns: 'Перетащите поля для добавления столбцов', values: 'Перетащите поля для добавления значений', filters: 'Перетащите поля для фильтрации' };
 
     function renderZones() {
       ['rows', 'columns', 'values', 'filters'].forEach(z => {
@@ -2345,7 +2417,7 @@
         const items = zones[z];
         if (!items.length) {
           drop.classList.remove('has-items');
-          drop.innerHTML = `<div class="zone-empty"><div class="zone-empty-icon">${EMPTY_SVG}</div><div class="zone-empty-text">${ZONE_HINT[z]}</div></div>`;
+          drop.innerHTML = `<div class="zone-empty"><div class="zone-empty-text">${ZONE_HINT[z]}</div></div>`;
           return;
         }
         drop.classList.add('has-items');
@@ -2389,7 +2461,7 @@
         const fitems = zones.filters;
         if (!fitems.length) {
           fdrop.classList.remove('has-items');
-          fdrop.innerHTML = `<div class="zone-empty"><div class="zone-empty-icon">${EMPTY_SVG}</div><div class="zone-empty-text">${ZONE_HINT['filters']}</div></div>`;
+          fdrop.innerHTML = `<div class="zone-empty"><div class="zone-empty-text">${ZONE_HINT['filters']}</div></div>`;
         } else {
           fdrop.classList.add('has-items');
           fdrop.innerHTML = '';
@@ -2512,10 +2584,13 @@
       renderAll();
     }
 
+    let _fieldSortAZ = false;
+
     function renderFields(filter = '') {
       const c = document.getElementById('field-list'); c.innerHTML = '';
       const lf = filter.toLowerCase(), counts = fieldUsageCounts();
-      FIELDS.forEach(f => {
+      const fields = _fieldSortAZ ? [...FIELDS].sort((a, b) => a.name.localeCompare(b.name, 'ru')) : FIELDS;
+      fields.forEach(f => {
         if (lf && !f.name.toLowerCase().includes(lf)) return;
         const el = document.createElement('div'); el.className = 'field-item';
         const cnt = counts[f.id] || 0;
@@ -2629,6 +2704,11 @@
     function renderAll() { clearZoneHint(); renderZones(); renderFields(document.getElementById('search-input').value); renderSheet() }
 
     document.getElementById('search-input').addEventListener('input', e => renderFields(e.target.value));
+    document.getElementById('fields-sort-btn').addEventListener('click', () => {
+      _fieldSortAZ = !_fieldSortAZ;
+      document.getElementById('fields-sort-btn').classList.toggle('active', _fieldSortAZ);
+      renderFields(document.getElementById('search-input').value);
+    });
 
     /* ====== FILTER POPUP ====== */
     function showFilterPopup(i, anchor) {
