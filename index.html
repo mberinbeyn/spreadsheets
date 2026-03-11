@@ -386,7 +386,7 @@
       pointer-events: none;
       z-index: 5;
       display: none;
-      border: 2px solid #4caf50;
+      border: 1px solid #989898;
       border-radius: 1px;
     }
     /* Case 2 — insert between data: new column squeezes between existing ones */
@@ -489,8 +489,8 @@
     .fpp-val input[type=checkbox] {
       appearance: none;
       -webkit-appearance: none;
-      width: 18px;
-      height: 18px;
+      width: 16px;
+      height: 16px;
       border: 2px solid #ccc;
       border-radius: 4px;
       cursor: pointer;
@@ -508,10 +508,10 @@
     .fpp-val input[type=checkbox]:checked::after {
       content: '';
       position: absolute;
-      left: 3px;
+      left: 2px;
       top: 0px;
-      width: 6px;
-      height: 10px;
+      width: 5px;
+      height: 9px;
       border: 2px solid #fff;
       border-top: none;
       border-left: none;
@@ -659,7 +659,6 @@
       background: #f0f7f0;
       font-weight: 700;
       color: #2e7d32;
-      text-align: center;
     }
     .pivot-sheet .grid td.pv-ph-row-header {
       background: #f0f7f0;
@@ -667,7 +666,7 @@
       color: #2e7d32;
     }
     .pivot-sheet .grid td.pv-ph-values {
-      color: #555;
+      color: #134A27;
     }
 
     /* ===== Sheets bar ===== */
@@ -764,8 +763,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 16px 20px 12px;
-      border-bottom: 1px solid #ececec
+      padding: 16px 20px 12px
     }
 
     .sidebar-header h2 {
@@ -883,11 +881,34 @@
       font-size: 18px;
       color: #bbb;
       transition: color .15s;
-      line-height: 1
+      line-height: 1;
+      position: relative
+    }
+
+    .zone-add::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      top: 100%;
+      right: 0;
+      margin-top: 6px;
+      padding: 4px 8px;
+      background: rgba(0, 0, 0, 0.8);
+      color: #fff;
+      border-radius: 4px;
+      font-size: 12px;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.15s;
+      z-index: 1000
     }
 
     .zone-add:hover {
       color: #4caf50
+    }
+
+    .zone-add:hover::after {
+      opacity: 1
     }
 
     /* Drop area — empty state */
@@ -932,14 +953,14 @@
       display: flex;
       align-items: center;
       gap: 6px;
-      background: #3d8c40;
+      background: white;
       border: none;
       border-radius: 6px;
       padding: 6px 10px;
       margin-bottom: 4px;
       cursor: grab;
       font-size: 13px;
-      color: #fff;
+      color: #1a1a1a;
       user-select: none;
       transition: box-shadow .12s, opacity .15s
     }
@@ -949,7 +970,7 @@
     }
 
     .pill:hover {
-      box-shadow: 0 1px 6px rgba(61, 140, 64, .25)
+      box-shadow: 0 1px 6px rgba(0, 0, 0, .15)
     }
 
     .pill.dragging {
@@ -958,7 +979,7 @@
 
     .pill .p-handle {
       font-size: 12px;
-      color: rgba(255, 255, 255, .45);
+      color: rgba(0, 0, 0, .35);
       flex-shrink: 0
     }
 
@@ -972,18 +993,18 @@
     }
 
     .pill .p-badge.t-text {
-      background: rgba(255, 255, 255, .2);
-      color: #fff
+      background: rgba(0, 0, 0, .08);
+      color: #333
     }
 
     .pill .p-badge.t-number {
-      background: rgba(255, 255, 255, .2);
-      color: #fff
+      background: rgba(0, 0, 0, .08);
+      color: #333
     }
 
     .pill .p-badge.t-date {
-      background: rgba(255, 255, 255, .2);
-      color: #fff
+      background: rgba(0, 0, 0, .08);
+      color: #333
     }
 
     .pill .p-name {
@@ -994,30 +1015,88 @@
     }
 
     .pill .p-chevron {
+      width: 14px;
+      height: 14px;
       font-size: 12px;
-      color: rgba(255, 255, 255, .55);
+      color: rgba(0, 0, 0, .4);
       flex-shrink: 0;
       cursor: pointer;
-      transition: color .15s
+      transition: color .15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 2px;
+      position: relative
+    }
+
+    .pill .p-chevron::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      top: 100%;
+      right: 0;
+      margin-top: 6px;
+      padding: 4px 8px;
+      background: rgba(0, 0, 0, 0.8);
+      color: #fff;
+      border-radius: 4px;
+      font-size: 12px;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.15s;
+      z-index: 1000
     }
 
     .pill .p-chevron:hover {
-      color: #fff
+      color: #1a1a1a
+    }
+
+    .pill .p-chevron:hover::after {
+      opacity: 1
     }
 
     .pill .p-rm {
+      width: 14px;
+      height: 14px;
       background: none;
       border: none;
       cursor: pointer;
-      font-size: 14px;
-      color: rgba(255, 255, 255, .5);
+      font-size: 12px;
+      color: rgba(0, 0, 0, .35);
       padding: 0;
       line-height: 1;
-      transition: color .15s
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color .15s;
+      position: relative
+    }
+
+    .pill .p-rm::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      top: 100%;
+      right: 0;
+      margin-top: 6px;
+      padding: 4px 8px;
+      background: rgba(0, 0, 0, 0.8);
+      color: #fff;
+      border-radius: 4px;
+      font-size: 12px;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.15s;
+      z-index: 1000
     }
 
     .pill .p-rm:hover {
-      color: #fff
+      color: #1a1a1a
+    }
+
+    .pill .p-rm:hover::after {
+      opacity: 1
     }
 
     /* ===== Value pills (white card + select) ===== */
@@ -1133,6 +1212,12 @@
       max-height: 300px;
       overflow-y: auto;
       padding: 4px 0
+    }
+
+    .ctx-divider {
+      height: 1px;
+      background: #f0f0f0;
+      margin: 4px 0
     }
 
     .ctx-item {
@@ -1264,11 +1349,33 @@
     }
 
     .ps-checkbox-row input[type=checkbox] {
-      width: 16px;
-      height: 16px;
-      accent-color: #4caf50;
+      appearance: none;
+      -webkit-appearance: none;
+      width: 32px;
+      height: 18px;
+      border-radius: 9px;
       cursor: pointer;
-      flex-shrink: 0
+      flex-shrink: 0;
+      background: #ccc;
+      transition: background .2s;
+      position: relative
+    }
+    .ps-checkbox-row input[type=checkbox]::after {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #fff;
+      transition: left .2s
+    }
+    .ps-checkbox-row input[type=checkbox]:checked {
+      background: #4caf50
+    }
+    .ps-checkbox-row input[type=checkbox]:checked::after {
+      left: 16px
     }
 
     .ps-divider {
@@ -1714,7 +1821,7 @@
           <div class="zones-col">
             <div class="data-range">
               <div class="data-range-label">Область данных</div>
-              <div class="data-range-box"><span>'Лист 1'!A1:I101</span><span>⊞</span></div>
+              <div class="data-range-box"><span>'Лист 1'!A1:E91</span><span>⊞</span></div>
             </div>
             <div class="validation-banner" id="validation-banner">
               <span class="vb-icon">⚠️</span>
@@ -1728,7 +1835,7 @@
                   <span class="zone-icon"><svg width="15" height="14" viewBox="0 0 15 14" fill="none"><rect x="1" y="1.5" width="13" height="3" rx="1" fill="currentColor" opacity=".4"/><rect x="1" y="5.5" width="13" height="3" rx="1" fill="currentColor"/><rect x="1" y="9.5" width="13" height="3" rx="1" fill="currentColor" opacity=".4"/></svg></span>
                   Строки
                 </span>
-                <button class="zone-add" data-zone="rows">＋</button>
+                <button class="zone-add" data-zone="rows" data-tooltip="Добавить">＋</button>
               </div>
               <div class="zone-drop" data-zone="rows" id="drop-rows"></div>
             </div>
@@ -1739,7 +1846,7 @@
                   <span class="zone-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="1" width="3" height="12" rx="1" fill="currentColor" opacity=".4"/><rect x="5.5" y="1" width="3" height="12" rx="1" fill="currentColor"/><rect x="10" y="1" width="3" height="12" rx="1" fill="currentColor" opacity=".4"/></svg></span>
                   Столбцы
                 </span>
-                <button class="zone-add" data-zone="columns">＋</button>
+                <button class="zone-add" data-zone="columns" data-tooltip="Добавить">＋</button>
               </div>
               <div class="zone-drop" data-zone="columns" id="drop-columns"></div>
             </div>
@@ -1750,7 +1857,7 @@
                   <span class="zone-icon" style="font-size:15px;font-weight:400;line-height:1">Σ</span>
                   Значения
                 </span>
-                <button class="zone-add" data-zone="values">＋</button>
+                <button class="zone-add" data-zone="values" data-tooltip="Добавить">＋</button>
               </div>
               <div class="zone-drop" data-zone="values" id="drop-values"></div>
             </div>
@@ -1761,7 +1868,7 @@
                   <span class="zone-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 3.5h12M3.5 7h7M6 10.5h2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
                   Фильтры
                 </span>
-                <button class="zone-add" data-zone="filters">＋</button>
+                <button class="zone-add" data-zone="filters" data-tooltip="Добавить">＋</button>
               </div>
               <div class="zone-drop" data-zone="filters" id="drop-filters"></div>
             </div>
@@ -1790,129 +1897,105 @@
 
   <script>
     const DATA = [
-      ["Дата", "Заказчик", "Город", "Регион", "Категория", "Товар", "Цена за штуку", "Количество", "Выручка"],
-      ["1/1/2021", "Sweetables", "Гамбург", "Север", "Крупы", "Гречка", 89, 216, 19224],
-      ["1/1/2021", "Sweetables", "Гамбург", "Север", "Сухофрукты", "Изюм", 195, 127, 24765],
-      ["1/1/2021", "Gold Food", "Штутгарт", "Юг", "Масла", "Подсолнечное масло", 149, 270, 40230],
-      ["1/1/2021", "NutriFix", "Штутгарт", "Юг", "Напитки", "Зеленый чай", 189, 196, 37044],
-      ["1/1/2021", "NutriFix", "Штутгарт", "Юг", "Сухофрукты", "Сушеные яблоки", 175, 108, 18900],
-      ["1/1/2021", "NutriFix", "Штутгарт", "Юг", "Масла", "Подсолнечное масло", 149, 222, 33078],
-      ["1/2/2021", "Organica", "Гамбург", "Север", "Консервы", "Говядина тушеная", 285, 75, 21375],
-      ["1/2/2021", "Go Bio", "Франкфурт", "Запад", "Напитки", "Кофе", 549, 29, 15921],
-      ["1/2/2021", "Cooking Corner", "Штутгарт", "Юг", "Крупы", "Рис", 79, 604, 47716],
-      ["1/2/2021", "Cooking Corner", "Штутгарт", "Юг", "Крупы", "Гречка", 89, 234, 20826],
-      ["1/2/2021", "Go Bio", "Дрезден", "Восток", "Масла", "Сливочное масло", 199, 57, 11343],
-      ["1/3/2021", "NutriFix", "Гамбург", "Север", "Консервы", "Шпроты", 149, 76, 11324],
-      ["1/3/2021", "Organica", "Гамбург", "Север", "Масла", "Сливочное масло", 199, 311, 61889],
-      ["1/3/2021", "Organica", "Гамбург", "Север", "Консервы", "Шпроты", 149, 51, 7599],
-      ["1/3/2021", "Sweetables", "Мюнхен", "Юг", "Напитки", "Зеленый чай", 189, 139, 26271],
-      ["1/3/2021", "Go Bio", "Франкфурт", "Запад", "Консервы", "Килька в томате", 75, 31, 2325],
-      ["1/3/2021", "Cooking Corner", "Штутгарт", "Юг", "Масла", "Подсолнечное масло", 149, 594, 88506],
-      ["1/3/2021", "Organica", "Штутгарт", "Юг", "Сыры", "Гауда", 520, 220, 114400],
-      ["1/4/2021", "Sweetables", "Мюнхен", "Юг", "Сыры", "Гауда", 520, 523, 271960],
-      ["1/4/2021", "Gold Food", "Кёльн", "Запад", "Масла", "Сливочное масло", 199, 191, 38009],
-      ["1/4/2021", "Go Bio", "Франкфурт", "Запад", "Сыры", "Моцарелла", 310, 82, 25420],
-      ["1/4/2021", "Cooking Corner", "Гамбург", "Север", "Сухофрукты", "Изюм", 195, 224, 43680],
-      ["1/4/2021", "mymeal", "Гамбург", "Север", "Сыры", "Гауда", 520, 610, 317200],
-      ["1/4/2021", "mymeal", "Гамбург", "Север", "Консервы", "Килька в томате", 75, 131, 9825],
-      ["1/5/2021", "Sweetables", "Мюнхен", "Юг", "Напитки", "Зеленый чай", 189, 334, 63126],
-      ["1/5/2021", "Go Bio", "Кёльн", "Запад", "Консервы", "Говядина тушеная", 285, 46, 13110],
-      ["1/5/2021", "Go Bio", "Кёльн", "Запад", "Крупы", "Гречка", 89, 117, 10413],
-      ["1/5/2021", "Organica", "Дрезден", "Восток", "Сладости", "Зефир", 155, 15, 2325],
-      ["1/5/2021", "Organica", "Дрезден", "Восток", "Консервы", "Шпроты", 149, 24, 3576],
-      ["1/5/2021", "Cooking Corner", "Гамбург", "Север", "Сухофрукты", "Курага", 269, 228, 61332],
-      ["1/6/2021", "Cooking Corner", "Бремен", "Север", "Сухофрукты", "Сушеные яблоки", 175, 69, 12075],
-      ["1/6/2021", "Organica", "Дрезден", "Восток", "Консервы", "Говядина тушеная", 285, 12, 3420],
-      ["1/6/2021", "foodbite", "Берлин", "Восток", "Сыры", "Гауда", 520, 1525, 793000],
-      ["1/6/2021", "Cooking Corner", "Гамбург", "Север", "Консервы", "Говядина тушеная", 285, 82, 23370],
-      ["1/6/2021", "Gold Food", "Гамбург", "Север", "Сухофрукты", "Курага", 269, 156, 41964],
-      ["1/7/2021", "mymeal", "Мюнхен", "Юг", "Сухофрукты", "Курага", 269, 101, 27169],
-      ["1/7/2021", "Organica", "Мюнхен", "Юг", "Крупы", "Перловка", 69, 201, 13869],
-      ["1/7/2021", "Organica", "Мюнхен", "Юг", "Сладости", "Шоколад", 99, 414, 40986],
-      ["1/7/2021", "foodbite", "Берлин", "Восток", "Сладости", "Зефир", 155, 246, 38130],
-      ["1/7/2021", "Gold Food", "Берлин", "Восток", "Сухофрукты", "Сушеные яблоки", 175, 177, 30975],
-      ["1/7/2021", "Gold Food", "Берлин", "Восток", "Масла", "Оливковое масло", 650, 154, 100100],
-      ["1/7/2021", "Gold Food", "Берлин", "Восток", "Сухофрукты", "Изюм", 195, 180, 35100],
-      ["1/7/2021", "Sweetables", "Гамбург", "Север", "Сладости", "Мармелад", 129, 182, 23478],
-      ["1/7/2021", "Gold Food", "Гамбург", "Север", "Напитки", "Зеленый чай", 189, 340, 64260],
-      ["1/7/2021", "Gold Food", "Гамбург", "Север", "Сухофрукты", "Курага", 269, 141, 37929],
-      ["1/8/2021", "foodbite", "Бремен", "Север", "Крупы", "Рис", 79, 273, 21567],
-      ["1/8/2021", "foodbite", "Бремен", "Север", "Напитки", "Черный чай", 159, 246, 39114],
-      ["1/8/2021", "mymeal", "Бремен", "Север", "Сыры", "Филадельфия", 380, 64, 24320],
-      ["1/8/2021", "Cooking Corner", "Берлин", "Восток", "Сладости", "Мармелад", 129, 509, 65661],
-      ["1/8/2021", "Cooking Corner", "Берлин", "Восток", "Напитки", "Кофе", 549, 561, 308109],
-      ["1/8/2021", "Organica", "Гамбург", "Север", "Масла", "Подсолнечное масло", 149, 398, 59302],
-      ["1/9/2021", "foodbite", "Бремен", "Север", "Сухофрукты", "Изюм", 195, 63, 12285],
-      ["1/9/2021", "mymeal", "Бремен", "Север", "Крупы", "Рис", 79, 207, 16353],
-      ["1/9/2021", "Cooking Corner", "Берлин", "Восток", "Крупы", "Гречка", 89, 762, 67818],
-      ["1/9/2021", "Organica", "Гамбург", "Север", "Крупы", "Рис", 79, 374, 29546],
-      ["1/10/2021", "foodbite", "Дрезден", "Восток", "Масла", "Сливочное масло", 199, 177, 35223],
-      ["1/10/2021", "foodbite", "Дрезден", "Восток", "Напитки", "Кофе", 549, 41, 22509],
-      ["1/11/2021", "Organica", "Бремен", "Север", "Напитки", "Кофе", 549, 27, 14823],
-      ["1/11/2021", "Go Bio", "Бремен", "Север", "Сыры", "Филадельфия", 380, 28, 10640],
-      ["1/11/2021", "foodbite", "Дрезден", "Восток", "Масла", "Оливковое масло", 650, 57, 37050],
-      ["1/11/2021", "Go Bio", "Гамбург", "Север", "Сухофрукты", "Курага", 269, 84, 22596],
-      ["1/11/2021", "Cooking Corner", "Мюнхен", "Юг", "Крупы", "Перловка", 69, 452, 31188],
-      ["1/11/2021", "Cooking Corner", "Мюнхен", "Юг", "Крупы", "Гречка", 89, 302, 26878],
-      ["1/12/2021", "Organica", "Бремен", "Север", "Напитки", "Зеленый чай", 189, 35, 6615],
-      ["1/12/2021", "Go Bio", "Гамбург", "Север", "Крупы", "Гречка", 89, 134, 11926],
-      ["1/12/2021", "Sweetables", "Мюнхен", "Юг", "Сыры", "Гауда", 520, 408, 212160],
-      ["1/12/2021", "Sweetables", "Мюнхен", "Юг", "Сухофрукты", "Сушеные яблоки", 175, 101, 17675],
-      ["1/13/2021", "Organica", "Бремен", "Север", "Напитки", "Черный чай", 159, 94, 14946],
-      ["1/13/2021", "Sweetables", "Мюнхен", "Юг", "Крупы", "Гречка", 89, 166, 14774],
-      ["1/15/2021", "Organica", "Франкфурт", "Запад", "Сухофрукты", "Курага", 269, 34, 9146],
-      ["1/16/2021", "Organica", "Франкфурт", "Запад", "Сухофрукты", "Изюм", 195, 29, 5655],
-      ["1/16/2021", "Organica", "Франкфурт", "Запад", "Сладости", "Мармелад", 129, 49, 6321],
-      ["1/17/2021", "Gold Food", "Кёльн", "Запад", "Масла", "Подсолнечное масло", 149, 188, 28012],
-      ["1/17/2021", "Cooking Corner", "Штутгарт", "Юг", "Масла", "Оливковое масло", 650, 126, 81900],
-      ["1/18/2021", "Gold Food", "Кёльн", "Запад", "Сыры", "Филадельфия", 380, 71, 26980],
-      ["1/18/2021", "Cooking Corner", "Штутгарт", "Юг", "Крупы", "Перловка", 69, 518, 35742],
-      ["1/19/2021", "Cooking Corner", "Кёльн", "Запад", "Крупы", "Рис", 79, 644, 50876],
-      ["1/19/2021", "foodbite", "Кёльн", "Запад", "Сухофрукты", "Курага", 269, 168, 45192],
-      ["1/19/2021", "Go Bio", "Кёльн", "Запад", "Специи", "Базилик", 65, 35, 2275],
-      ["1/19/2021", "Cooking Corner", "Штутгарт", "Юг", "Консервы", "Килька в томате", 75, 272, 20400],
-      ["1/19/2021", "NutriFix", "Дрезден", "Восток", "Специи", "Базилик", 65, 21, 1365],
-      ["1/20/2021", "Cooking Corner", "Кёльн", "Запад", "Сладости", "Шоколад", 99, 582, 57618],
-      ["1/20/2021", "foodbite", "Кёльн", "Запад", "Масла", "Подсолнечное масло", 149, 372, 55428],
-      ["1/20/2021", "mymeal", "Штутгарт", "Юг", "Напитки", "Кофе", 549, 92, 50508],
-      ["1/20/2021", "foodbite", "Бремен", "Север", "Специи", "Базилик", 65, 53, 3445],
-      ["1/20/2021", "foodbite", "Дрезден", "Восток", "Крупы", "Перловка", 69, 165, 11385],
-      ["1/20/2021", "foodbite", "Дрезден", "Восток", "Сладости", "Мармелад", 129, 63, 8127],
-      ["1/20/2021", "NutriFix", "Дрезден", "Восток", "Сладости", "Шоколад", 99, 80, 7920],
-      ["1/20/2021", "NutriFix", "Дрезден", "Восток", "Крупы", "Рис", 79, 109, 8611],
-      ["1/21/2021", "Cooking Corner", "Бремен", "Север", "Консервы", "Шпроты", 149, 63, 9387],
-      ["1/21/2021", "Cooking Corner", "Бремен", "Север", "Сухофрукты", "Изюм", 195, 77, 15015],
-      ["1/21/2021", "NutriFix", "Бремен", "Север", "Специи", "Кориандр", 55, 10, 550],
-      ["1/21/2021", "Organica", "Бремен", "Север", "Напитки", "Кофе", 549, 28, 15372],
-      ["1/21/2021", "foodbite", "Дрезден", "Восток", "Напитки", "Кофе", 549, 78, 42822],
-      ["1/21/2021", "Organica", "Берлин", "Восток", "Консервы", "Говядина тушеная", 285, 96, 27360],
-      ["1/21/2021", "Organica", "Берлин", "Восток", "Специи", "Кориандр", 55, 59, 3245],
-      ["1/21/2021", "Sweetables", "Мюнхен", "Юг", "Сыры", "Моцарелла", 310, 223, 69130],
-      ["1/22/2021", "Sweetables", "Бремен", "Север", "Масла", "Подсолнечное масло", 149, 146, 21754],
-      ["1/22/2021", "Sweetables", "Бремен", "Север", "Крупы", "Рис", 79, 210, 16590],
-      ["1/22/2021", "Organica", "Бремен", "Север", "Сладости", "Зефир", 155, 16, 2480],
+      ['Город', 'Категория', 'Товар', 'Количество', 'Цена за ед.'],
+      ['Новосибирск', 'Молочные продукты', 'Молоко', 5, 89],
+      ['Москва', 'Хлеб и выпечка', 'Хлеб ржаной', 12, 55],
+      ['Москва', 'Молочные продукты', 'Йогурт', 10, 49],
+      ['Москва', 'Бакалея', 'Макароны', 2, 85],
+      ['Новосибирск', 'Хлеб и выпечка', 'Хлеб ржаной', 10, 55],
+      ['Москва', 'Молочные продукты', 'Йогурт', 12, 49],
+      ['Москва', 'Снеки', 'Крекеры', 8, 89],
+      ['Москва', 'Снеки', 'Сухарики', 13, 59],
+      ['Екатеринбург', 'Хлеб и выпечка', 'Батон', 5, 69],
+      ['Екатеринбург', 'Хлеб и выпечка', 'Хлеб ржаной', 2, 55],
+      ['Москва', 'Молочные продукты', 'Творог', 6, 95],
+      ['Москва', 'Напитки', 'Лимонад', 12, 79],
+      ['Москва', 'Бакалея', 'Мука', 15, 79],
+      ['Новосибирск', 'Бакалея', 'Макароны', 5, 85],
+      ['Новосибирск', 'Снеки', 'Сухарики', 4, 59],
+      ['Новосибирск', 'Молочные продукты', 'Молоко', 4, 89],
+      ['Москва', 'Напитки', 'Сок апельсиновый', 14, 109],
+      ['Екатеринбург', 'Молочные продукты', 'Творог', 8, 95],
+      ['Екатеринбург', 'Напитки', 'Вода', 6, 39],
+      ['Новосибирск', 'Хлеб и выпечка', 'Булочка', 15, 35],
+      ['Новосибирск', 'Молочные продукты', 'Йогурт', 3, 49],
+      ['Москва', 'Снеки', 'Орехи', 8, 199],
+      ['Новосибирск', 'Бакалея', 'Гречка', 12, 119],
+      ['Новосибирск', 'Снеки', 'Орехи', 6, 199],
+      ['Москва', 'Молочные продукты', 'Кефир', 13, 75],
+      ['Екатеринбург', 'Напитки', 'Чай в бутылке', 2, 59],
+      ['Москва', 'Хлеб и выпечка', 'Булочка', 11, 35],
+      ['Новосибирск', 'Бакалея', 'Овсянка', 8, 69],
+      ['Москва', 'Хлеб и выпечка', 'Булочка', 4, 35],
+      ['Новосибирск', 'Снеки', 'Сухарики', 10, 59],
+      ['Екатеринбург', 'Бакалея', 'Мука', 6, 79],
+      ['Новосибирск', 'Хлеб и выпечка', 'Хлеб ржаной', 8, 55],
+      ['Москва', 'Молочные продукты', 'Молоко', 3, 89],
+      ['Новосибирск', 'Хлеб и выпечка', 'Батон', 2, 69],
+      ['Новосибирск', 'Бакалея', 'Овсянка', 8, 69],
+      ['Новосибирск', 'Снеки', 'Сухарики', 14, 59],
+      ['Новосибирск', 'Молочные продукты', 'Молоко', 15, 89],
+      ['Новосибирск', 'Снеки', 'Сухарики', 6, 59],
+      ['Екатеринбург', 'Молочные продукты', 'Сметана', 3, 65],
+      ['Новосибирск', 'Бакалея', 'Макароны', 15, 85],
+      ['Новосибирск', 'Напитки', 'Вода', 15, 39],
+      ['Новосибирск', 'Молочные продукты', 'Сметана', 9, 65],
+      ['Москва', 'Снеки', 'Орехи', 6, 199],
+      ['Новосибирск', 'Хлеб и выпечка', 'Батон', 6, 45],
+      ['Москва', 'Бакалея', 'Макароны', 15, 85],
+      ['Москва', 'Напитки', 'Лимонад', 1, 79],
+      ['Москва', 'Хлеб и выпечка', 'Батон', 12, 45],
+      ['Новосибирск', 'Бакалея', 'Макароны', 13, 85],
+      ['Новосибирск', 'Хлеб и выпечка', 'Хлеб ржаной', 8, 55],
+      ['Екатеринбург', 'Снеки', 'Орехи', 9, 199],
+      ['Москва', 'Снеки', 'Крекеры', 15, 89],
+      ['Новосибирск', 'Снеки', 'Орехи', 5, 199],
+      ['Екатеринбург', 'Бакалея', 'Гречка', 15, 119],
+      ['Москва', 'Снеки', 'Крекеры', 4, 89],
+      ['Екатеринбург', 'Хлеб и выпечка', 'Батон', 1, 45],
+      ['Новосибирск', 'Снеки', 'Орехи', 4, 199],
+      ['Новосибирск', 'Молочные продукты', 'Молоко', 11, 89],
+      ['Москва', 'Молочные продукты', 'Кефир', 15, 75],
+      ['Москва', 'Молочные продукты', 'Сметана', 9, 65],
+      ['Новосибирск', 'Хлеб и выпечка', 'Булочка', 8, 35],
+      ['Новосибирск', 'Хлеб и выпечка', 'Хлеб ржаной', 15, 55],
+      ['Москва', 'Снеки', 'Крекеры', 13, 89],
+      ['Москва', 'Бакалея', 'Овсянка', 2, 69],
+      ['Екатеринбург', 'Молочные продукты', 'Творог', 7, 95],
+      ['Новосибирск', 'Бакалея', 'Овсянка', 1, 69],
+      ['Екатеринбург', 'Молочные продукты', 'Молоко', 12, 89],
+      ['Москва', 'Напитки', 'Сок апельсиновый', 4, 109],
+      ['Москва', 'Хлеб и выпечка', 'Батон', 7, 69],
+      ['Екатеринбург', 'Хлеб и выпечка', 'Булочка', 4, 35],
+      ['Новосибирск', 'Молочные продукты', 'Творог', 2, 95],
+      ['Москва', 'Молочные продукты', 'Йогурт', 2, 49],
+      ['Екатеринбург', 'Хлеб и выпечка', 'Хлеб ржаной', 8, 55],
+      ['Екатеринбург', 'Бакалея', 'Рис', 15, 99],
+      ['Екатеринбург', 'Молочные продукты', 'Кефир', 1, 75],
+      ['Екатеринбург', 'Бакалея', 'Гречка', 5, 119],
+      ['Новосибирск', 'Бакалея', 'Мука', 12, 79],
+      ['Москва', 'Бакалея', 'Рис', 5, 99],
+      ['Новосибирск', 'Хлеб и выпечка', 'Батон', 12, 45],
+      ['Новосибирск', 'Снеки', 'Чипсы', 6, 129],
+      ['Новосибирск', 'Молочные продукты', 'Молоко', 8, 89],
+      ['Москва', 'Снеки', 'Орехи', 9, 199],
+      ['Москва', 'Молочные продукты', 'Кефир', 10, 75],
+      ['Екатеринбург', 'Молочные продукты', 'Кефир', 2, 75],
+      ['Новосибирск', 'Снеки', 'Орехи', 10, 199],
+      ['Москва', 'Молочные продукты', 'Йогурт', 7, 49],
+      ['Екатеринбург', 'Снеки', 'Сухарики', 4, 59],
+      ['Екатеринбург', 'Напитки', 'Вода', 7, 39],
+      ['Екатеринбург', 'Хлеб и выпечка', 'Булочка', 6, 35],
+      ['Екатеринбург', 'Молочные продукты', 'Молоко', 10, 89],
+      ['Москва', 'Снеки', 'Чипсы', 9, 129],
     ];
 
-    // Format dates M/D/YYYY → DD.MM.YYYY
-    DATA.slice(1).forEach(r => {
-      if (typeof r[0] === 'string' && r[0].includes('/')) {
-        const p = r[0].split('/');
-        r[0] = String(p[1]).padStart(2,'0') + '.' + String(p[0]).padStart(2,'0') + '.' + p[2];
-      }
-    });
-    // Capitalize Заказчик (col 1)
-    DATA.slice(1).forEach(r => { if (typeof r[1] === 'string' && r[1]) r[1] = r[1][0].toUpperCase() + r[1].slice(1); });
-
     const FIELDS = [
-      { id: 'f0', name: 'Дата', col: 0, type: 'date', color: '#ef9a9a' },
-      { id: 'f1', name: 'Заказчик', col: 1, type: 'text', color: '#ce93d8' },
-      { id: 'f2', name: 'Город', col: 2, type: 'text', color: '#90caf9' },
-      { id: 'f3', name: 'Регион', col: 3, type: 'text', color: '#a5d6a7' },
-      { id: 'f4', name: 'Категория', col: 4, type: 'text', color: '#fff59d' },
-      { id: 'f5', name: 'Товар', col: 5, type: 'text', color: '#ffcc80' },
-      { id: 'f6', name: 'Цена за штуку', col: 6, type: 'number', color: '#b0bec5' },
-      { id: 'f7', name: 'Количество', col: 7, type: 'number', color: '#80cbc4' },
-      { id: 'f8', name: 'Выручка', col: 8, type: 'number', color: '#f48fb1' },
+      { id: 'f0', name: 'Город', col: 0, type: 'text', color: '#90caf9' },
+      { id: 'f1', name: 'Категория', col: 1, type: 'text', color: '#fff59d' },
+      { id: 'f2', name: 'Товар', col: 2, type: 'text', color: '#ffcc80' },
+      { id: 'f3', name: 'Количество', col: 3, type: 'number', color: '#80cbc4' },
+      { id: 'f4', name: 'Цена за ед.', col: 4, type: 'number', color: '#b0bec5' },
     ];
     const TYPE_ICON = { date: 'Даты', text: 'Текст', number: 'Числа', mixed: '⚠' };
     const TYPE_BADGE = { date: 't-date', text: 't-text', number: 't-number', mixed: 't-text' };
@@ -2062,7 +2145,7 @@
     }
 
     function renderSourceGrid(c) {
-      const nc = 26, tr = 50;
+      const nc = 26, tr = Math.max(DATA.length, 50);
       let h = '<table class="grid"><thead><tr><th class="rn"></th>';
       for (let i = 0; i < nc; i++) h += `<th style="min-width:${i === 0 ? 80 : i <= 1 ? 100 : i === 2 ? 130 : 90}px">${COLS[i]}</th>`;
       h += '</tr></thead><tbody>';
@@ -2299,7 +2382,7 @@
         const tr = []; tr._meta = [];
         for (let i = 0; i < rhc; i++) { tr.push(i === 0 ? 'Итого' : ''); tr._meta.push('total') }
         if (vE.length) {
-          colsI.forEach(ck => { vE.forEach((ve, vi) => { const f = FIELDS.find(x => x.id === ve.fid); const a = ve.agg || (f && f.type === 'number' ? 'СУММ' : 'СЧЁТ'); let t = 0; sortedRKeys.forEach(rk => { t += gv(agg2[rk] && agg2[rk][ck] ? agg2[rk][ck][vi] : null, a) }); tr.push(t); tr._meta.push('total') }) });
+          colsI.forEach(ck => { vE.forEach((ve, vi) => { const f = FIELDS.find(x => x.id === ve.fid); const a = ve.agg || (f && f.type === 'number' ? 'СУММ' : 'СЧЁТ'); let t; if (a === 'СРЕДНЕЕ') { let ts = 0, tc = 0; sortedRKeys.forEach(rk => { const b = agg2[rk] && agg2[rk][ck] ? agg2[rk][ck][vi] : null; if (b) { ts += b.s; tc += b.cnt; } }); t = tc ? Math.round(ts / tc * 100) / 100 : 0; } else if (a === 'МАКС') { t = -Infinity; sortedRKeys.forEach(rk => { const b = agg2[rk] && agg2[rk][ck] ? agg2[rk][ck][vi] : null; if (b && b.mx !== -Infinity) t = Math.max(t, b.mx); }); if (t === -Infinity) t = 0; } else if (a === 'МИН') { t = Infinity; sortedRKeys.forEach(rk => { const b = agg2[rk] && agg2[rk][ck] ? agg2[rk][ck][vi] : null; if (b && b.mn !== Infinity) t = Math.min(t, b.mn); }); if (t === Infinity) t = 0; } else { t = 0; sortedRKeys.forEach(rk => { t += gv(agg2[rk] && agg2[rk][ck] ? agg2[rk][ck][vi] : null, a); }); } tr.push(t); tr._meta.push('total') }) });
         } else {
           // No value fields — extend total row to full pivot width with empty styled cells
           colsI.forEach(() => { tr.push(''); tr._meta.push('total'); });
@@ -2316,7 +2399,19 @@
       closeCtxMenu(); const rect = anchor.getBoundingClientRect();
       const ov = document.createElement('div'); ov.className = 'ctx-overlay'; ov.addEventListener('click', closeCtxMenu); document.body.appendChild(ov);
       const menu = document.createElement('div'); menu.className = 'ctx-menu';
-      FIELDS.forEach(f => {
+      const sortedFields = [...FIELDS].sort((a, b) => {
+        const aRel = zoneName === 'values' ? (a.type === 'number' ? 0 : 1) : (a.type === 'text' ? 0 : 1);
+        const bRel = zoneName === 'values' ? (b.type === 'number' ? 0 : 1) : (b.type === 'text' ? 0 : 1);
+        return aRel - bRel;
+      });
+      const hasBothGroups = sortedFields.some(f => f.type === 'number') && sortedFields.some(f => f.type === 'text');
+      let dividerInserted = false;
+      sortedFields.forEach(f => {
+        const isSecondGroup = zoneName === 'values' ? f.type !== 'number' : f.type !== 'text';
+        if (hasBothGroups && isSecondGroup && !dividerInserted) {
+          const div = document.createElement('div'); div.className = 'ctx-divider';
+          menu.appendChild(div); dividerInserted = true;
+        }
         const it = document.createElement('div'); it.className = 'ctx-item';
         it.innerHTML = `<span class="ci-name">${f.name}</span><span class="ci-type">${TYPE_ICON[f.type]}</span>`;
         it.addEventListener('click', () => {
@@ -2329,7 +2424,7 @@
           }
           if (zoneName === 'filters') {
             const col = f.col;
-            const allVals = [...new Set(DATA.slice(1).map(r => String(r[col])).filter(v => v !== '' && v !== 'undefined'))];
+            const allVals = [...new Set(DATA.slice(1).map(r => String(r[col])).filter(v => v !== '' && v !== 'undefined' && v !== 'null' && v !== 'NaN'))];
             zones.filters.push({ fid: f.id, selected: null, allVals });
           } else {
             zones[zoneName].push({ fid: f.id, agg: defaultAgg });
@@ -2392,11 +2487,12 @@
       });
 
       pill.addEventListener('drop', e => {
-        e.preventDefault();
-        e.stopPropagation();
         clearReorderIndicators();
         let d; try { d = JSON.parse(e.dataTransfer.getData('text/plain')); } catch { return; }
+        // Only handle same-zone reordering; cross-zone drops bubble up to the zone-drop handler
         if (!d || d.src !== 'zone' || d.sz !== zone || d.si === idx) return;
+        e.preventDefault();
+        e.stopPropagation();
         const item = zones[zone].splice(d.si, 1)[0];
         const after = pill._reorderAfter;
         // Adjust index after removal
@@ -2431,7 +2527,7 @@
             const curAgg = entry.agg || (f.type === 'number' ? 'СУММ' : 'СЧЁТ');
             const curLabel = AGG_REV[curAgg] || curAgg;
             let opts = AGG_OPTIONS.map(a => `<option${a === curLabel ? ' selected' : ''}>${a}</option>`).join('');
-            p.innerHTML = `<span class="p-handle">⠿</span><span class="p-badge ${TYPE_BADGE[f.type]}">${TYPE_ICON[f.type]}</span><span class="p-name">${f.name}</span><select class="p-select">${opts}</select><button class="p-rm">✕</button>`;
+            p.innerHTML = `<span class="p-handle">⠿</span><span class="p-name">${f.name}</span><select class="p-select">${opts}</select><button class="p-rm">✕</button>`;
             p.querySelector('.p-select').addEventListener('change', e => { e.stopPropagation(); zones[z][i].agg = AGG_MAP[e.target.value] || 'СУММ'; renderSheet() });
             p.querySelector('.p-select').addEventListener('mousedown', e => e.stopPropagation());
             p.querySelector('.p-rm').addEventListener('click', e => { e.stopPropagation(); zones[z].splice(i, 1); renderAll() });
@@ -2442,7 +2538,7 @@
           } else {
             // Standard green pill
             const p = document.createElement('div'); p.className = 'pill'; p.draggable = true;
-            p.innerHTML = `<span class="p-handle">⠿</span><span class="p-badge ${TYPE_BADGE[f.type]}">${TYPE_ICON[f.type]}</span><span class="p-name">${f.name}</span><span class="p-chevron">▾</span><button class="p-rm">✕</button>`;
+            p.innerHTML = `<span class="p-handle">⠿</span><span class="p-name">${f.name}</span><span class="p-chevron" data-tooltip="Порядок и итоги"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 16 4 4 4-4"/><path d="M7 20V4"/><path d="m21 8-4-4-4 4"/><path d="M17 4v16"/></svg></span><button class="p-rm" data-tooltip="Удалить">✕</button>`;
             p.querySelector('.p-rm').addEventListener('click', e => { e.stopPropagation(); zones[z].splice(i, 1); renderAll() });
             p.querySelector('.p-chevron').addEventListener('click', e => { e.stopPropagation(); showPillMenu(z, i, f, e.target) });
             p.addEventListener('dragstart', e => { const d = { fid: entry.fid, src: 'zone', sz: z, si: i }; e.dataTransfer.setData('text/plain', JSON.stringify(d)); e.dataTransfer.effectAllowed = 'move'; p.classList.add('dragging'); window._currentDragData = d; mkGhost(e, f.name) });
@@ -2475,7 +2571,6 @@
             const p = document.createElement('div'); p.className = 'filter-pill'; p.draggable = true;
             p.innerHTML = `
               <span class="fp-handle">⠿</span>
-              <span class="fp-badge ${TYPE_BADGE[f.type]}">${TYPE_ICON[f.type]}</span>
               <span class="fp-name">${f.name}</span>
               <span class="fp-count" style="color:${isFiltered || hasSortOrder ? '#e65100' : '#aaa'}">${activeCount}/${totalCount}${sortIcon}</span>
               <span class="fp-chevron" title="Настроить фильтр">▾</span>
@@ -2683,7 +2778,7 @@
 
           if (z === 'filters') {
             const col = FIELDS.find(x => x.id === d.fid)?.col;
-            const allVals = col !== undefined ? [...new Set(DATA.slice(1).map(r => String(r[col])).filter(v => v !== '' && v !== 'undefined'))] : [];
+            const allVals = col !== undefined ? [...new Set(DATA.slice(1).map(r => String(r[col])).filter(v => v !== '' && v !== 'undefined' && v !== 'null' && v !== 'NaN'))] : [];
             zones.filters.push({ fid: f.id, selected: null, allVals });
           } else {
             zones[z].push({ fid: f.id, agg: defaultAgg });
