@@ -460,13 +460,13 @@
       transition: border-color .15s, box-shadow .12s
     }
     .filter-pill:hover { border-color: #4caf50; box-shadow: 0 1px 4px rgba(76,175,80,.12) }
-    .filter-pill .fp-handle { color: #ccc; font-size: 12px; cursor: grab; flex-shrink: 0 }
+    .filter-pill .fp-handle { color: #999; font-size: 12px; cursor: grab; flex-shrink: 0 }
     .filter-pill .fp-badge { font-size: 10px; padding: 1px 5px; border-radius: 3px; font-weight: 700; flex-shrink: 0; line-height: 1.3 }
     .filter-pill .fp-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
     .filter-pill .fp-count { font-size: 11px; color: #777; white-space: nowrap; flex-shrink: 0 }
-    .filter-pill .fp-chevron { font-size: 11px; color: #aaa; cursor: pointer; flex-shrink: 0; transition: color .15s }
+    .filter-pill .fp-chevron { font-size: 11px; color: #666; cursor: pointer; flex-shrink: 0; transition: color .15s }
     .filter-pill .fp-chevron:hover { color: #4caf50 }
-    .filter-pill .fp-rm { background: none; border: none; cursor: pointer; font-size: 14px; color: #ccc; padding: 0 2px; line-height: 1; transition: color .15s }
+    .filter-pill .fp-rm { background: none; border: none; cursor: pointer; font-size: 14px; color: #888; padding: 0 2px; line-height: 1; transition: color .15s }
     .filter-pill .fp-rm:hover { color: #e53935 }
 
     /* Filter popup */
@@ -533,7 +533,29 @@
     .fpp-btn:hover:not(.primary) { background: #f5f5f5 }
     .fpp-btn.primary:hover { background: #43a047 }
 
-
+    /* ===== Pivot filter button (in header cells) ===== */
+    .pv-filter-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      position: absolute;
+      right: 5px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 14px;
+      height: 14px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #bbb;
+      padding: 0;
+      border-radius: 2px;
+      line-height: 1;
+      transition: color .15s;
+    }
+    .pv-filter-btn:hover { color: #4caf50; }
+    .pv-filter-btn.active { color: #4caf50; }
+    .pv-has-filter { position: relative; padding-right: 22px; }
 
     /* ===== Formula bar ===== */
     .formula-bar {
@@ -644,6 +666,25 @@
       background: #f0f7f0;
       font-weight: 700;
       color: #2e7d32
+    }
+
+    .pivot-sheet .grid td.pv-header.pv-sortable {
+      cursor: pointer;
+      user-select: none
+    }
+
+    .pivot-sheet .grid td.pv-header.pv-sortable:hover {
+      background: #dcedc8
+    }
+
+    .pv-sort-arrow {
+      font-size: 11px;
+      margin-left: 4px;
+      color: #4caf50
+    }
+
+    .pv-sort-arrow.pv-sort-inactive {
+      color: #ccc
     }
 
     .pivot-sheet .grid td.pv-total {
@@ -776,7 +817,7 @@
       border: none;
       cursor: pointer;
       font-size: 18px;
-      color: #888;
+      color: #555;
       padding: 4px;
       border-radius: 4px;
       line-height: 1
@@ -879,7 +920,7 @@
       border: none;
       cursor: pointer;
       font-size: 18px;
-      color: #bbb;
+      color: #888;
       transition: color .15s;
       line-height: 1;
       position: relative
@@ -938,14 +979,14 @@
       align-items: center;
       justify-content: center;
       padding: 14px 10px;
-      color: #bbb;
+      color: #888;
       text-align: center
     }
 
     .zone-empty-text {
       font-size: 12px;
       line-height: 1.5;
-      color: #bbb
+      color: #888
     }
 
     /* ===== Pills (Строки/Столбцы) ===== */
@@ -979,7 +1020,7 @@
 
     .pill .p-handle {
       font-size: 12px;
-      color: rgba(0, 0, 0, .35);
+      color: rgba(0, 0, 0, .6);
       flex-shrink: 0
     }
 
@@ -1018,7 +1059,7 @@
       width: 14px;
       height: 14px;
       font-size: 12px;
-      color: rgba(0, 0, 0, .4);
+      color: rgba(0, 0, 0, .65);
       flex-shrink: 0;
       cursor: pointer;
       transition: color .15s;
@@ -1062,7 +1103,7 @@
       border: none;
       cursor: pointer;
       font-size: 12px;
-      color: rgba(0, 0, 0, .35);
+      color: rgba(0, 0, 0, .6);
       padding: 0;
       line-height: 1;
       flex-shrink: 0;
@@ -1461,7 +1502,7 @@
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
-      color: #777;
+      color: #555;
       transition: all .15s
     }
 
@@ -1504,7 +1545,7 @@
     }
 
     .field-item .f-handle {
-      color: #d0d0d0;
+      color: #888;
       font-size: 14px;
       flex-shrink: 0;
       cursor: grab;
@@ -1519,7 +1560,7 @@
     }
 
     .field-item:hover .f-handle {
-      color: #aaa
+      color: #666
     }
 
     .field-item .f-check {
@@ -1555,7 +1596,7 @@
 
     .field-item .f-type {
       font-size: 11px;
-      color: #666;
+      color: #444;
       background: #efefef;
       border-radius: 4px;
       padding: 2px 7px;
@@ -1797,7 +1838,7 @@
     <!-- HEADER -->
     <header class="app-header" id="appHeader"><div class="hdr-bg">
       <img src="bg_ss.svg" alt="" width="1280" height="122">
-    </div><div class="header-top"><div class="header-circle logo"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 40 40"><path fill="url(#ya360a)" d="M20 40c11.046 0 20-8.954 20-20S31.046 0 20 0 0 8.954 0 20s8.954 20 20 20"></path><path fill="#fff" d="M20 31.6c3.755 0 6.8-5.194 6.8-11.6 0-6.407-3.045-11.6-6.8-11.6s-6.8 5.193-6.8 11.6c0 6.406 3.044 11.6 6.8 11.6"></path><path fill="#fff" fill-rule="evenodd" d="M7.251 10.8c-2.018-.104-4.45 4.12-4.45 9.198 0 5.08 2.432 9.302 4.45 9.198 2.001-.104 3.15-4.119 3.15-9.198S9.252 10.904 7.25 10.8m25.5 18.396c2.018.104 4.45-4.119 4.45-9.198s-2.432-9.302-4.45-9.198c-2.002.104-3.15 4.12-3.15 9.198 0 5.08 1.148 9.094 3.15 9.198" clip-rule="evenodd"></path><defs><radialGradient id="ya360a" cx="0" cy="0" r="1" gradientTransform="matrix(0 25.6 -33.2388 0 20 14.4)" gradientUnits="userSpaceOnUse"><stop stop-color="#FF9A6F"></stop><stop offset="0.61" stop-color="#FF6427"></stop><stop offset="1" stop-color="#EB581E"></stop></radialGradient></defs></svg></div><div class="header-circle logo"><svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12.4977 6.58733C12.8545 5.30119 14.2234 4.53793 15.5551 4.88255L26.1491 7.624C27.4808 7.96862 28.2712 9.29062 27.9143 10.5768L24.3534 23.4114C23.9965 24.6975 22.6277 25.4608 21.2959 25.1161L10.702 22.3747C9.37023 22.0301 8.57992 20.7081 8.93676 19.4219L12.4977 6.58733Z" fill="#0CBD70"></path><g filter="url(#f0)"><path d="M6.82263 18.7942C6.86381 21.5295 8.95049 23.7988 11.6728 24.0687L21.6247 25.0553C21.9643 25.089 22.2589 24.8222 22.2589 24.4809V11.7627C22.2589 11.4439 22.0005 11.1855 21.6816 11.1855H6.70807L6.82263 18.7942Z" fill="#147638"></path></g><path d="M3.99915 12.011C3.99915 10.6795 5.11682 9.6001 6.49554 9.6001H17.1031C18.4818 9.6001 19.5995 10.6795 19.5995 12.011V25.2H6.49554C5.11682 25.2 3.99915 24.1206 3.99915 22.7891V12.011Z" fill="#00D97B"></path><path d="M19.5989 23.176C19.5989 24.2941 20.8976 25.2006 22.0554 25.2006L19.5995 25.2L19.5989 23.176Z" fill="#00D97B"></path><path d="M7.59961 18.5913C7.59961 18.1012 7.99687 17.704 8.48691 17.704H10.6088C11.0988 17.704 11.4961 18.1012 11.4961 18.5913V20.7131C11.4961 21.2031 11.0988 21.6004 10.6088 21.6004H8.48691C7.99687 21.6004 7.59961 21.2031 7.59961 20.7131V18.5913Z" fill="white"></path><path d="M7.59963 14.0875C7.59963 13.5974 7.99689 13.2002 8.48693 13.2002H10.6088C11.0988 13.2002 11.4961 13.5974 11.4961 14.0875V16.2093C11.4961 16.6993 11.0988 17.0966 10.6088 17.0966H8.48693C7.99689 17.0966 7.59963 16.6993 7.59963 16.2093V14.0875Z" fill="white"></path><path d="M12.1033 18.5912C12.1033 18.1011 12.5006 17.7039 12.9906 17.7039H15.1125C15.6025 17.7039 15.9998 18.1011 15.9998 18.5912V20.713C15.9998 21.203 15.6025 21.6003 15.1125 21.6003H12.9906C12.5006 21.6003 12.1033 21.203 12.1033 20.713V18.5912Z" fill="white"></path><path d="M12.1033 14.0875C12.1033 13.5974 12.5006 13.2002 12.9906 13.2002H15.1125C15.6025 13.2002 15.9998 13.5974 15.9998 14.0875V16.2093C15.9998 16.6993 15.6025 17.0966 15.1125 17.0966H12.9906C12.5006 17.0966 12.1033 16.6993 12.1033 16.2093V14.0875Z" fill="white"></path><defs><filter id="f0" x="3.60514" y="8.08262" width="21.7567" height="20.0784" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feFlood flood-opacity="0" result="BackgroundImageFix"></feFlood><feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"></feBlend><feGaussianBlur stdDeviation="1.55147" result="effect1_foregroundBlur_47_29164"></feGaussianBlur></filter></defs></svg></div><span class="header-title" contenteditable="true" spellcheck="false">Новая таблица (5)</span><button type="button" class="header-top-icon-btn" data-tooltip="Сохранено" title="Сохранено" aria-label="Сохранено"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" d="M11.232 7.33 10.17 6.268 7 9.439 5.53 7.97 4.47 9.03 7 11.56z"></path><path fill="currentColor" fill-rule="evenodd" d="M7.5 1.5a5 5 0 0 0-4.995 4.766A4.014 4.014 0 0 0 4 14h7a5 5 0 0 0 .874-9.924A5 5 0 0 0 7.5 1.5M3.07 7.656l.89-.36.044-.96a3.5 3.5 0 0 1 6.559-1.532l.347.624.703.124A3.501 3.501 0 0 1 11 12.5H4.005a2.513 2.513 0 0 1-.936-4.843" clip-rule="evenodd"></path></svg></button><button type="button" class="header-top-icon-btn" style="margin-left:auto" data-tooltip="Все комментарии" title="Все комментарии" aria-label="Все комментарии"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" d="M11.998 2a3 3 0 0 1 3 3v3.985a3 3 0 0 1-3 3H9.572a4 4 0 0 0-2.295.724L5.37 14.045H4.003v-2.06a3.003 3.003 0 0 1-3.003-3V5a3 3 0 0 1 3-3zM4 3.5A1.5 1.5 0 0 0 2.5 5v3.985c0 .827.673 1.5 1.503 1.5h1.5v1.636l.914-.64a5.5 5.5 0 0 1 3.155-.996h2.426a1.5 1.5 0 0 0 1.5-1.5V5a1.5 1.5 0 0 0-1.5-1.5z"/></svg></button><button type="button" class="header-share-btn" style="margin-left:4px" title="Поделиться" aria-label="Поделиться"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" fill-rule="evenodd" d="M6.5 10.75q.736-.083 1.5-.083V14h1.455L16 8 9.455 2H8v3.352c-3.96.584-6.746 2.982-7.696 6.147a8.5 8.5 0 0 0-.304 1.5h1.273q.135-.125.275-.242C2.953 11.582 4.655 10.96 6.5 10.75m-4.075-.357C4.144 9.518 6.065 9.167 8 9.167h1.5v2.757L13.78 8 9.5 4.077v2.57l-1.28.188c-2.714.401-4.7 1.745-5.795 3.558" clip-rule="evenodd"/></svg>Поделиться</button><div class="header-circle" style="margin-left:8px;background:#4caf50;color:#fff;font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;">А</div></div><div class="header-menu"><button type="button" class="header-menu-btn">Файл</button><button type="button" class="header-menu-btn">Правка</button><button type="button" class="header-menu-btn">Вставка</button><button type="button" class="header-menu-btn">Формат</button><button type="button" class="header-menu-btn">Структура</button><button type="button" class="header-menu-btn">Данные</button><button type="button" class="header-menu-btn">Вид</button><button type="button" class="header-menu-btn">Справка</button></div><div class="header-bottom"><div class="header-rect header-rect-tools"><button type="button" class="header-tool-btn" data-tooltip="Отменить" title="Отменить" aria-label="Отменить"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16"><path fill="currentColor" d="m.94 5 3.53 3.53 1.06-1.06-1.72-1.72H9.5a3.25 3.25 0 0 1 0 6.5H5v1.5h4.5a4.75 4.75 0 0 0 0-9.5H3.81l1.72-1.72-1.06-1.06z"/></svg></button><button type="button" class="header-tool-btn" data-tooltip="Повторить" title="Повторить" aria-label="Повторить" disabled><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16"><path fill="currentColor" d="m14.25 5-3.53 3.53-1.06-1.06 1.719-1.72h-5.69a3.25 3.25 0 0 0 0 6.5h4.5v1.5h-4.5a4.75 4.75 0 0 1 0-9.5h5.69l-1.72-1.72 1.06-1.06z"/></svg></button></div><div class="header-rect header-rect-tools"><button type="button" class="header-tool-btn" data-tooltip="Подсказки" title="Подсказки" aria-label="Подсказки"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16"><g clip-path="url(#clip0_14331_36439)"><path fill="url(#neuro_gradient)" d="M5.66 2.62a1.1 1.1 0 0 0-1.6.92L3.92 5.5H5.5V7H3.82l-.4 5.84A2.32 2.32 0 0 1 0 14.72l.7-1.32a.82.82 0 0 0 1.2-.66L2.32 7H1V5.5h1.42l.14-2.06c.13-1.86 2.1-3 3.78-2.16z"></path><path fill="url(#paint1_linear_14331_36439)" d="M13.1 8.13c.22.61.39.92.61 1.14s.53.39 1.14.6l1.15.38v.35l-1.15.38c-.61.21-.92.38-1.14.6s-.39.53-.6 1.14l-.37 1.15h-.36L12 12.72a3 3 0 0 0-.6-1.14 3 3 0 0 0-1.15-.6L9.1 10.6v-.35l1.15-.38c.62-.21.92-.38 1.14-.6.23-.22.39-.53.6-1.14.22-.6.37-1.14.38-1.15h.34zm-2.47-2.96-.4.76c-.2.41-.26.65-.26.87s.07.46.27.87l.39.76-.18.18-.77-.39c-.41-.2-.65-.27-.87-.27s-.45.07-.87.27l-.76.4-.18-.2.4-.76c.19-.41.26-.65.26-.87s-.07-.46-.27-.87C7.2 5.5 7 5.17 7 5.17l.17-.18.77.39c.42.2.65.27.87.27s.46-.07.87-.27l.77-.4z"></path></g><defs><linearGradient id="neuro_gradient" x1="0" x2="10.52" y1="1" y2="5.76" gradientUnits="userSpaceOnUse"><stop stop-color="#f43f5e"></stop><stop offset="1" stop-color="#f7993c"></stop></linearGradient><linearGradient id="paint1_linear_14331_36439" x1="7" x2="15.88" y1="4.99" y2="13.99" gradientUnits="userSpaceOnUse"><stop stop-color="#f43f5e"></stop><stop offset="1" stop-color="#f7993c"></stop></linearGradient><clipPath id="clip0_14331_36439"><path fill="#fff" d="M0 0h16v16H0z"></path></clipPath></defs></svg></button></div><div class="header-rect header-rect-tools"><button type="button" class="header-tool-btn" data-tooltip="Копировать форматирование" title="Копировать форматирование"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" fill-rule="evenodd" d="M2.006 3.19c.012-.43.046-.714.146-.955a2 2 0 0 1 1.083-1.083C3.602 1 4.068 1 5 1h7c.932 0 1.398 0 1.765.152a2 2 0 0 1 1.083 1.083C15 2.602 15 3.068 15 4s0 1.398-.152 1.765a2 2 0 0 1-1.083 1.083C13.398 7 12.932 7 12 7H5c-.932 0-1.398 0-1.765-.152a2 2 0 0 1-.985-.88V6.5c0 .476 0 .796.017 1.043.017.241.046.358.078.435.127.307.37.55.677.677.077.032.194.061.435.078.247.017.567.017 1.043.017h6V13c0 .465 0 .697-.051.888a1.5 1.5 0 0 1-1.06 1.06C9.196 15 8.964 15 8.5 15s-.697 0-.888-.051a1.5 1.5 0 0 1-1.06-1.06C6.5 13.697 6.5 13.464 6.5 13v-2.75H4.475c-.445 0-.816 0-1.12-.02a2.8 2.8 0 0 1-.907-.19A2.75 2.75 0 0 1 .959 8.553c-.12-.29-.167-.59-.188-.907C.75 7.341.75 6.97.75 6.525V5.5c0-.968.5-1.82 1.256-2.31M5 2.5h7c.486 0 .776 0 .992.016.134.009.19.02.205.025a.5.5 0 0 1 .262.262c.004.014.016.071.025.205.015.216.016.506.016.992s0 .776-.016.992c-.009.134-.02.19-.025.205a.5.5 0 0 1-.262.262 1.3 1.3 0 0 1-.205.025c-.216.015-.506.016-.992.016H5c-.486 0-.776 0-.992-.016a1.3 1.3 0 0 1-.205-.025.5.5 0 0 1-.262-.262 1.3 1.3 0 0 1-.025-.205A17 17 0 0 1 3.5 4c0-.486 0-.776.016-.992.009-.134.02-.19.025-.205a.5.5 0 0 1 .262-.262 1.3 1.3 0 0 1 .205-.025C4.224 2.5 4.514 2.5 5 2.5m3 7.754h1V13c0 .246 0 .38-.005.479v.015l-.016.001c-.098.005-.233.005-.479.005s-.38 0-.479-.005h-.015l-.001-.016A12 12 0 0 1 8 13z" clip-rule="evenodd"/></svg></button><button type="button" class="header-tool-btn" data-tooltip="Печать" title="Печать"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16"><path fill="currentColor" d="M12 4.02c.49.026.843.082 1.148.209a3 3 0 0 1 1.624 1.623C15 6.402 15 7.102 15 8.5s0 2.097-.229 2.648a3 3 0 0 1-1.623 1.625c-.305.126-.657.182-1.148.207V15H4v-2.02c-.49-.025-.843-.08-1.148-.207a3 3 0 0 1-1.623-1.625C1 10.598 1 9.898 1 8.5s0-2.097.229-2.648a3 3 0 0 1 1.623-1.623c.305-.127.657-.183 1.148-.208V1h8zM5.5 9.5v4h5v-4zm0-4c-.72 0-1.184.001-1.54.025-.341.024-.472.063-.534.09a1.5 1.5 0 0 0-.812.81c-.026.063-.065.194-.089.536-.024.355-.025.82-.025 1.539 0 .72.001 1.185.025 1.54.024.342.063.472.09.534a1.5 1.5 0 0 0 .81.813c.063.026.194.065.536.089l.039.001V8h8v3.477l.04-.001c.341-.024.472-.063.534-.09a1.5 1.5 0 0 0 .812-.812c.026-.062.065-.192.089-.534.024-.355.025-.82.025-1.54s-.001-1.184-.025-1.54c-.024-.341-.063-.472-.09-.534a1.5 1.5 0 0 0-.81-.812c-.063-.026-.194-.065-.536-.089-.355-.024-.82-.025-1.539-.025zm0-3V4h5V2.5z"/></svg></button></div><div class="header-rect header-rect-tools"><button type="button" class="header-tool-btn" data-tooltip="Валюта" title="Валюта"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="16" height="16" viewBox="0 0 16 16"><g fill="currentColor" clip-path="url(#cash-stack-outline-sm__a)"><path d="M4 2.3h8V.8H4zM2 4.55h12v-1.5H2z"/><path fill-rule="evenodd" d="M10.5 10.3a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0m-1.5 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0" clip-rule="evenodd"/><path d="M4.25 9.75a.75.75 0 0 0-.75.75v.75h.75a.75.75 0 0 0 0-1.5m7.5 0a.75.75 0 0 0-.75.75v.75h.75a.75.75 0 0 0 0-1.5"/><path fill-rule="evenodd" d="M.5 8.286a3 3 0 0 1 3-3h9a3 3 0 0 1 3 3V12.3a3 3 0 0 1-3 3h-9a3 3 0 0 1-3-3zm3-1.5h9a1.5 1.5 0 0 1 1.5 1.5V12.3a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 2 12.3V8.286a1.5 1.5 0 0 1 1.5-1.5" clip-rule="evenodd"/></g><defs><clipPath id="cash-stack-outline-sm__a"><path fill="#fff" d="M0 0h16v16H0z"/></clipPath></defs></svg></button><button type="button" class="header-tool-btn" data-tooltip="Проценты" title="Проценты"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" fill-rule="evenodd" d="M4.25 7.5a3.25 3.25 0 1 0 0-6.5 3.25 3.25 0 0 0 0 6.5m0-1.5a1.75 1.75 0 1 0 0-3.5 1.75 1.75 0 0 0 0 3.5" clip-rule="evenodd"/><path fill="currentColor" d="m2.105 14.5 9.903-13h1.886l-9.903 13z"/><path fill="currentColor" fill-rule="evenodd" d="M15 11.75a3.25 3.25 0 1 1-6.5 0 3.25 3.25 0 0 1 6.5 0m-1.5 0a1.75 1.75 0 1 1-3.5 0 1.75 1.75 0 0 1 3.5 0" clip-rule="evenodd"/></svg></button></div><div class="header-rect header-rect-tools"><div class="font-select-wrap"><select class="font-select"><option>Arial</option><option>Inter</option><option>Georgia</option><option>Courier New</option><option>Times New Roman</option></select><span class="font-select-chevron"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="12" height="12" viewBox="0 0 12 12"><path fill="currentColor" d="M1 5.348V3.446l5 3.303 5-3.4V5.25l-5 3.4z"/></svg></span></div></div><div class="header-rect header-rect-tools"><div class="font-size-wrap"><button type="button" class="header-tool-btn" data-tooltip="Уменьшить шрифт" title="Уменьшить шрифт" aria-label="Уменьшить шрифт"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="12" height="12" viewBox="0 0 12 12"><path fill="currentColor" d="M1 5.25h10v1.5H1z"/></svg></button><span class="font-size-value">9</span><button type="button" class="header-tool-btn" data-tooltip="Увеличить шрифт" title="Увеличить шрифт" aria-label="Увеличить шрифт"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="12" height="12" viewBox="0 0 12 12"><path fill="currentColor" d="M5.25 5.25V1h1.5v4.25H11v1.5H6.75V11h-1.5V6.75H1v-1.5z"/></svg></button></div></div><div class="header-rect header-rect-tools"><button type="button" class="header-tool-btn" data-tooltip="Жирный" title="Жирный"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16"><path fill="currentColor" d="M7.85 1.5q1.198 0 2.106.163.926.163 1.544.545.618.381.926.999.327.6.327 1.453 0 1.271-.654 1.98-.655.708-1.798.998-.245.06-.505.106.615.072 1.123.203 1.126.29 1.707.962.58.672.581 1.834 0 1.018-.4 1.743a3.2 3.2 0 0 1-1.144 1.163q-.726.436-1.707.654-.98.2-2.143.2H3.4V1.5zM5.798 8.818v3.668h2.324q.78 0 1.362-.163.6-.181.926-.58.345-.419.345-1.108 0-.672-.309-1.072-.308-.4-.925-.563-.618-.182-1.58-.182zm0-2.015H8.03q.69 0 1.198-.2.528-.2.818-.582.308-.4.308-1.016 0-.58-.253-.89-.255-.327-.746-.454a5 5 0 0 0-1.198-.127h-2.36z"/></svg></button><button type="button" class="header-tool-btn" data-tooltip="Курсив" title="Курсив"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16"><path fill="currentColor" d="M8.512 3.001H6v-1.5h6.5v1.5h-2.45L7.779 13H10v1.5H3.5V13h2.74z"/></svg></button><button type="button" class="header-tool-btn" data-tooltip="Подчёркивание" title="Подчёркивание"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" d="M3.25 1.5V8c0 1.295.435 2.433 1.25 3.25.817.815 1.955 1.25 3.25 1.25h.5c1.295 0 2.433-.435 3.25-1.25.815-.817 1.25-1.955 1.25-3.25V1.5h-1.5V8c0 .955-.315 1.692-.812 2.188-.496.497-1.233.812-2.188.812h-.5c-.955 0-1.692-.315-2.188-.812C5.065 9.692 4.75 8.955 4.75 8V1.5zM2 15.5h12V14H2z"/></svg></button><button type="button" class="header-tool-btn" data-tooltip="Зачёркивание" title="Зачёркивание"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" d="M7.838 14.682a9.3 9.3 0 0 1-1.761-.164 7.4 7.4 0 0 1-1.507-.454 4 4 0 0 1-1.072-.672v-1.634q.454.399 1.162.708.727.31 1.562.49a7.6 7.6 0 0 0 1.616.182 5.3 5.3 0 0 0 1.308-.145q.58-.145.962-.418.4-.271.6-.672.218-.417.218-.926 0-.472-.146-.799a1.33 1.33 0 0 0-.472-.581q-.326-.254-.926-.454a16 16 0 0 0-1.357-.41H1v-1.5h3.513l-.004-.004H9q.008 0 .014.003H15v1.5h-3.037q.066.076.125.157.328.4.454.908.145.49.145 1.107 0 .709-.218 1.308a3.1 3.1 0 0 1-.617 1.053q-.4.454-.999.781a5.2 5.2 0 0 1-1.344.472 8 8 0 0 1-1.67.164M3.807 6.201l.01.028h2.206l-.091-.064a1.7 1.7 0 0 1-.49-.581 1.9 1.9 0 0 1-.146-.763q0-.49.182-.854a1.6 1.6 0 0 1 .58-.617q.383-.254.963-.363.6-.127 1.38-.127.745 0 1.38.108.636.091 1.181.291.544.2.999.509V2.133a5.8 5.8 0 0 0-1.108-.454 7.4 7.4 0 0 0-1.162-.272q-.6-.09-1.29-.091-1.161 0-2.07.236-.89.236-1.507.69-.6.436-.908 1.108t-.309 1.543q0 .727.2 1.308"/></svg></button><button type="button" class="header-tool-btn" data-tooltip="Цвет текста" title="Цвет текста"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg></button><div class="split-btn"><button type="button" class="header-tool-btn split-btn-main" id="fillColorBtn" data-tooltip="Заливка" title="Заливка" aria-label="Заливка"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" fill-rule="evenodd" d="m3.575 1-.78 1.276L4.832 3.45 1.094 9.922l.002.001c-.474.943.853 2.685 3.004 3.926 2.184 1.26 4.39 1.527 4.928.595a1 1 0 0 0 .049-.097l4.406-7.628zm6.858 8H3.359l2.77-4.794 5.304 3.062z" clip-rule="evenodd"/><path fill="currentColor" d="M13.25 15c.966 0 1.75-.715 1.75-1.596 0-1.349-1.604-3.07-1.604-3.07h-.292s-1.604 1.74-1.604 3.07c0 .881.784 1.596 1.75 1.596"/></svg></button><button type="button" class="header-tool-btn split-btn-arrow" id="fillArrowBtn" aria-label="Цвет заливки"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="12" height="12" viewBox="0 0 12 12"><path fill="currentColor" d="M1 5.348V3.446l5 3.303 5-3.4V5.25l-5 3.4z"/></svg></button></div><div class="split-btn-menu" id="fillMenu"><button class="split-btn-menu-item" id="fillYellow"><span class="split-btn-color-dot" style="background:#fff176"></span>Жёлтый</button><button class="split-btn-menu-item" id="fillClear"><span class="split-btn-color-dot" style="background:#fff"></span>Без заливки</button></div></div><div class="header-rect header-rect-tools"><button type="button" class="header-tool-btn" data-tooltip="Границы" title="Границы"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h18v18H3z"/><path d="M3 9h18"/><path d="M3 15h18"/><path d="M9 3v18"/><path d="M15 3v18"/></svg></button><button type="button" class="header-tool-btn" data-tooltip="По левому краю" title="По левому краю"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" d="M1 2.5h14V1H1zm9 4.167H1v-1.5h9zm-9 4.167h14v-1.5H1zM1 15h9v-1.5H1z"/></svg></button><button type="button" class="header-tool-btn" data-tooltip="По центру" title="По центру"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" d="M1 2.5h14V1H1zm11.5 4.167h-9v-1.5h9zM1 10.834h14v-1.5H1zM3.5 15h9v-1.5h-9z"/></svg></button><button type="button" class="header-tool-btn" data-tooltip="По правому краю" title="По правому краю"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" d="M15 2.502H1v-1.5h14zM6 6.668h9v-1.5H6zm9 4.166H1v-1.5h14zM15 15H6v-1.5h9z"/></svg></button><button type="button" class="header-tool-btn" data-tooltip="По верху" title="По верху"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 21V3"/><path d="M12 12H3"/><path d="M18 21V3"/></svg></button><button type="button" class="header-tool-btn" data-tooltip="По середине" title="По середине"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 21V3"/><path d="M12 12H3"/><path d="M18 21V3"/></svg></button><button type="button" class="header-tool-btn" data-tooltip="По низу" title="По низу"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3v18"/><path d="M12 12H3"/><path d="M18 3v18"/></svg></button></div><div class="header-rect header-rect-tools"><div class="split-btn"><button type="button" class="header-tool-btn split-btn-main" id="filterBtn" data-tooltip="Фильтр" title="Фильтр" aria-label="Фильтр"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" fill-rule="evenodd" d="m6.5 14.053 3-1.133V7.798a3 3 0 0 1 .75-1.985L13.176 2.5H2.825l2.924 3.313A3 3 0 0 1 6.5 7.8zM1 2.699V1h14v1.698l-3.625 4.108a1.5 1.5 0 0 0-.375.992v6.159l-5.323 2.01A.5.5 0 0 1 5 15.5V7.8a1.5 1.5 0 0 0-.375-.993z" clip-rule="evenodd"/></svg></button><button type="button" class="header-tool-btn split-btn-arrow" id="filterArrowBtn" aria-label="Параметры фильтра"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="12" height="12" viewBox="0 0 12 12"><path fill="currentColor" d="M1 5.348V3.446l5 3.303 5-3.4V5.25l-5 3.4z"/></svg></button></div><div class="split-btn-menu" id="filterMenu"><button class="split-btn-menu-item" id="filterApply">Применить фильтр</button><button class="split-btn-menu-item" id="filterClear">Очистить фильтры</button></div><button type="button" class="header-tool-btn" data-tooltip="Ссылка" title="Ссылка"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="16" height="16" viewBox="0 0 16 16"><g clip-path="url(#link-outline-sm__a)"><path fill="currentColor" fill-rule="evenodd" d="M8.706 1.99a3.75 3.75 0 0 1 5.304 5.303l-1.301 1.3-1.06-1.06 1.3-1.3A2.25 2.25 0 1 0 9.767 3.05l-2.43 2.43a2.314 2.314 0 0 0 0 3.272l.309.309-1.06 1.06-.31-.308a3.814 3.814 0 0 1 0-5.394zm.708 3.889.308.308a3.814 3.814 0 0 1 0 5.393l-2.43 2.43A3.75 3.75 0 0 1 1.99 8.707l1.3-1.301 1.062 1.06L3.05 9.769a2.25 2.25 0 1 0 3.182 3.182l2.43-2.43a2.314 2.314 0 0 0 0-3.272l-.31-.309z" clip-rule="evenodd"/></g><defs><clipPath id="link-outline-sm__a"><path fill="#fff" d="M0 0h16v16H0z"/></clipPath></defs></svg></button><button type="button" class="header-tool-btn" data-tooltip="Сумма" title="Сумма"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" d="M3.135 15v-1.451l4.627-5.784L3.331 2.47V1h9.274v1.569H6.507q-.607 0-.921-.02l4.02 4.765v.53L5.153 13.43h1.432q.705-.02 1.49-.02h4.765V15z"/></svg></button><button type="button" class="header-tool-btn" data-tooltip="Диаграмма" title="Диаграмма"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" fill-rule="evenodd" d="M1 6.1c0-1.964 0-2.946.442-3.667a3 3 0 0 1 .99-.99C3.155 1 4.137 1 6.1 1h3.8c1.964 0 2.946 0 3.668.442a3 3 0 0 1 .99.99C15 3.155 15 4.137 15 6.1v3.8c0 1.964 0 2.946-.442 3.668a3 3 0 0 1-.99.99C12.846 15 11.864 15 9.9 15H6.1c-1.964 0-2.946 0-3.667-.442a3 3 0 0 1-.99-.99C1 12.846 1 11.864 1 9.9zm5.1-3.6h3.8c1.011 0 1.664.002 2.158.049.471.044.64.12.726.172a1.5 1.5 0 0 1 .495.495c.052.086.128.255.172.726.047.494.049 1.147.049 2.158v1.15h-2.75v-2h-5.5v3.5H2.5V6.1c0-1.011.002-1.664.049-2.158.044-.471.12-.64.172-.726a1.5 1.5 0 0 1 .495-.495c.086-.052.255-.128.726-.172C4.436 2.502 5.09 2.5 6.1 2.5m-3.6 7.75c.001.816.007 1.374.049 1.808.044.471.12.64.172.726a1.5 1.5 0 0 0 .495.495c.086.052.255.128.726.172.34.033.754.044 1.308.047V10.25zm4.25 3.25h2.5V6.75h-2.5zm4-.002a16 16 0 0 0 1.308-.046c.471-.045.64-.12.726-.173a1.5 1.5 0 0 0 .495-.495c.052-.086.128-.255.172-.726.047-.494.049-1.147.049-2.158V8.75h-2.75z" clip-rule="evenodd"/></svg></button></div><div class="header-rect header-rect-tools"><button type="button" class="header-tool-btn" data-tooltip="Обновить" title="Обновить"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M21 21v-5h-5"/></svg></button><button type="button" class="header-tool-btn" data-tooltip="Таблица" title="Таблица"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M4 9h16"/><path d="M4 15h16"/></svg></button></div></div></header>
+    </div><div class="header-top"><div class="header-circle logo"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 40 40"><path fill="url(#ya360a)" d="M20 40c11.046 0 20-8.954 20-20S31.046 0 20 0 0 8.954 0 20s8.954 20 20 20"></path><path fill="#fff" d="M20 31.6c3.755 0 6.8-5.194 6.8-11.6 0-6.407-3.045-11.6-6.8-11.6s-6.8 5.193-6.8 11.6c0 6.406 3.044 11.6 6.8 11.6"></path><path fill="#fff" fill-rule="evenodd" d="M7.251 10.8c-2.018-.104-4.45 4.12-4.45 9.198 0 5.08 2.432 9.302 4.45 9.198 2.001-.104 3.15-4.119 3.15-9.198S9.252 10.904 7.25 10.8m25.5 18.396c2.018.104 4.45-4.119 4.45-9.198s-2.432-9.302-4.45-9.198c-2.002.104-3.15 4.12-3.15 9.198 0 5.08 1.148 9.094 3.15 9.198" clip-rule="evenodd"></path><defs><radialGradient id="ya360a" cx="0" cy="0" r="1" gradientTransform="matrix(0 25.6 -33.2388 0 20 14.4)" gradientUnits="userSpaceOnUse"><stop stop-color="#FF9A6F"></stop><stop offset="0.61" stop-color="#FF6427"></stop><stop offset="1" stop-color="#EB581E"></stop></radialGradient></defs></svg></div><div class="header-circle logo"><svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12.4977 6.58733C12.8545 5.30119 14.2234 4.53793 15.5551 4.88255L26.1491 7.624C27.4808 7.96862 28.2712 9.29062 27.9143 10.5768L24.3534 23.4114C23.9965 24.6975 22.6277 25.4608 21.2959 25.1161L10.702 22.3747C9.37023 22.0301 8.57992 20.7081 8.93676 19.4219L12.4977 6.58733Z" fill="#0CBD70"></path><g filter="url(#f0)"><path d="M6.82263 18.7942C6.86381 21.5295 8.95049 23.7988 11.6728 24.0687L21.6247 25.0553C21.9643 25.089 22.2589 24.8222 22.2589 24.4809V11.7627C22.2589 11.4439 22.0005 11.1855 21.6816 11.1855H6.70807L6.82263 18.7942Z" fill="#147638"></path></g><path d="M3.99915 12.011C3.99915 10.6795 5.11682 9.6001 6.49554 9.6001H17.1031C18.4818 9.6001 19.5995 10.6795 19.5995 12.011V25.2H6.49554C5.11682 25.2 3.99915 24.1206 3.99915 22.7891V12.011Z" fill="#00D97B"></path><path d="M19.5989 23.176C19.5989 24.2941 20.8976 25.2006 22.0554 25.2006L19.5995 25.2L19.5989 23.176Z" fill="#00D97B"></path><path d="M7.59961 18.5913C7.59961 18.1012 7.99687 17.704 8.48691 17.704H10.6088C11.0988 17.704 11.4961 18.1012 11.4961 18.5913V20.7131C11.4961 21.2031 11.0988 21.6004 10.6088 21.6004H8.48691C7.99687 21.6004 7.59961 21.2031 7.59961 20.7131V18.5913Z" fill="white"></path><path d="M7.59963 14.0875C7.59963 13.5974 7.99689 13.2002 8.48693 13.2002H10.6088C11.0988 13.2002 11.4961 13.5974 11.4961 14.0875V16.2093C11.4961 16.6993 11.0988 17.0966 10.6088 17.0966H8.48693C7.99689 17.0966 7.59963 16.6993 7.59963 16.2093V14.0875Z" fill="white"></path><path d="M12.1033 18.5912C12.1033 18.1011 12.5006 17.7039 12.9906 17.7039H15.1125C15.6025 17.7039 15.9998 18.1011 15.9998 18.5912V20.713C15.9998 21.203 15.6025 21.6003 15.1125 21.6003H12.9906C12.5006 21.6003 12.1033 21.203 12.1033 20.713V18.5912Z" fill="white"></path><path d="M12.1033 14.0875C12.1033 13.5974 12.5006 13.2002 12.9906 13.2002H15.1125C15.6025 13.2002 15.9998 13.5974 15.9998 14.0875V16.2093C15.9998 16.6993 15.6025 17.0966 15.1125 17.0966H12.9906C12.5006 17.0966 12.1033 16.6993 12.1033 16.2093V14.0875Z" fill="white"></path><defs><filter id="f0" x="3.60514" y="8.08262" width="21.7567" height="20.0784" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feFlood flood-opacity="0" result="BackgroundImageFix"></feFlood><feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"></feBlend><feGaussianBlur stdDeviation="1.55147" result="effect1_foregroundBlur_47_29164"></feGaussianBlur></filter></defs></svg></div><span class="header-title" contenteditable="true" spellcheck="false">Продажи (20.02—27.02)</span><button type="button" class="header-top-icon-btn" data-tooltip="Сохранено" title="Сохранено" aria-label="Сохранено"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" d="M11.232 7.33 10.17 6.268 7 9.439 5.53 7.97 4.47 9.03 7 11.56z"></path><path fill="currentColor" fill-rule="evenodd" d="M7.5 1.5a5 5 0 0 0-4.995 4.766A4.014 4.014 0 0 0 4 14h7a5 5 0 0 0 .874-9.924A5 5 0 0 0 7.5 1.5M3.07 7.656l.89-.36.044-.96a3.5 3.5 0 0 1 6.559-1.532l.347.624.703.124A3.501 3.501 0 0 1 11 12.5H4.005a2.513 2.513 0 0 1-.936-4.843" clip-rule="evenodd"></path></svg></button><button type="button" class="header-top-icon-btn" style="margin-left:auto" data-tooltip="Все комментарии" title="Все комментарии" aria-label="Все комментарии"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" d="M11.998 2a3 3 0 0 1 3 3v3.985a3 3 0 0 1-3 3H9.572a4 4 0 0 0-2.295.724L5.37 14.045H4.003v-2.06a3.003 3.003 0 0 1-3.003-3V5a3 3 0 0 1 3-3zM4 3.5A1.5 1.5 0 0 0 2.5 5v3.985c0 .827.673 1.5 1.503 1.5h1.5v1.636l.914-.64a5.5 5.5 0 0 1 3.155-.996h2.426a1.5 1.5 0 0 0 1.5-1.5V5a1.5 1.5 0 0 0-1.5-1.5z"/></svg></button><button type="button" class="header-share-btn" style="margin-left:4px" title="Поделиться" aria-label="Поделиться"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" fill-rule="evenodd" d="M6.5 10.75q.736-.083 1.5-.083V14h1.455L16 8 9.455 2H8v3.352c-3.96.584-6.746 2.982-7.696 6.147a8.5 8.5 0 0 0-.304 1.5h1.273q.135-.125.275-.242C2.953 11.582 4.655 10.96 6.5 10.75m-4.075-.357C4.144 9.518 6.065 9.167 8 9.167h1.5v2.757L13.78 8 9.5 4.077v2.57l-1.28.188c-2.714.401-4.7 1.745-5.795 3.558" clip-rule="evenodd"/></svg>Поделиться</button><div class="header-circle" style="margin-left:8px;background:#4caf50;color:#fff;font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;">А</div></div><div class="header-menu"><button type="button" class="header-menu-btn">Файл</button><button type="button" class="header-menu-btn">Правка</button><button type="button" class="header-menu-btn">Вставка</button><button type="button" class="header-menu-btn">Формат</button><button type="button" class="header-menu-btn">Структура</button><button type="button" class="header-menu-btn">Данные</button><button type="button" class="header-menu-btn">Вид</button><button type="button" class="header-menu-btn">Справка</button></div><div class="header-bottom"><div class="header-rect header-rect-tools"><button type="button" class="header-tool-btn" data-tooltip="Отменить" title="Отменить" aria-label="Отменить"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16"><path fill="currentColor" d="m.94 5 3.53 3.53 1.06-1.06-1.72-1.72H9.5a3.25 3.25 0 0 1 0 6.5H5v1.5h4.5a4.75 4.75 0 0 0 0-9.5H3.81l1.72-1.72-1.06-1.06z"/></svg></button><button type="button" class="header-tool-btn" data-tooltip="Повторить" title="Повторить" aria-label="Повторить" disabled><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16"><path fill="currentColor" d="m14.25 5-3.53 3.53-1.06-1.06 1.719-1.72h-5.69a3.25 3.25 0 0 0 0 6.5h4.5v1.5h-4.5a4.75 4.75 0 0 1 0-9.5h5.69l-1.72-1.72 1.06-1.06z"/></svg></button></div><div class="header-rect header-rect-tools"><button type="button" class="header-tool-btn" data-tooltip="Подсказки" title="Подсказки" aria-label="Подсказки"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16"><g clip-path="url(#clip0_14331_36439)"><path fill="url(#neuro_gradient)" d="M5.66 2.62a1.1 1.1 0 0 0-1.6.92L3.92 5.5H5.5V7H3.82l-.4 5.84A2.32 2.32 0 0 1 0 14.72l.7-1.32a.82.82 0 0 0 1.2-.66L2.32 7H1V5.5h1.42l.14-2.06c.13-1.86 2.1-3 3.78-2.16z"></path><path fill="url(#paint1_linear_14331_36439)" d="M13.1 8.13c.22.61.39.92.61 1.14s.53.39 1.14.6l1.15.38v.35l-1.15.38c-.61.21-.92.38-1.14.6s-.39.53-.6 1.14l-.37 1.15h-.36L12 12.72a3 3 0 0 0-.6-1.14 3 3 0 0 0-1.15-.6L9.1 10.6v-.35l1.15-.38c.62-.21.92-.38 1.14-.6.23-.22.39-.53.6-1.14.22-.6.37-1.14.38-1.15h.34zm-2.47-2.96-.4.76c-.2.41-.26.65-.26.87s.07.46.27.87l.39.76-.18.18-.77-.39c-.41-.2-.65-.27-.87-.27s-.45.07-.87.27l-.76.4-.18-.2.4-.76c.19-.41.26-.65.26-.87s-.07-.46-.27-.87C7.2 5.5 7 5.17 7 5.17l.17-.18.77.39c.42.2.65.27.87.27s.46-.07.87-.27l.77-.4z"></path></g><defs><linearGradient id="neuro_gradient" x1="0" x2="10.52" y1="1" y2="5.76" gradientUnits="userSpaceOnUse"><stop stop-color="#f43f5e"></stop><stop offset="1" stop-color="#f7993c"></stop></linearGradient><linearGradient id="paint1_linear_14331_36439" x1="7" x2="15.88" y1="4.99" y2="13.99" gradientUnits="userSpaceOnUse"><stop stop-color="#f43f5e"></stop><stop offset="1" stop-color="#f7993c"></stop></linearGradient><clipPath id="clip0_14331_36439"><path fill="#fff" d="M0 0h16v16H0z"></path></clipPath></defs></svg></button></div><div class="header-rect header-rect-tools"><button type="button" class="header-tool-btn" data-tooltip="Копировать форматирование" title="Копировать форматирование"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" fill-rule="evenodd" d="M2.006 3.19c.012-.43.046-.714.146-.955a2 2 0 0 1 1.083-1.083C3.602 1 4.068 1 5 1h7c.932 0 1.398 0 1.765.152a2 2 0 0 1 1.083 1.083C15 2.602 15 3.068 15 4s0 1.398-.152 1.765a2 2 0 0 1-1.083 1.083C13.398 7 12.932 7 12 7H5c-.932 0-1.398 0-1.765-.152a2 2 0 0 1-.985-.88V6.5c0 .476 0 .796.017 1.043.017.241.046.358.078.435.127.307.37.55.677.677.077.032.194.061.435.078.247.017.567.017 1.043.017h6V13c0 .465 0 .697-.051.888a1.5 1.5 0 0 1-1.06 1.06C9.196 15 8.964 15 8.5 15s-.697 0-.888-.051a1.5 1.5 0 0 1-1.06-1.06C6.5 13.697 6.5 13.464 6.5 13v-2.75H4.475c-.445 0-.816 0-1.12-.02a2.8 2.8 0 0 1-.907-.19A2.75 2.75 0 0 1 .959 8.553c-.12-.29-.167-.59-.188-.907C.75 7.341.75 6.97.75 6.525V5.5c0-.968.5-1.82 1.256-2.31M5 2.5h7c.486 0 .776 0 .992.016.134.009.19.02.205.025a.5.5 0 0 1 .262.262c.004.014.016.071.025.205.015.216.016.506.016.992s0 .776-.016.992c-.009.134-.02.19-.025.205a.5.5 0 0 1-.262.262 1.3 1.3 0 0 1-.205.025c-.216.015-.506.016-.992.016H5c-.486 0-.776 0-.992-.016a1.3 1.3 0 0 1-.205-.025.5.5 0 0 1-.262-.262 1.3 1.3 0 0 1-.025-.205A17 17 0 0 1 3.5 4c0-.486 0-.776.016-.992.009-.134.02-.19.025-.205a.5.5 0 0 1 .262-.262 1.3 1.3 0 0 1 .205-.025C4.224 2.5 4.514 2.5 5 2.5m3 7.754h1V13c0 .246 0 .38-.005.479v.015l-.016.001c-.098.005-.233.005-.479.005s-.38 0-.479-.005h-.015l-.001-.016A12 12 0 0 1 8 13z" clip-rule="evenodd"/></svg></button><button type="button" class="header-tool-btn" data-tooltip="Печать" title="Печать"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16"><path fill="currentColor" d="M12 4.02c.49.026.843.082 1.148.209a3 3 0 0 1 1.624 1.623C15 6.402 15 7.102 15 8.5s0 2.097-.229 2.648a3 3 0 0 1-1.623 1.625c-.305.126-.657.182-1.148.207V15H4v-2.02c-.49-.025-.843-.08-1.148-.207a3 3 0 0 1-1.623-1.625C1 10.598 1 9.898 1 8.5s0-2.097.229-2.648a3 3 0 0 1 1.623-1.623c.305-.127.657-.183 1.148-.208V1h8zM5.5 9.5v4h5v-4zm0-4c-.72 0-1.184.001-1.54.025-.341.024-.472.063-.534.09a1.5 1.5 0 0 0-.812.81c-.026.063-.065.194-.089.536-.024.355-.025.82-.025 1.539 0 .72.001 1.185.025 1.54.024.342.063.472.09.534a1.5 1.5 0 0 0 .81.813c.063.026.194.065.536.089l.039.001V8h8v3.477l.04-.001c.341-.024.472-.063.534-.09a1.5 1.5 0 0 0 .812-.812c.026-.062.065-.192.089-.534.024-.355.025-.82.025-1.54s-.001-1.184-.025-1.54c-.024-.341-.063-.472-.09-.534a1.5 1.5 0 0 0-.81-.812c-.063-.026-.194-.065-.536-.089-.355-.024-.82-.025-1.539-.025zm0-3V4h5V2.5z"/></svg></button></div><div class="header-rect header-rect-tools"><button type="button" class="header-tool-btn" data-tooltip="Валюта" title="Валюта"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="16" height="16" viewBox="0 0 16 16"><g fill="currentColor" clip-path="url(#cash-stack-outline-sm__a)"><path d="M4 2.3h8V.8H4zM2 4.55h12v-1.5H2z"/><path fill-rule="evenodd" d="M10.5 10.3a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0m-1.5 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0" clip-rule="evenodd"/><path d="M4.25 9.75a.75.75 0 0 0-.75.75v.75h.75a.75.75 0 0 0 0-1.5m7.5 0a.75.75 0 0 0-.75.75v.75h.75a.75.75 0 0 0 0-1.5"/><path fill-rule="evenodd" d="M.5 8.286a3 3 0 0 1 3-3h9a3 3 0 0 1 3 3V12.3a3 3 0 0 1-3 3h-9a3 3 0 0 1-3-3zm3-1.5h9a1.5 1.5 0 0 1 1.5 1.5V12.3a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 2 12.3V8.286a1.5 1.5 0 0 1 1.5-1.5" clip-rule="evenodd"/></g><defs><clipPath id="cash-stack-outline-sm__a"><path fill="#fff" d="M0 0h16v16H0z"/></clipPath></defs></svg></button><button type="button" class="header-tool-btn" data-tooltip="Проценты" title="Проценты"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" fill-rule="evenodd" d="M4.25 7.5a3.25 3.25 0 1 0 0-6.5 3.25 3.25 0 0 0 0 6.5m0-1.5a1.75 1.75 0 1 0 0-3.5 1.75 1.75 0 0 0 0 3.5" clip-rule="evenodd"/><path fill="currentColor" d="m2.105 14.5 9.903-13h1.886l-9.903 13z"/><path fill="currentColor" fill-rule="evenodd" d="M15 11.75a3.25 3.25 0 1 1-6.5 0 3.25 3.25 0 0 1 6.5 0m-1.5 0a1.75 1.75 0 1 1-3.5 0 1.75 1.75 0 0 1 3.5 0" clip-rule="evenodd"/></svg></button></div><div class="header-rect header-rect-tools"><div class="font-select-wrap"><select class="font-select"><option>Arial</option><option>Inter</option><option>Georgia</option><option>Courier New</option><option>Times New Roman</option></select><span class="font-select-chevron"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="12" height="12" viewBox="0 0 12 12"><path fill="currentColor" d="M1 5.348V3.446l5 3.303 5-3.4V5.25l-5 3.4z"/></svg></span></div></div><div class="header-rect header-rect-tools"><div class="font-size-wrap"><button type="button" class="header-tool-btn" data-tooltip="Уменьшить шрифт" title="Уменьшить шрифт" aria-label="Уменьшить шрифт"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="12" height="12" viewBox="0 0 12 12"><path fill="currentColor" d="M1 5.25h10v1.5H1z"/></svg></button><span class="font-size-value">9</span><button type="button" class="header-tool-btn" data-tooltip="Увеличить шрифт" title="Увеличить шрифт" aria-label="Увеличить шрифт"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="12" height="12" viewBox="0 0 12 12"><path fill="currentColor" d="M5.25 5.25V1h1.5v4.25H11v1.5H6.75V11h-1.5V6.75H1v-1.5z"/></svg></button></div></div><div class="header-rect header-rect-tools"><button type="button" class="header-tool-btn" data-tooltip="Жирный" title="Жирный"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16"><path fill="currentColor" d="M7.85 1.5q1.198 0 2.106.163.926.163 1.544.545.618.381.926.999.327.6.327 1.453 0 1.271-.654 1.98-.655.708-1.798.998-.245.06-.505.106.615.072 1.123.203 1.126.29 1.707.962.58.672.581 1.834 0 1.018-.4 1.743a3.2 3.2 0 0 1-1.144 1.163q-.726.436-1.707.654-.98.2-2.143.2H3.4V1.5zM5.798 8.818v3.668h2.324q.78 0 1.362-.163.6-.181.926-.58.345-.419.345-1.108 0-.672-.309-1.072-.308-.4-.925-.563-.618-.182-1.58-.182zm0-2.015H8.03q.69 0 1.198-.2.528-.2.818-.582.308-.4.308-1.016 0-.58-.253-.89-.255-.327-.746-.454a5 5 0 0 0-1.198-.127h-2.36z"/></svg></button><button type="button" class="header-tool-btn" data-tooltip="Курсив" title="Курсив"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16"><path fill="currentColor" d="M8.512 3.001H6v-1.5h6.5v1.5h-2.45L7.779 13H10v1.5H3.5V13h2.74z"/></svg></button><button type="button" class="header-tool-btn" data-tooltip="Подчёркивание" title="Подчёркивание"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" d="M3.25 1.5V8c0 1.295.435 2.433 1.25 3.25.817.815 1.955 1.25 3.25 1.25h.5c1.295 0 2.433-.435 3.25-1.25.815-.817 1.25-1.955 1.25-3.25V1.5h-1.5V8c0 .955-.315 1.692-.812 2.188-.496.497-1.233.812-2.188.812h-.5c-.955 0-1.692-.315-2.188-.812C5.065 9.692 4.75 8.955 4.75 8V1.5zM2 15.5h12V14H2z"/></svg></button><button type="button" class="header-tool-btn" data-tooltip="Зачёркивание" title="Зачёркивание"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" d="M7.838 14.682a9.3 9.3 0 0 1-1.761-.164 7.4 7.4 0 0 1-1.507-.454 4 4 0 0 1-1.072-.672v-1.634q.454.399 1.162.708.727.31 1.562.49a7.6 7.6 0 0 0 1.616.182 5.3 5.3 0 0 0 1.308-.145q.58-.145.962-.418.4-.271.6-.672.218-.417.218-.926 0-.472-.146-.799a1.33 1.33 0 0 0-.472-.581q-.326-.254-.926-.454a16 16 0 0 0-1.357-.41H1v-1.5h3.513l-.004-.004H9q.008 0 .014.003H15v1.5h-3.037q.066.076.125.157.328.4.454.908.145.49.145 1.107 0 .709-.218 1.308a3.1 3.1 0 0 1-.617 1.053q-.4.454-.999.781a5.2 5.2 0 0 1-1.344.472 8 8 0 0 1-1.67.164M3.807 6.201l.01.028h2.206l-.091-.064a1.7 1.7 0 0 1-.49-.581 1.9 1.9 0 0 1-.146-.763q0-.49.182-.854a1.6 1.6 0 0 1 .58-.617q.383-.254.963-.363.6-.127 1.38-.127.745 0 1.38.108.636.091 1.181.291.544.2.999.509V2.133a5.8 5.8 0 0 0-1.108-.454 7.4 7.4 0 0 0-1.162-.272q-.6-.09-1.29-.091-1.161 0-2.07.236-.89.236-1.507.69-.6.436-.908 1.108t-.309 1.543q0 .727.2 1.308"/></svg></button><button type="button" class="header-tool-btn" data-tooltip="Цвет текста" title="Цвет текста"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg></button><div class="split-btn"><button type="button" class="header-tool-btn split-btn-main" id="fillColorBtn" data-tooltip="Заливка" title="Заливка" aria-label="Заливка"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" fill-rule="evenodd" d="m3.575 1-.78 1.276L4.832 3.45 1.094 9.922l.002.001c-.474.943.853 2.685 3.004 3.926 2.184 1.26 4.39 1.527 4.928.595a1 1 0 0 0 .049-.097l4.406-7.628zm6.858 8H3.359l2.77-4.794 5.304 3.062z" clip-rule="evenodd"/><path fill="currentColor" d="M13.25 15c.966 0 1.75-.715 1.75-1.596 0-1.349-1.604-3.07-1.604-3.07h-.292s-1.604 1.74-1.604 3.07c0 .881.784 1.596 1.75 1.596"/></svg></button><button type="button" class="header-tool-btn split-btn-arrow" id="fillArrowBtn" aria-label="Цвет заливки"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="12" height="12" viewBox="0 0 12 12"><path fill="currentColor" d="M1 5.348V3.446l5 3.303 5-3.4V5.25l-5 3.4z"/></svg></button></div><div class="split-btn-menu" id="fillMenu"><button class="split-btn-menu-item" id="fillYellow"><span class="split-btn-color-dot" style="background:#fff176"></span>Жёлтый</button><button class="split-btn-menu-item" id="fillClear"><span class="split-btn-color-dot" style="background:#fff"></span>Без заливки</button></div></div><div class="header-rect header-rect-tools"><button type="button" class="header-tool-btn" data-tooltip="Границы" title="Границы"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h18v18H3z"/><path d="M3 9h18"/><path d="M3 15h18"/><path d="M9 3v18"/><path d="M15 3v18"/></svg></button><button type="button" class="header-tool-btn" data-tooltip="По левому краю" title="По левому краю"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" d="M1 2.5h14V1H1zm9 4.167H1v-1.5h9zm-9 4.167h14v-1.5H1zM1 15h9v-1.5H1z"/></svg></button><button type="button" class="header-tool-btn" data-tooltip="По центру" title="По центру"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" d="M1 2.5h14V1H1zm11.5 4.167h-9v-1.5h9zM1 10.834h14v-1.5H1zM3.5 15h9v-1.5h-9z"/></svg></button><button type="button" class="header-tool-btn" data-tooltip="По правому краю" title="По правому краю"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" d="M15 2.502H1v-1.5h14zM6 6.668h9v-1.5H6zm9 4.166H1v-1.5h14zM15 15H6v-1.5h9z"/></svg></button><button type="button" class="header-tool-btn" data-tooltip="По верху" title="По верху"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 21V3"/><path d="M12 12H3"/><path d="M18 21V3"/></svg></button><button type="button" class="header-tool-btn" data-tooltip="По середине" title="По середине"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 21V3"/><path d="M12 12H3"/><path d="M18 21V3"/></svg></button><button type="button" class="header-tool-btn" data-tooltip="По низу" title="По низу"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3v18"/><path d="M12 12H3"/><path d="M18 3v18"/></svg></button></div><div class="header-rect header-rect-tools"><div class="split-btn"><button type="button" class="header-tool-btn split-btn-main" id="filterBtn" data-tooltip="Фильтр" title="Фильтр" aria-label="Фильтр"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" fill-rule="evenodd" d="m6.5 14.053 3-1.133V7.798a3 3 0 0 1 .75-1.985L13.176 2.5H2.825l2.924 3.313A3 3 0 0 1 6.5 7.8zM1 2.699V1h14v1.698l-3.625 4.108a1.5 1.5 0 0 0-.375.992v6.159l-5.323 2.01A.5.5 0 0 1 5 15.5V7.8a1.5 1.5 0 0 0-.375-.993z" clip-rule="evenodd"/></svg></button><button type="button" class="header-tool-btn split-btn-arrow" id="filterArrowBtn" aria-label="Параметры фильтра"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="12" height="12" viewBox="0 0 12 12"><path fill="currentColor" d="M1 5.348V3.446l5 3.303 5-3.4V5.25l-5 3.4z"/></svg></button></div><div class="split-btn-menu" id="filterMenu"><button class="split-btn-menu-item" id="filterApply">Применить фильтр</button><button class="split-btn-menu-item" id="filterClear">Очистить фильтры</button></div><button type="button" class="header-tool-btn" data-tooltip="Ссылка" title="Ссылка"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="16" height="16" viewBox="0 0 16 16"><g clip-path="url(#link-outline-sm__a)"><path fill="currentColor" fill-rule="evenodd" d="M8.706 1.99a3.75 3.75 0 0 1 5.304 5.303l-1.301 1.3-1.06-1.06 1.3-1.3A2.25 2.25 0 1 0 9.767 3.05l-2.43 2.43a2.314 2.314 0 0 0 0 3.272l.309.309-1.06 1.06-.31-.308a3.814 3.814 0 0 1 0-5.394zm.708 3.889.308.308a3.814 3.814 0 0 1 0 5.393l-2.43 2.43A3.75 3.75 0 0 1 1.99 8.707l1.3-1.301 1.062 1.06L3.05 9.769a2.25 2.25 0 1 0 3.182 3.182l2.43-2.43a2.314 2.314 0 0 0 0-3.272l-.31-.309z" clip-rule="evenodd"/></g><defs><clipPath id="link-outline-sm__a"><path fill="#fff" d="M0 0h16v16H0z"/></clipPath></defs></svg></button><button type="button" class="header-tool-btn" data-tooltip="Сумма" title="Сумма"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" d="M3.135 15v-1.451l4.627-5.784L3.331 2.47V1h9.274v1.569H6.507q-.607 0-.921-.02l4.02 4.765v.53L5.153 13.43h1.432q.705-.02 1.49-.02h4.765V15z"/></svg></button><button type="button" class="header-tool-btn" data-tooltip="Диаграмма" title="Диаграмма"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" fill-rule="evenodd" d="M1 6.1c0-1.964 0-2.946.442-3.667a3 3 0 0 1 .99-.99C3.155 1 4.137 1 6.1 1h3.8c1.964 0 2.946 0 3.668.442a3 3 0 0 1 .99.99C15 3.155 15 4.137 15 6.1v3.8c0 1.964 0 2.946-.442 3.668a3 3 0 0 1-.99.99C12.846 15 11.864 15 9.9 15H6.1c-1.964 0-2.946 0-3.667-.442a3 3 0 0 1-.99-.99C1 12.846 1 11.864 1 9.9zm5.1-3.6h3.8c1.011 0 1.664.002 2.158.049.471.044.64.12.726.172a1.5 1.5 0 0 1 .495.495c.052.086.128.255.172.726.047.494.049 1.147.049 2.158v1.15h-2.75v-2h-5.5v3.5H2.5V6.1c0-1.011.002-1.664.049-2.158.044-.471.12-.64.172-.726a1.5 1.5 0 0 1 .495-.495c.086-.052.255-.128.726-.172C4.436 2.502 5.09 2.5 6.1 2.5m-3.6 7.75c.001.816.007 1.374.049 1.808.044.471.12.64.172.726a1.5 1.5 0 0 0 .495.495c.086.052.255.128.726.172.34.033.754.044 1.308.047V10.25zm4.25 3.25h2.5V6.75h-2.5zm4-.002a16 16 0 0 0 1.308-.046c.471-.045.64-.12.726-.173a1.5 1.5 0 0 0 .495-.495c.052-.086.128-.255.172-.726.047-.494.049-1.147.049-2.158V8.75h-2.75z" clip-rule="evenodd"/></svg></button></div><div class="header-rect header-rect-tools"><button type="button" class="header-tool-btn" data-tooltip="Обновить" title="Обновить"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M21 21v-5h-5"/></svg></button><button type="button" class="header-tool-btn" data-tooltip="Таблица" title="Таблица"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M4 9h16"/><path d="M4 15h16"/></svg></button></div></div></header>
 
     <!-- WORKSPACE: formula bar + grid -->
     <div class="app-workspace" id="appWorkspace">
@@ -1897,104 +1938,104 @@
 
   <script>
     const DATA = [
-      ['Город', 'Категория', 'Товар', 'Количество', 'Цена за ед.'],
-      ['Новосибирск', 'Молочные продукты', 'Молоко', 5, 89],
-      ['Москва', 'Хлеб и выпечка', 'Хлеб ржаной', 12, 55],
-      ['Москва', 'Молочные продукты', 'Йогурт', 10, 49],
-      ['Москва', 'Бакалея', 'Макароны', 2, 85],
-      ['Новосибирск', 'Хлеб и выпечка', 'Хлеб ржаной', 10, 55],
-      ['Москва', 'Молочные продукты', 'Йогурт', 12, 49],
-      ['Москва', 'Снеки', 'Крекеры', 8, 89],
-      ['Москва', 'Снеки', 'Сухарики', 13, 59],
-      ['Екатеринбург', 'Хлеб и выпечка', 'Батон', 5, 69],
-      ['Екатеринбург', 'Хлеб и выпечка', 'Хлеб ржаной', 2, 55],
-      ['Москва', 'Молочные продукты', 'Творог', 6, 95],
-      ['Москва', 'Напитки', 'Лимонад', 12, 79],
-      ['Москва', 'Бакалея', 'Мука', 15, 79],
-      ['Новосибирск', 'Бакалея', 'Макароны', 5, 85],
-      ['Новосибирск', 'Снеки', 'Сухарики', 4, 59],
-      ['Новосибирск', 'Молочные продукты', 'Молоко', 4, 89],
-      ['Москва', 'Напитки', 'Сок апельсиновый', 14, 109],
-      ['Екатеринбург', 'Молочные продукты', 'Творог', 8, 95],
-      ['Екатеринбург', 'Напитки', 'Вода', 6, 39],
-      ['Новосибирск', 'Хлеб и выпечка', 'Булочка', 15, 35],
-      ['Новосибирск', 'Молочные продукты', 'Йогурт', 3, 49],
-      ['Москва', 'Снеки', 'Орехи', 8, 199],
-      ['Новосибирск', 'Бакалея', 'Гречка', 12, 119],
-      ['Новосибирск', 'Снеки', 'Орехи', 6, 199],
-      ['Москва', 'Молочные продукты', 'Кефир', 13, 75],
-      ['Екатеринбург', 'Напитки', 'Чай в бутылке', 2, 59],
-      ['Москва', 'Хлеб и выпечка', 'Булочка', 11, 35],
-      ['Новосибирск', 'Бакалея', 'Овсянка', 8, 69],
-      ['Москва', 'Хлеб и выпечка', 'Булочка', 4, 35],
-      ['Новосибирск', 'Снеки', 'Сухарики', 10, 59],
-      ['Екатеринбург', 'Бакалея', 'Мука', 6, 79],
-      ['Новосибирск', 'Хлеб и выпечка', 'Хлеб ржаной', 8, 55],
-      ['Москва', 'Молочные продукты', 'Молоко', 3, 89],
-      ['Новосибирск', 'Хлеб и выпечка', 'Батон', 2, 69],
-      ['Новосибирск', 'Бакалея', 'Овсянка', 8, 69],
-      ['Новосибирск', 'Снеки', 'Сухарики', 14, 59],
-      ['Новосибирск', 'Молочные продукты', 'Молоко', 15, 89],
-      ['Новосибирск', 'Снеки', 'Сухарики', 6, 59],
-      ['Екатеринбург', 'Молочные продукты', 'Сметана', 3, 65],
-      ['Новосибирск', 'Бакалея', 'Макароны', 15, 85],
-      ['Новосибирск', 'Напитки', 'Вода', 15, 39],
-      ['Новосибирск', 'Молочные продукты', 'Сметана', 9, 65],
-      ['Москва', 'Снеки', 'Орехи', 6, 199],
-      ['Новосибирск', 'Хлеб и выпечка', 'Батон', 6, 45],
-      ['Москва', 'Бакалея', 'Макароны', 15, 85],
-      ['Москва', 'Напитки', 'Лимонад', 1, 79],
-      ['Москва', 'Хлеб и выпечка', 'Батон', 12, 45],
-      ['Новосибирск', 'Бакалея', 'Макароны', 13, 85],
-      ['Новосибирск', 'Хлеб и выпечка', 'Хлеб ржаной', 8, 55],
-      ['Екатеринбург', 'Снеки', 'Орехи', 9, 199],
-      ['Москва', 'Снеки', 'Крекеры', 15, 89],
-      ['Новосибирск', 'Снеки', 'Орехи', 5, 199],
-      ['Екатеринбург', 'Бакалея', 'Гречка', 15, 119],
-      ['Москва', 'Снеки', 'Крекеры', 4, 89],
-      ['Екатеринбург', 'Хлеб и выпечка', 'Батон', 1, 45],
-      ['Новосибирск', 'Снеки', 'Орехи', 4, 199],
-      ['Новосибирск', 'Молочные продукты', 'Молоко', 11, 89],
-      ['Москва', 'Молочные продукты', 'Кефир', 15, 75],
-      ['Москва', 'Молочные продукты', 'Сметана', 9, 65],
-      ['Новосибирск', 'Хлеб и выпечка', 'Булочка', 8, 35],
-      ['Новосибирск', 'Хлеб и выпечка', 'Хлеб ржаной', 15, 55],
-      ['Москва', 'Снеки', 'Крекеры', 13, 89],
-      ['Москва', 'Бакалея', 'Овсянка', 2, 69],
-      ['Екатеринбург', 'Молочные продукты', 'Творог', 7, 95],
-      ['Новосибирск', 'Бакалея', 'Овсянка', 1, 69],
-      ['Екатеринбург', 'Молочные продукты', 'Молоко', 12, 89],
-      ['Москва', 'Напитки', 'Сок апельсиновый', 4, 109],
-      ['Москва', 'Хлеб и выпечка', 'Батон', 7, 69],
-      ['Екатеринбург', 'Хлеб и выпечка', 'Булочка', 4, 35],
-      ['Новосибирск', 'Молочные продукты', 'Творог', 2, 95],
-      ['Москва', 'Молочные продукты', 'Йогурт', 2, 49],
-      ['Екатеринбург', 'Хлеб и выпечка', 'Хлеб ржаной', 8, 55],
-      ['Екатеринбург', 'Бакалея', 'Рис', 15, 99],
-      ['Екатеринбург', 'Молочные продукты', 'Кефир', 1, 75],
-      ['Екатеринбург', 'Бакалея', 'Гречка', 5, 119],
-      ['Новосибирск', 'Бакалея', 'Мука', 12, 79],
-      ['Москва', 'Бакалея', 'Рис', 5, 99],
-      ['Новосибирск', 'Хлеб и выпечка', 'Батон', 12, 45],
-      ['Новосибирск', 'Снеки', 'Чипсы', 6, 129],
-      ['Новосибирск', 'Молочные продукты', 'Молоко', 8, 89],
-      ['Москва', 'Снеки', 'Орехи', 9, 199],
-      ['Москва', 'Молочные продукты', 'Кефир', 10, 75],
-      ['Екатеринбург', 'Молочные продукты', 'Кефир', 2, 75],
-      ['Новосибирск', 'Снеки', 'Орехи', 10, 199],
-      ['Москва', 'Молочные продукты', 'Йогурт', 7, 49],
-      ['Екатеринбург', 'Снеки', 'Сухарики', 4, 59],
-      ['Екатеринбург', 'Напитки', 'Вода', 7, 39],
-      ['Екатеринбург', 'Хлеб и выпечка', 'Булочка', 6, 35],
-      ['Екатеринбург', 'Молочные продукты', 'Молоко', 10, 89],
-      ['Москва', 'Снеки', 'Чипсы', 9, 129],
+      ['Город', 'Категория', 'Товар', 'Продано, шт.', 'Цена за ед.'],
+      ['Новосибирск', 'Молочные продукты', 'Молоко, 1 л.', 145, 82],
+      ['Москва', 'Хлеб и выпечка', 'Хлеб ржаной, 500 гр.', 365, 72],
+      ['Москва', 'Молочные продукты', 'Йогурт, 250 гр.', 320, 89],
+      ['Москва', 'Бакалея', 'Макароны, 400 гр.', 70, 99],
+      ['Новосибирск', 'Хлеб и выпечка', 'Хлеб ржаной, 500 гр.', 330, 72],
+      ['Москва', 'Молочные продукты', 'Йогурт, 250 гр.', 375, 89],
+      ['Москва', 'Снеки', 'Крекеры, 200 гр.', 255, 119],
+      ['Москва', 'Снеки', 'Сухарики, 100 гр.', 395, 55],
+      ['Екатеринбург', 'Хлеб и выпечка', 'Батон, 400 гр.', 155, 62],
+      ['Екатеринбург', 'Хлеб и выпечка', 'Хлеб ржаной, 500 гр.', 45, 72],
+      ['Москва', 'Молочные продукты', 'Творог, 200 гр.', 185, 149],
+      ['Москва', 'Напитки', 'Лимонад, 1.5 л.', 350, 129],
+      ['Москва', 'Бакалея', 'Мука, 1 кг.', 440, 89],
+      ['Новосибирск', 'Бакалея', 'Макароны, 400 гр.', 140, 99],
+      ['Новосибирск', 'Снеки', 'Сухарики, 100 гр.', 110, 55],
+      ['Новосибирск', 'Молочные продукты', 'Молоко, 1 л.', 125, 82],
+      ['Москва', 'Напитки', 'Сок апельсиновый, 1 л.', 415, 169],
+      ['Екатеринбург', 'Молочные продукты', 'Творог, 200 гр.', 235, 149],
+      ['Екатеринбург', 'Напитки', 'Вода, 1.5 л.', 170, 49],
+      ['Новосибирск', 'Хлеб и выпечка', 'Булочка, 80 гр.', 455, 42],
+      ['Новосибирск', 'Молочные продукты', 'Йогурт, 250 гр.', 85, 89],
+      ['Москва', 'Снеки', 'Орехи, 200 гр.', 265, 349],
+      ['Новосибирск', 'Бакалея', 'Гречка, 900 гр.', 385, 139],
+      ['Новосибирск', 'Снеки', 'Орехи, 200 гр.', 200, 349],
+      ['Москва', 'Молочные продукты', 'Кефир, 1 л.', 405, 92],
+      ['Екатеринбург', 'Напитки', 'Чай в бутылке, 0.5 л.', 55, 109],
+      ['Москва', 'Хлеб и выпечка', 'Булочка, 80 гр.', 345, 42],
+      ['Новосибирск', 'Бакалея', 'Овсянка, 500 гр.', 250, 119],
+      ['Москва', 'Хлеб и выпечка', 'Булочка, 80 гр.', 100, 42],
+      ['Новосибирск', 'Снеки', 'Сухарики, 100 гр.', 310, 55],
+      ['Екатеринбург', 'Бакалея', 'Мука, 1 кг.', 180, 89],
+      ['Новосибирск', 'Хлеб и выпечка', 'Хлеб ржаной, 500 гр.', 280, 72],
+      ['Москва', 'Молочные продукты', 'Молоко, 1 л.', 95, 82],
+      ['Новосибирск', 'Хлеб и выпечка', 'Батон, 400 гр.', 80, 62],
+      ['Новосибирск', 'Бакалея', 'Овсянка, 500 гр.', 240, 119],
+      ['Новосибирск', 'Снеки', 'Сухарики, 100 гр.', 410, 55],
+      ['Новосибирск', 'Молочные продукты', 'Молоко, 1 л.', 430, 82],
+      ['Новосибирск', 'Снеки', 'Сухарики, 100 гр.', 205, 55],
+      ['Екатеринбург', 'Молочные продукты', 'Сметана, 200 гр.', 90, 139],
+      ['Новосибирск', 'Бакалея', 'Макароны, 400 гр.', 465, 99],
+      ['Новосибирск', 'Напитки', 'Вода, 1.5 л.', 445, 49],
+      ['Новосибирск', 'Молочные продукты', 'Сметана, 200 гр.', 295, 139],
+      ['Москва', 'Снеки', 'Орехи, 200 гр.', 175, 349],
+      ['Новосибирск', 'Хлеб и выпечка', 'Батон, 400 гр.', 210, 62],
+      ['Москва', 'Бакалея', 'Макароны, 400 гр.', 420, 99],
+      ['Москва', 'Напитки', 'Лимонад, 1.5 л.', 30, 129],
+      ['Москва', 'Хлеб и выпечка', 'Батон, 400 гр.', 355, 62],
+      ['Новосибирск', 'Бакалея', 'Макароны, 400 гр.', 390, 99],
+      ['Новосибирск', 'Хлеб и выпечка', 'Хлеб ржаной, 500 гр.', 270, 72],
+      ['Екатеринбург', 'Снеки', 'Орехи, 200 гр.', 285, 349],
+      ['Москва', 'Снеки', 'Крекеры, 200 гр.', 460, 119],
+      ['Новосибирск', 'Снеки', 'Орехи, 200 гр.', 165, 349],
+      ['Екатеринбург', 'Бакалея', 'Гречка, 900 гр.', 435, 139],
+      ['Москва', 'Снеки', 'Крекеры, 200 гр.', 135, 119],
+      ['Екатеринбург', 'Хлеб и выпечка', 'Батон, 400 гр.', 40, 62],
+      ['Новосибирск', 'Снеки', 'Орехи, 200 гр.', 115, 349],
+      ['Новосибирск', 'Молочные продукты', 'Молоко, 1 л.', 340, 82],
+      ['Москва', 'Молочные продукты', 'Кефир, 1 л.', 470, 92],
+      ['Москва', 'Молочные продукты', 'Сметана, 200 гр.', 305, 139],
+      ['Новосибирск', 'Хлеб и выпечка', 'Булочка, 80 гр.', 245, 42],
+      ['Новосибирск', 'Хлеб и выпечка', 'Хлеб ржаной, 500 гр.', 425, 72],
+      ['Москва', 'Снеки', 'Крекеры, 200 гр.', 400, 119],
+      ['Москва', 'Бакалея', 'Овсянка, 500 гр.', 60, 119],
+      ['Екатеринбург', 'Молочные продукты', 'Творог, 200 гр.', 225, 149],
+      ['Новосибирск', 'Бакалея', 'Овсянка, 500 гр.', 25, 119],
+      ['Екатеринбург', 'Молочные продукты', 'Молоко, 1 л.', 370, 82],
+      ['Москва', 'Напитки', 'Сок апельсиновый, 1 л.', 105, 169],
+      ['Москва', 'Хлеб и выпечка', 'Батон, 400 гр.', 215, 62],
+      ['Екатеринбург', 'Хлеб и выпечка', 'Булочка, 80 гр.', 130, 42],
+      ['Новосибирск', 'Молочные продукты', 'Творог, 200 гр.', 50, 149],
+      ['Москва', 'Молочные продукты', 'Йогурт, 250 гр.', 75, 89],
+      ['Екатеринбург', 'Хлеб и выпечка', 'Хлеб ржаной, 500 гр.', 260, 72],
+      ['Екатеринбург', 'Бакалея', 'Рис, 800 гр.', 450, 149],
+      ['Екатеринбург', 'Молочные продукты', 'Кефир, 1 л.', 35, 92],
+      ['Екатеринбург', 'Бакалея', 'Гречка, 900 гр.', 150, 139],
+      ['Новосибирск', 'Бакалея', 'Мука, 1 кг.', 360, 89],
+      ['Москва', 'Бакалея', 'Рис, 800 гр.', 160, 149],
+      ['Новосибирск', 'Хлеб и выпечка', 'Батон, 400 гр.', 380, 62],
+      ['Новосибирск', 'Снеки', 'Чипсы, 150 гр.', 190, 185],
+      ['Новосибирск', 'Молочные продукты', 'Молоко, 1 л.', 275, 82],
+      ['Москва', 'Снеки', 'Орехи, 200 гр.', 290, 349],
+      ['Москва', 'Молочные продукты', 'Кефир, 1 л.', 335, 92],
+      ['Екатеринбург', 'Молочные продукты', 'Кефир, 1 л.', 65, 92],
+      ['Новосибирск', 'Снеки', 'Орехи, 200 гр.', 315, 349],
+      ['Москва', 'Молочные продукты', 'Йогурт, 250 гр.', 230, 89],
+      ['Екатеринбург', 'Снеки', 'Сухарики, 100 гр.', 120, 55],
+      ['Екатеринбург', 'Напитки', 'Вода, 1.5 л.', 220, 49],
+      ['Екатеринбург', 'Хлеб и выпечка', 'Булочка, 80 гр.', 195, 42],
+      ['Екатеринбург', 'Молочные продукты', 'Молоко, 1 л.', 325, 82],
+      ['Москва', 'Снеки', 'Чипсы, 150 гр.', 300, 185],
     ];
 
     const FIELDS = [
       { id: 'f0', name: 'Город', col: 0, type: 'text', color: '#90caf9' },
       { id: 'f1', name: 'Категория', col: 1, type: 'text', color: '#fff59d' },
       { id: 'f2', name: 'Товар', col: 2, type: 'text', color: '#ffcc80' },
-      { id: 'f3', name: 'Количество', col: 3, type: 'number', color: '#80cbc4' },
+      { id: 'f3', name: 'Продано, шт.', col: 3, type: 'number', color: '#80cbc4' },
       { id: 'f4', name: 'Цена за ед.', col: 4, type: 'number', color: '#b0bec5' },
     ];
     const TYPE_ICON = { date: 'Даты', text: 'Текст', number: 'Числа', mixed: '⚠' };
@@ -2005,6 +2046,7 @@
     const AGG_REV = { 'СУММ': 'Сумма', 'СЧЁТ': 'Количество', 'СРЕДНЕЕ': 'Среднее', 'МАКС': 'Макс', 'МИН': 'Мин' };
 
     const EMPTY_SVG = `<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="18" stroke="#ccc" stroke-width="1.5" stroke-dasharray="3 3"/><circle cx="24" cy="24" r="10" stroke="#ccc" stroke-width="1.5"/><circle cx="24" cy="24" r="3" fill="#ddd"/><line x1="24" y1="6" x2="24" y2="14" stroke="#ccc" stroke-width="1.5"/><line x1="24" y1="34" x2="24" y2="42" stroke="#ccc" stroke-width="1.5"/></svg>`;
+    const FUNNEL_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="10" height="10" fill="currentColor"><path fill-rule="evenodd" d="m6.5 14.053 3-1.133V7.798a3 3 0 0 1 .75-1.985L13.176 2.5H2.825l2.924 3.313A3 3 0 0 1 6.5 7.8zM1 2.699V1h14v1.698l-3.625 4.108a1.5 1.5 0 0 0-.375.992v6.159l-5.323 2.01A.5.5 0 0 1 5 15.5V7.8a1.5 1.5 0 0 0-.375-.993z" clip-rule="evenodd"/></svg>`;
 
     /* ====== TOAST ====== */
     function showToast(msg, type = 'warn', duration = 5000) {
@@ -2052,6 +2094,9 @@
     let activeSheet = 'source';
     let pivotGrid = null;
     const collapsedGroups = new Set(); // group keys (first row-field value) that are collapsed
+    let _pivotSort = { key: null, order: null }; // key: 'dim:N' or 'val:N', order: 'asc'/'desc'/null
+    let _pivotFilters = {}; // { [fid]: string[] | null } — null = all values; filters pivot rows by dimension field values
+    let _pivotRowFields = []; // rF from last computePivot — used by pivot filter panel
     let _hintPinnedZone = null; // zone whose hint is pinned while ctx-menu is open
 
     // Count how many times each field is used across all zones (multi-use allowed)
@@ -2125,6 +2170,7 @@
     /* ====== TABS ====== */
     document.querySelectorAll('.tab-btn').forEach(btn => {
       btn.addEventListener('click', () => {
+        closeCtxMenu();
         activeSheet = btn.dataset.sheet;
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b === btn));
         if (activeSheet === 'pivot') { layout.toggleSidebar(true); validateSource(); }
@@ -2159,6 +2205,113 @@
         h += '</tr>';
       }
       h += '</tbody></table>'; c.innerHTML = h; c.classList.remove('pivot-sheet');
+    }
+
+    /* ====== PIVOT FILTER PANEL ====== */
+    function showPivotFilterPanel(fid, btn) {
+      closeCtxMenu();
+      const f = FIELDS.find(x => x.id === fid); if (!f) return;
+
+      // Compute value counts from data rows (after zone filters, before pivot filters)
+      const baseRows = DATA.slice(1).filter(r => zones.filters.every(fe => {
+        if (fe.selected === null) return true;
+        const ff = FIELDS.find(x => x.id === fe.fid); if (!ff) return true;
+        return fe.selected.includes(String(r[ff.col]));
+      }));
+      const valueCounts = new Map();
+      baseRows.forEach(r => {
+        const v = String(r[f.col] ?? '');
+        valueCounts.set(v, (valueCounts.get(v) || 0) + 1);
+      });
+      const allVals = [...valueCounts.keys()].sort((a, b) => a.localeCompare(b, 'ru'));
+
+      const existing = _pivotFilters[fid];
+      let pendingSel = existing ? new Set(existing) : new Set(allVals);
+      let _searchVal = '';
+
+      // Determine sort key for this field in _pivotRowFields
+      const dimIdx = _pivotRowFields.findIndex(rf => rf.id === fid);
+      const sk = dimIdx >= 0 ? 'dim:' + dimIdx : null;
+
+      const ov = document.createElement('div'); ov.className = 'ctx-overlay'; ov.addEventListener('click', closeCtxMenu); document.body.appendChild(ov);
+      const popup = document.createElement('div'); popup.className = 'filter-popup';
+
+      function render() {
+        const sv = _searchVal;
+        const vis = sv ? allVals.filter(v => v.toLowerCase().includes(sv.toLowerCase())) : allVals;
+        const allCk = vis.length > 0 && vis.every(v => pendingSel.has(v));
+        const someCk = vis.some(v => pendingSel.has(v));
+        const isAsc  = sk && _pivotSort.key === sk && _pivotSort.order === 'asc';
+        const isDesc = sk && _pivotSort.key === sk && _pivotSort.order === 'desc';
+        const isNum  = f.type === 'number';
+        popup.innerHTML = `
+          <div class="fpp-title">${f.name}</div>
+          <div class="fpp-sort">
+            <span class="fpp-sort-label">Сортировка</span>
+            <div class="fpp-sort-btns">
+              <button class="fpp-sort-btn${isAsc  ? ' active' : ''}" data-sort="asc">${isNum  ? '↑ Меньше→Больше' : '↑ А → Я'}</button>
+              <button class="fpp-sort-btn${isDesc ? ' active' : ''}" data-sort="desc">${isNum ? '↓ Больше→Меньше' : '↓ Я → А'}</button>
+            </div>
+          </div>
+          <div class="fpp-search"><span>🔍</span><input type="text" id="pfp-search-inp" placeholder="Поиск..." value="${sv.replace(/"/g,'&quot;')}"></div>
+          <label class="fpp-all"><input type="checkbox" id="pfp-all" ${allCk ? 'checked' : ''}><span>Выбрать все</span></label>
+          <div class="fpp-values">${vis.map(v => `<label class="fpp-val"><input type="checkbox" value="${v.replace(/"/g,'&quot;')}" ${pendingSel.has(v) ? 'checked' : ''}><span>${v || '(пусто)'}</span><span style="margin-left:auto;color:#aaa;font-size:11px;padding-left:8px">${valueCounts.get(v)||0}</span></label>`).join('')}</div>
+          <div class="fpp-actions">
+            <button class="fpp-btn" id="pfp-cancel">Отмена</button>
+            <button class="fpp-btn primary" id="pfp-ok">Применить</button>
+          </div>`;
+
+        const allCb = popup.querySelector('#pfp-all');
+        if (allCb && !allCk && someCk) allCb.indeterminate = true;
+
+        // Sort buttons — immediate effect on pivot
+        popup.querySelectorAll('.fpp-sort-btn').forEach(sb => {
+          sb.addEventListener('click', e => {
+            e.stopPropagation();
+            if (!sk) return;
+            const s = sb.dataset.sort;
+            if (_pivotSort.key === sk && _pivotSort.order === s) { _pivotSort.key = null; _pivotSort.order = null; }
+            else { _pivotSort.key = sk; _pivotSort.order = s; }
+            renderPivotGrid(document.getElementById('grid-scroll'));
+            popup.querySelectorAll('.fpp-sort-btn').forEach(b => {
+              b.classList.toggle('active', b.dataset.sort === (_pivotSort.key === sk ? _pivotSort.order : null));
+            });
+          });
+        });
+
+        popup.querySelector('#pfp-search-inp').addEventListener('input', e => { _searchVal = e.target.value; render(); popup.querySelector('#pfp-search-inp').focus(); });
+
+        allCb?.addEventListener('change', e => { vis.forEach(v => e.target.checked ? pendingSel.add(v) : pendingSel.delete(v)); render(); });
+
+        popup.querySelectorAll('.fpp-val input').forEach(cb => {
+          cb.addEventListener('change', e => {
+            if (e.target.checked) pendingSel.add(e.target.value); else pendingSel.delete(e.target.value);
+            const ac = popup.querySelector('#pfp-all');
+            if (ac) { const a = vis.every(v => pendingSel.has(v)); ac.checked = a; ac.indeterminate = !a && vis.some(v => pendingSel.has(v)); }
+          });
+        });
+
+        popup.querySelector('#pfp-cancel').addEventListener('click', e => { e.stopPropagation(); closeCtxMenu(); });
+
+        popup.querySelector('#pfp-ok').addEventListener('click', () => {
+          _pivotFilters[fid] = pendingSel.size === allVals.length ? null : [...pendingSel];
+          closeCtxMenu();
+          renderPivotGrid(document.getElementById('grid-scroll'));
+        });
+
+        popup.addEventListener('click', e => e.stopPropagation());
+      }
+
+      render();
+      const rect = btn.getBoundingClientRect();
+      popup.style.top = (rect.bottom + 6) + 'px';
+      popup.style.left = Math.max(4, rect.left - 40) + 'px';
+      document.body.appendChild(popup);
+      requestAnimationFrame(() => {
+        const pr = popup.getBoundingClientRect();
+        if (pr.bottom > window.innerHeight - 8) popup.style.top = (rect.top - pr.height - 6) + 'px';
+        if (pr.right > window.innerWidth - 8) popup.style.left = (window.innerWidth - pr.width - 8) + 'px';
+      });
     }
 
     // Placeholder data for pivot empty state: A1:E10
@@ -2214,6 +2367,31 @@
             const gkEsc = rm.gk.replace(/"/g, '&quot;');
             content = `<span class="pv-toggle" data-gk="${gkEsc}">${icon}</span>${content}`;
           }
+          // Add sort indicator + filter button to label row header cells
+          if (row && row._isLabelRow && row._sortKeys && row._sortKeys[i]) {
+            const sk = row._sortKeys[i];
+            const isActive = _pivotSort.key === sk;
+            const arrowHtml = isActive
+              ? `<span class="pv-sort-arrow">${_pivotSort.order === 'asc' ? '↑' : '↓'}</span>`
+              : '';
+            if (sk.startsWith('dim:')) {
+              // Dim header: filter button at right edge, no click-to-sort
+              const di = parseInt(sk.split(':')[1]);
+              const rf = _pivotRowFields[di];
+              let filterBtnHtml = '';
+              if (rf) {
+                const isFiltered = _pivotFilters[rf.id] !== null && _pivotFilters[rf.id] !== undefined;
+                filterBtnHtml = `<button class="pv-filter-btn${isFiltered ? ' active' : ''}" data-fid="${rf.id}" title="Фильтр">${FUNNEL_SVG}</button>`;
+              }
+              content = `${content}${arrowHtml}${filterBtnHtml}`;
+              cls += ' pv-has-filter';
+            } else {
+              // Val header: click-to-sort remains
+              const skEsc = sk.replace(/"/g, '&quot;');
+              content = `<span class="pv-sort-cell" data-sk="${skEsc}">${content}${arrowHtml}</span>`;
+              cls += ' pv-sortable';
+            }
+          }
           h += `<td class="${cls.trim()}">${content}</td>`;
         }
         h += '</tr>';
@@ -2226,6 +2404,28 @@
           const gk = btn.dataset.gk;
           if (collapsedGroups.has(gk)) collapsedGroups.delete(gk); else collapsedGroups.add(gk);
           renderPivotGrid(c);
+        });
+      });
+      // Sort header click handlers
+      c.querySelectorAll('.pv-sort-cell').forEach(cell => {
+        cell.addEventListener('click', e => {
+          e.stopPropagation();
+          const sk = cell.dataset.sk;
+          if (_pivotSort.key === sk) {
+            if (_pivotSort.order === 'asc') { _pivotSort.order = 'desc'; }
+            else { _pivotSort.key = null; _pivotSort.order = null; }
+          } else {
+            _pivotSort.key = sk;
+            _pivotSort.order = 'asc';
+          }
+          renderPivotGrid(c);
+        });
+      });
+      // Pivot filter button click handlers
+      c.querySelectorAll('.pv-filter-btn').forEach(btn => {
+        btn.addEventListener('click', e => {
+          e.stopPropagation();
+          showPivotFilterPanel(btn.dataset.fid, btn);
         });
       });
       requestAnimationFrame(() => positionPlaceholderBorder(c, g));
@@ -2262,6 +2462,7 @@
       const cF = zones.columns.map(e => FIELDS.find(x => x.id === e.fid)).filter(Boolean);
       const vE = zones.values;
       if (!rF.length && !cF.length && !vE.length) { pivotGrid = null; return }
+      _pivotRowFields = rF; // expose for filter panel
 
       // Apply zone filters
       let filteredByFilter = allRows.filter(r => {
@@ -2269,6 +2470,15 @@
           if (fe.selected === null) return true; // all selected
           const f = FIELDS.find(x => x.id === fe.fid); if (!f) return true;
           return fe.selected.includes(String(r[f.col]));
+        });
+      });
+
+      // Apply pivot dimension filters (_pivotFilters — from header filter panel)
+      filteredByFilter = filteredByFilter.filter(r => {
+        return Object.entries(_pivotFilters).every(([fid, sel]) => {
+          if (!sel) return true;
+          const ff = FIELDS.find(x => x.id === fid); if (!ff) return true;
+          return sel.includes(String(r[ff.col]));
         });
       });
 
@@ -2307,31 +2517,40 @@
       });
       const rKeys = [...rMap.keys()], cKeys = [...cMap.keys()], rLabels = [...rMap.values()], cLabels = [...cMap.values()];
 
-      // Apply sort from row zone settings
-      const rSorted = rKeys.map((k, i) => ({ k, label: rLabels[i] }));
-      if (zones.rows.length > 0) {
-        const rowEntry = zones.rows[0];
-        const sortOrder = rowEntry.sortOrder || 'asc';
-        const sortFieldName = rowEntry.sortField;
-        const sortField = sortFieldName ? FIELDS.find(x => x.name === sortFieldName) : null;
+      // Validate _pivotSort is still applicable
+      if (_pivotSort.key) {
+        if (_pivotSort.key.startsWith('dim:') && parseInt(_pivotSort.key.split(':')[1]) >= rF.length) { _pivotSort.key = null; _pivotSort.order = null; }
+        if (_pivotSort.key.startsWith('val:') && parseInt(_pivotSort.key.split(':')[1]) >= vE.length) { _pivotSort.key = null; _pivotSort.order = null; }
+      }
 
-        if (sortField && sortField.type === 'number') {
-          // Pre-aggregate to sort by value
-          const preAgg = {};
-          rKeys.forEach(rk => { preAgg[rk] = 0 });
-          rows.forEach(r => {
-            const rk = rF.map(f => String(r[f.col])).join('|||');
-            if (preAgg[rk] === undefined) return;
-            const sf = sortField; const v = r[sf.col]; const n = typeof v === 'number' ? v : parseFloat(v);
-            if (!isNaN(n)) preAgg[rk] += n;
-          });
-          rSorted.sort((a, b) => sortOrder === 'asc' ? preAgg[a.k] - preAgg[b.k] : preAgg[b.k] - preAgg[a.k]);
-        } else {
+      // Apply sort from _pivotSort
+      const rSorted = rKeys.map((k, i) => ({ k, label: rLabels[i] }));
+      if (_pivotSort.key && _pivotSort.order) {
+        if (_pivotSort.key.startsWith('dim:')) {
+          const dimIdx = parseInt(_pivotSort.key.split(':')[1]);
           rSorted.sort((a, b) => {
-            const av = a.label[0] ?? '', bv = b.label[0] ?? '';
-            const cmp = String(av).localeCompare(String(bv), 'ru');
-            return sortOrder === 'asc' ? cmp : -cmp;
+            const av = a.label[dimIdx] ?? '', bv = b.label[dimIdx] ?? '';
+            const isNum = typeof av === 'number' && typeof bv === 'number';
+            const cmp = isNum ? av - bv : String(av).localeCompare(String(bv), 'ru');
+            return _pivotSort.order === 'asc' ? cmp : -cmp;
           });
+        } else if (_pivotSort.key.startsWith('val:')) {
+          const valIdx = parseInt(_pivotSort.key.split(':')[1]);
+          const ve = vE[valIdx];
+          if (ve) {
+            const vf = FIELDS.find(x => x.id === ve.fid);
+            if (vf) {
+              const preAgg = {};
+              rKeys.forEach(rk => { preAgg[rk] = 0 });
+              rows.forEach(r => {
+                const rk = rF.map(f => String(r[f.col])).join('|||');
+                if (preAgg[rk] === undefined) return;
+                const v = r[vf.col], n = typeof v === 'number' ? v : parseFloat(v);
+                if (!isNaN(n)) preAgg[rk] += n;
+              });
+              rSorted.sort((a, b) => _pivotSort.order === 'asc' ? preAgg[a.k] - preAgg[b.k] : preAgg[b.k] - preAgg[a.k]);
+            }
+          }
         }
       }
       const sortedRKeys = rSorted.map(x => x.k);
@@ -2356,12 +2575,13 @@
 
       const grid = [];
       if (cF.length) cF.forEach((cf, cfi) => { const row = new Array(rhc).fill(''); row._meta = new Array(rhc).fill('header'); cLabels.forEach(cl => { for (let vi = 0; vi < vc; vi++) { row.push(cl[cfi] ?? ''); row._meta.push('header') } }); grid.push(row) });
-      const lr = []; lr._meta = [];
-      rF.forEach(f => { lr.push(f.name); lr._meta.push('header') }); if (!rF.length) { lr.push(''); lr._meta.push('header') }
+      const lr = []; lr._meta = []; lr._isLabelRow = true; lr._sortKeys = [];
+      rF.forEach((f, fi) => { lr.push(f.name); lr._meta.push('header'); lr._sortKeys.push('dim:' + fi); });
+      if (!rF.length) { lr.push(''); lr._meta.push('header'); lr._sortKeys.push(null); }
       const colsI = cKeys.length ? cKeys : [''];
-      colsI.forEach(() => {
-        if (vE.length) { vE.forEach(ve => { const f = FIELDS.find(x => x.id === ve.fid); const a = ve.agg || (f && f.type === 'number' ? 'СУММ' : 'СЧЁТ'); lr.push(`${f ? f.name : '?'} (${AGG_REV[a] || a})`); lr._meta.push('header') }); }
-        else { lr.push(''); lr._meta.push('header'); }
+      colsI.forEach((ck, ci) => {
+        if (vE.length) { vE.forEach((ve, vi) => { const f = FIELDS.find(x => x.id === ve.fid); const a = ve.agg || (f && f.type === 'number' ? 'СУММ' : 'СЧЁТ'); lr.push(`${f ? f.name : '?'} (${AGG_REV[a] || a})`); lr._meta.push('header'); lr._sortKeys.push(ci === 0 ? 'val:' + vi : null); }); }
+        else { lr.push(''); lr._meta.push('header'); lr._sortKeys.push(null); }
       });
       grid.push(lr);
       let prevFirstKey = '\x00'; // sentinel
@@ -2538,7 +2758,7 @@
           } else {
             // Standard green pill
             const p = document.createElement('div'); p.className = 'pill'; p.draggable = true;
-            p.innerHTML = `<span class="p-handle">⠿</span><span class="p-name">${f.name}</span><span class="p-chevron" data-tooltip="Порядок и итоги"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 16 4 4 4-4"/><path d="M7 20V4"/><path d="m21 8-4-4-4 4"/><path d="M17 4v16"/></svg></span><button class="p-rm" data-tooltip="Удалить">✕</button>`;
+            p.innerHTML = `<span class="p-handle">⠿</span><span class="p-name">${f.name}</span><span class="p-chevron" data-tooltip="Итоги"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 16 4 4 4-4"/><path d="M7 20V4"/><path d="m21 8-4-4-4 4"/><path d="M17 4v16"/></svg></span><button class="p-rm" data-tooltip="Удалить">✕</button>`;
             p.querySelector('.p-rm').addEventListener('click', e => { e.stopPropagation(); zones[z].splice(i, 1); renderAll() });
             p.querySelector('.p-chevron').addEventListener('click', e => { e.stopPropagation(); showPillMenu(z, i, f, e.target) });
             p.addEventListener('dragstart', e => { const d = { fid: entry.fid, src: 'zone', sz: z, si: i }; e.dataTransfer.setData('text/plain', JSON.stringify(d)); e.dataTransfer.effectAllowed = 'move'; p.classList.add('dragging'); window._currentDragData = d; mkGhost(e, f.name) });
@@ -2572,7 +2792,7 @@
             p.innerHTML = `
               <span class="fp-handle">⠿</span>
               <span class="fp-name">${f.name}</span>
-              <span class="fp-count" style="color:${isFiltered || hasSortOrder ? '#e65100' : '#aaa'}">${activeCount}/${totalCount}${sortIcon}</span>
+              <span class="fp-count" style="color:${isFiltered || hasSortOrder ? '#e65100' : '#666'}">${activeCount}/${totalCount}${sortIcon}</span>
               <span class="fp-chevron" title="Настроить фильтр">▾</span>
               <button class="fp-rm" title="Убрать">✕</button>`;
             p.querySelector('.fp-chevron').addEventListener('click', e => { e.stopPropagation(); showFilterPopup(i, e.target); });
@@ -2595,23 +2815,11 @@
 
       const panel = document.createElement('div'); panel.className = 'pill-settings';
 
-      // Sort field options: own name + numeric value fields
-      const sortFieldOptions = [f.name, ...FIELDS.filter(x => x.type === 'number' && x.id !== f.id).map(x => x.name)];
-
       panel.innerHTML = `
         <div class="ps-header">
           <span class="ps-title">${f.name}</span>
           <button class="ps-close">✕</button>
         </div>
-        <div class="ps-label">Сортировка по</div>
-        <select class="ps-select" id="ps-sort-field">
-          ${sortFieldOptions.map(n => `<option${(entry.sortField || f.name) === n ? ' selected' : ''}>${n}</option>`).join('')}
-        </select>
-        <div class="ps-label">Порядок</div>
-        <select class="ps-select" id="ps-sort-order">
-          <option${(entry.sortOrder || 'asc') === 'asc' ? ' selected' : ''}>По возрастанию</option>
-          <option${entry.sortOrder === 'desc' ? ' selected' : ''}>По убыванию</option>
-        </select>
         <label class="ps-checkbox-row">
           <input type="checkbox" id="ps-show-total" ${entry.showTotal !== false ? 'checked' : ''}>
           <span>Показывать итог</span>
@@ -2633,14 +2841,6 @@
       });
 
       panel.querySelector('.ps-close').addEventListener('click', closeCtxMenu);
-
-      panel.querySelector('#ps-sort-field').addEventListener('change', e => {
-        zones[z][i].sortField = e.target.value; renderSheet();
-      });
-
-      panel.querySelector('#ps-sort-order').addEventListener('change', e => {
-        zones[z][i].sortOrder = e.target.value === 'По возрастанию' ? 'asc' : 'desc'; renderSheet();
-      });
 
       panel.querySelector('#ps-show-total').addEventListener('change', e => {
         zones[z][i].showTotal = e.target.checked; renderSheet();
@@ -2750,7 +2950,7 @@
     function initDrop() {
       document.querySelectorAll('.zone-drop').forEach(el => {
         const z = el.dataset.zone;
-        el.addEventListener('dragover', e => { e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; el.classList.add('drag-over'); showZoneHint(z); });
+        el.addEventListener('dragover', e => { e.preventDefault(); const _d = window._currentDragData; e.dataTransfer.dropEffect = (_d && _d.src === 'zone') ? 'move' : 'copy'; el.classList.add('drag-over'); showZoneHint(z); });
         el.addEventListener('dragleave', e => { if (!el.contains(e.relatedTarget)) { el.classList.remove('drag-over'); } });
         el.addEventListener('drop', e => {
           e.preventDefault(); el.classList.remove('drag-over'); clearZoneHint(); _isDraggingField = false;
@@ -2796,7 +2996,7 @@
       });
     }
 
-    function renderAll() { clearZoneHint(); renderZones(); renderFields(document.getElementById('search-input').value); renderSheet() }
+    function renderAll() { clearZoneHint(); _pivotSort = { key: null, order: null }; _pivotFilters = {}; _pivotRowFields = []; renderZones(); renderFields(document.getElementById('search-input').value); renderSheet() }
 
     document.getElementById('search-input').addEventListener('input', e => renderFields(e.target.value));
     document.getElementById('fields-sort-btn').addEventListener('click', () => {
