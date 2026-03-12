@@ -2038,7 +2038,7 @@
       { id: 'f3', name: 'Продано, шт.', col: 3, type: 'number', color: '#80cbc4' },
       { id: 'f4', name: 'Цена за ед.', col: 4, type: 'number', color: '#b0bec5' },
     ];
-    const TYPE_ICON = { date: 'Даты', text: 'Текст', number: 'Числа', mixed: '⚠' };
+    const TYPE_ICON = { date: 'Даты', text: 'Абв', number: '123', mixed: '⚠' };
     const TYPE_BADGE = { date: 't-date', text: 't-text', number: 't-number', mixed: 't-text' };
     const COLS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     const AGG_OPTIONS = ['Сумма', 'Количество', 'Среднее', 'Макс', 'Мин'];
@@ -2374,8 +2374,9 @@
             const arrowHtml = isActive
               ? `<span class="pv-sort-arrow">${_pivotSort.order === 'asc' ? '↑' : '↓'}</span>`
               : '';
+            const skEsc = sk.replace(/"/g, '&quot;');
             if (sk.startsWith('dim:')) {
-              // Dim header: filter button at right edge, no click-to-sort
+              // Dim header: click-to-sort + filter button at right edge
               const di = parseInt(sk.split(':')[1]);
               const rf = _pivotRowFields[di];
               let filterBtnHtml = '';
@@ -2383,11 +2384,10 @@
                 const isFiltered = _pivotFilters[rf.id] !== null && _pivotFilters[rf.id] !== undefined;
                 filterBtnHtml = `<button class="pv-filter-btn${isFiltered ? ' active' : ''}" data-fid="${rf.id}" title="Фильтр">${FUNNEL_SVG}</button>`;
               }
-              content = `${content}${arrowHtml}${filterBtnHtml}`;
-              cls += ' pv-has-filter';
+              content = `<span class="pv-sort-cell" data-sk="${skEsc}">${content}${arrowHtml}</span>${filterBtnHtml}`;
+              cls += ' pv-sortable pv-has-filter';
             } else {
-              // Val header: click-to-sort remains
-              const skEsc = sk.replace(/"/g, '&quot;');
+              // Val header: click-to-sort
               content = `<span class="pv-sort-cell" data-sk="${skEsc}">${content}${arrowHtml}</span>`;
               cls += ' pv-sortable';
             }
@@ -2521,6 +2521,19 @@
       if (_pivotSort.key) {
         if (_pivotSort.key.startsWith('dim:') && parseInt(_pivotSort.key.split(':')[1]) >= rF.length) { _pivotSort.key = null; _pivotSort.order = null; }
         if (_pivotSort.key.startsWith('val:') && parseInt(_pivotSort.key.split(':')[1]) >= vE.length) { _pivotSort.key = null; _pivotSort.order = null; }
+        if (_pivotSort.key.startsWith('col:') && parseInt(_pivotSort.key.split(':')[1]) >= cF.length) { _pivotSort.key = null; _pivotSort.order = null; }
+      }
+      // Apply col:N sort to column keys in-place
+      if (_pivotSort.key && _pivotSort.order && _pivotSort.key.startsWith('col:')) {
+        const colIdx = parseInt(_pivotSort.key.split(':')[1]);
+        const paired = cKeys.map((k, j) => [k, cLabels[j]]);
+        paired.sort((a, b) => {
+          const av = a[1][colIdx] ?? '', bv = b[1][colIdx] ?? '';
+          const isNum = typeof av === 'number' && typeof bv === 'number';
+          const cmp = isNum ? av - bv : String(av).localeCompare(String(bv), 'ru');
+          return _pivotSort.order === 'asc' ? cmp : -cmp;
+        });
+        paired.forEach(([k, l], j) => { cKeys[j] = k; cLabels[j] = l; });
       }
 
       // Apply sort from _pivotSort
@@ -2815,11 +2828,25 @@
 
       const panel = document.createElement('div'); panel.className = 'pill-settings';
 
+      const sk = z === 'rows' ? 'dim:' + i : z === 'columns' ? 'col:' + i : null;
+      const sortOrder = sk ? _pivotSort.key === sk ? _pivotSort.order : null : null;
+      const isNum = f.type === 'number';
+      const sortHtml = sk ? `
+        <div class="fpp-sort" style="margin-bottom:12px">
+          <span class="fpp-sort-label">Сортировка</span>
+          <div class="fpp-sort-btns">
+            <button class="fpp-sort-btn${sortOrder === 'asc'  ? ' active' : ''}" data-sort="asc">${isNum ? '↑ Меньше→Больше' : '↑ А → Я'}</button>
+            <button class="fpp-sort-btn${sortOrder === 'desc' ? ' active' : ''}" data-sort="desc">${isNum ? '↓ Больше→Меньше' : '↓ Я → А'}</button>
+          </div>
+        </div>
+        <hr class="ps-divider">` : '';
+
       panel.innerHTML = `
         <div class="ps-header">
           <span class="ps-title">${f.name}</span>
           <button class="ps-close">✕</button>
         </div>
+        ${sortHtml}
         <label class="ps-checkbox-row">
           <input type="checkbox" id="ps-show-total" ${entry.showTotal !== false ? 'checked' : ''}>
           <span>Показывать итог</span>
@@ -2841,6 +2868,21 @@
       });
 
       panel.querySelector('.ps-close').addEventListener('click', closeCtxMenu);
+
+      if (sk) {
+        panel.querySelectorAll('.fpp-sort-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const ord = btn.dataset.sort;
+            if (_pivotSort.key === sk && _pivotSort.order === ord) {
+              _pivotSort.key = null; _pivotSort.order = null;
+            } else {
+              _pivotSort.key = sk; _pivotSort.order = ord;
+            }
+            panel.querySelectorAll('.fpp-sort-btn').forEach(b => b.classList.toggle('active', b.dataset.sort === _pivotSort.order && _pivotSort.key === sk));
+            renderSheet();
+          });
+        });
+      }
 
       panel.querySelector('#ps-show-total').addEventListener('change', e => {
         zones[z][i].showTotal = e.target.checked; renderSheet();
