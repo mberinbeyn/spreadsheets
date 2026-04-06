@@ -1,0 +1,2906 @@
+<html lang="ru">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Яндекс Таблицы</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Unbounded:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0
+    }
+
+    html,
+    body {
+      height: 100%;
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-size: 14px;
+      background: #f4f6f8;
+      color: #1a1a1a;
+      overflow: hidden
+    }
+
+    /* ============================================================
+       DESIGN TOKENS
+       ============================================================ */
+    :root {
+      --header-height:      122px;
+      --formula-bar-height:  28px;
+      --sheets-bar-height:   30px;
+      --sidebar-width:       420px;
+      --sidebar-min-width:   300px;
+      --sidebar-max-width:   640px;
+      --resize-handle-size:    4px;
+
+      /* Orb design tokens */
+      --orb-spacing-m:        4px;
+      --orb-spacing-2-m:      8px;
+      --orb-rounding-6-m:     12px;
+      --orb-line-generiс:     rgba(181, 183, 192, 0.30);
+      --orb-misc-surface-meeting: rgba(255, 255, 255, 0.18);
+    }
+
+    /* ===== App shell — CSS Grid ===== */
+    #app {
+      display: grid;
+      grid-template-columns: 1fr var(--sidebar-width);
+      grid-template-rows:
+        var(--header-height)
+        1fr
+        var(--sheets-bar-height);
+      height: 100vh;
+      width: 100%;
+      transition: grid-template-columns .2s ease;
+    }
+
+    #app.sidebar-hidden {
+      grid-template-columns: 1fr 0;
+    }
+
+    /* ===== App header ===== */
+    .app-header {
+      grid-column: 1 / -1;
+      grid-row: 1;
+      background: #e8f5e9;
+      border-bottom: 1px solid #c8e6c9;
+      overflow: visible;
+      padding: 12px 16px 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      min-height: 0;
+      position: relative;
+      z-index: 10;
+    }
+    .app-header.header-frozen button:not(.header-circle),
+    .app-header.header-frozen select,
+    .app-header.header-frozen [contenteditable],
+    .app-header.header-frozen .font-size-value,
+    .app-header.header-frozen .font-select-chevron {
+      opacity: 0.35;
+      cursor: not-allowed !important;
+      pointer-events: none;
+    }
+
+    /* Background SVG pinned to top-right of header */
+    .hdr-bg {
+      position: absolute;
+      right: 0;
+      top: 0;
+      pointer-events: none;
+      line-height: 0;
+      z-index: 0;
+    }
+
+    /* Ensure header content sits above the background */
+    .header-top,
+    .header-menu,
+    .header-bottom {
+      position: relative;
+      z-index: 1;
+    }
+
+    .header-top { z-index: 10; }
+
+    .header-top {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      flex-shrink: 0;
+    }
+
+    .header-bottom {
+      display: flex;
+      align-items: flex-end;
+      gap: 4px;
+      flex: 1;
+      overflow: visible;
+      min-width: 0;
+      min-height: 32px;
+      flex-shrink: 0;
+    }
+
+    .header-rect.hidden-overflow {
+      display: none;
+    }
+
+    .header-circle {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #d0d0d0;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .header-circle.logo {
+      background: transparent;
+      cursor: pointer;
+      transition: background .15s;
+      border-radius: 50%;
+    }
+
+    .header-circle.logo:hover {
+      background: rgba(0, 0, 0, 0.08);
+    }
+    .header-top .header-circle.logo:nth-child(2):hover {
+      background: transparent;
+      cursor: default;
+    }
+
+    .header-menu {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      flex-shrink: 0;
+      margin-top: 2px;
+      margin-bottom: 8px;
+    }
+
+    .header-menu-btn {
+      height: 28px;
+      padding: 0 8px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 14px;
+      color: #333;
+      transition: background .15s;
+      border-radius: 10px;
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .header-menu-btn:hover {
+      background: rgba(0, 0, 0, 0.08);
+    }
+
+    .header-title {
+      font-family: 'Inter', 'Google Sans', sans-serif;
+      font-weight: 400;
+      font-size: 15px;
+      color: #3d3d3d;
+      margin-left: 4px;
+      flex-shrink: 0;
+      border-radius: 4px;
+      padding: 2px 4px;
+      cursor: text;
+    }
+    .header-title:focus {
+      outline: none;
+      background: rgba(0,0,0,0.05);
+    }
+
+    .header-tool-btn-sparkles {
+      color: #e65100;
+    }
+    .header-tool-btn-sparkles:hover {
+      color: #bf360c;
+    }
+
+    .header-rect {
+      display: flex;
+      height: 32px;
+      padding: var(--orb-spacing-2-m);
+      justify-content: center;
+      align-items: center;
+      gap: var(--orb-spacing-m);
+      border-radius: var(--orb-rounding-6-m);
+      border: 1px solid var(--orb-line-generiс);
+      background: var(--orb-misc-surface-meeting);
+      backdrop-filter: blur(2.5px);
+      flex-shrink: 0;
+    }
+
+    .header-rect.header-rect-tools {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      padding: 2px;
+      border-radius: 12px;
+      width: fit-content;
+    }
+
+    .header-tool-btn {
+      position: relative;
+      width: 28px;
+      height: 28px;
+      min-width: 28px;
+      min-height: 28px;
+      flex-shrink: 0;
+      padding: 0;
+      border: none;
+      background: transparent;
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: rgb(0 0 0 / 75%);
+    }
+    .header-tool-btn::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      margin-top: 6px;
+      padding: 4px 8px;
+      background: rgba(0, 0, 0, 0.8);
+      color: #fff;
+      border-radius: 4px;
+      font-size: 12px;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.15s;
+      z-index: 1000;
+    }
+    .header-tool-btn:hover {
+      background: rgba(0, 0, 0, 0.06);
+    }
+    .header-tool-btn:hover::after {
+      opacity: 1;
+    }
+    .header-tool-btn:active {
+      background: rgba(0, 0, 0, 0.1);
+    }
+    .header-tool-btn:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+      pointer-events: auto;
+    }
+    .header-tool-btn:disabled:hover {
+      background: transparent;
+    }
+    .header-tool-btn:disabled::after {
+      display: none;
+    }
+    .header-tool-btn svg {
+      width: 15px;
+      height: 15px;
+    }
+    .header-tool-btn svg [stroke] {
+      stroke-width: 1.5;
+    }
+
+    /* ===== Font dropdown ===== */
+    .font-select-wrap {
+      position: relative;
+      width: 110px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      border-radius: 10px;
+      transition: background .15s;
+    }
+    .font-select-wrap:hover {
+      background: rgba(0, 0, 0, 0.06);
+    }
+    .font-select {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      appearance: none;
+      -webkit-appearance: none;
+      background: transparent;
+      border: none;
+      padding: 0 22px 0 8px;
+      font-family: inherit;
+      font-size: 14px;
+      color: rgb(0 0 0 / 75%);
+      cursor: pointer;
+      outline: none;
+    }
+    .font-select-chevron {
+      position: absolute;
+      right: 6px;
+      top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+      color: rgb(0 0 0 / 75%);
+      display: flex;
+    }
+
+    /* ===== Font size control ===== */
+    .font-size-wrap {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      height: 28px;
+      border-radius: 10px;
+    }
+    .font-size-value {
+      font-size: 14px;
+      color: rgb(0 0 0 / 75%);
+      min-width: 16px;
+      text-align: center;
+      user-select: none;
+      cursor: default;
+    }
+    .font-size-wrap .header-tool-btn svg {
+      width: 12px;
+      height: 12px;
+    }
+
+    /* ===== Workspace ===== */
+    .app-workspace {
+      grid-column: 1;
+      grid-row: 2;
+      display: flex;
+      flex-direction: row;
+      overflow: hidden;
+      min-width: 0;
+    }
+    .workspace-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-width: 0;
+      position: relative;
+    }
+
+    /* ===== Zone highlight during drag ===== */
+    .zone-drop.drag-ready {
+      border-color: #81c784 !important;
+      background: #f1f8f1 !important
+    }
+
+    /* ===== Cell selection ===== */
+    .grid td.selected {
+      outline: 2px solid #4caf50;
+      outline-offset: -2px;
+      background: transparent !important
+    }
+    .grid thead th.col-highlight {
+      background: #e8f5e9 !important;
+      color: rgba(0, 0, 0, 0.9)
+    }
+    .grid .rn.row-highlight {
+      background: #e8f5e9 !important;
+      color: rgba(0, 0, 0, 0.9)
+    }
+
+    /* ===== Filter pill ===== */
+    .filter-pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: #fff;
+      border: 1.5px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 5px 10px;
+      margin-bottom: 5px;
+      font-size: 13px;
+      color: #333;
+      user-select: none;
+      transition: border-color .15s, box-shadow .12s
+    }
+    .filter-pill:hover { border-color: #4caf50; box-shadow: 0 1px 4px rgba(76,175,80,.12) }
+    .filter-pill .fp-handle { color: #ccc; font-size: 12px; cursor: grab; flex-shrink: 0 }
+    .filter-pill .fp-badge { font-size: 10px; padding: 1px 5px; border-radius: 3px; font-weight: 700; flex-shrink: 0; line-height: 1.3 }
+    .filter-pill .fp-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+    .filter-pill .fp-count { font-size: 11px; color: #777; white-space: nowrap; flex-shrink: 0 }
+    .filter-pill .fp-chevron { font-size: 11px; color: #aaa; cursor: pointer; flex-shrink: 0; transition: color .15s }
+    .filter-pill .fp-chevron:hover { color: #4caf50 }
+    .filter-pill .fp-rm { background: none; border: none; cursor: pointer; font-size: 14px; color: #ccc; padding: 0 2px; line-height: 1; transition: color .15s }
+    .filter-pill .fp-rm:hover { color: #e53935 }
+
+    /* Filter popup */
+    .filter-popup {
+      position: fixed;
+      z-index: 1001;
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      border-radius: 10px;
+      box-shadow: 0 6px 24px rgba(0,0,0,.14);
+      width: 220px;
+      padding: 12px 14px 14px;
+      font-size: 13px
+    }
+    .fpp-title { font-weight: 700; font-size: 13px; margin-bottom: 8px; color: #111 }
+    .fpp-search { display: flex; align-items: center; gap: 6px; background: #f7f7f7; border: 1px solid #e0e0e0; border-radius: 6px; padding: 5px 8px; margin-bottom: 8px }
+    .fpp-search input { border: none; background: none; outline: none; font-family: inherit; font-size: 12px; color: #333; width: 100% }
+    .fpp-all { display: flex; align-items: center; gap: 8px; padding: 4px 2px 6px; border-bottom: 1px solid #f0f0f0; margin-bottom: 6px; cursor: pointer; font-weight: 700; font-size: 12px; color: #333 }
+    .fpp-all input[type=checkbox],
+    .fpp-val input[type=checkbox] {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 18px;
+      height: 18px;
+      border: 2px solid #ccc;
+      border-radius: 4px;
+      cursor: pointer;
+      flex-shrink: 0;
+      background: #fff;
+      transition: all .15s;
+      position: relative
+    }
+    .fpp-all input[type=checkbox]:checked,
+    .fpp-val input[type=checkbox]:checked {
+      background: #4caf50;
+      border-color: #4caf50
+    }
+    .fpp-all input[type=checkbox]:checked::after,
+    .fpp-val input[type=checkbox]:checked::after {
+      content: '';
+      position: absolute;
+      left: 3px;
+      top: 0px;
+      width: 6px;
+      height: 10px;
+      border: 2px solid #fff;
+      border-top: none;
+      border-left: none;
+      transform: rotate(45deg)
+    }
+    .fpp-values { max-height: 160px; overflow-y: auto; display: flex; flex-direction: column; gap: 1px }
+    .fpp-val { display: flex; align-items: center; gap: 8px; padding: 4px 2px; border-radius: 4px; cursor: pointer; font-size: 12px; color: #333; transition: background .1s }
+    .fpp-val:hover { background: #f5f5f5 }
+    .fpp-val input { accent-color: #4caf50; cursor: pointer; flex-shrink: 0 }
+    .fpp-sort { margin-bottom: 10px }
+    .fpp-sort-label { font-size: 11px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: .4px; display: block; margin-bottom: 5px }
+    .fpp-sort-btns { display: flex; gap: 5px }
+    .fpp-sort-btn { flex: 1; padding: 5px 4px; border: 1.5px solid #e0e0e0; border-radius: 6px; font-size: 11px; font-family: inherit; cursor: pointer; background: #fff; color: #555; transition: all .15s; text-align: center }
+    .fpp-sort-btn:hover { border-color: #4caf50; color: #2e7d32 }
+    .fpp-sort-btn.active { background: #e8f5e9; border-color: #4caf50; color: #2e7d32; font-weight: 700 }
+    .fpp-actions { display: flex; gap: 6px; margin-top: 10px }
+    .fpp-btn { flex: 1; padding: 6px 0; border-radius: 6px; border: 1px solid #e0e0e0; font-size: 12px; font-family: inherit; cursor: pointer; background: #fff; color: #333; transition: all .15s }
+    .fpp-btn.primary { background: #4caf50; border-color: #4caf50; color: #fff; font-weight: 700 }
+    .fpp-btn:hover:not(.primary) { background: #f5f5f5 }
+    .fpp-btn.primary:hover { background: #43a047 }
+
+
+
+    /* ===== Formula bar ===== */
+    .formula-bar {
+      display: flex;
+      align-items: center;
+      border-bottom: 1px solid #e0e0e0;
+      flex: 0 0 var(--formula-bar-height);
+      background: #fff;
+    }
+
+    .fb-cell {
+      width: 60px;
+      border-right: 1px solid #e0e0e0;
+      padding: 0 8px;
+      font-size: 12px;
+      color: #555;
+      display: flex;
+      align-items: center;
+      height: 100%
+    }
+
+    .fb-fx {
+      width: 28px;
+      border-right: 1px solid #e0e0e0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      color: #888;
+      font-style: italic;
+      height: 100%
+    }
+
+    .fb-input {
+      flex: 1;
+      padding: 0 8px;
+      font-size: 12px;
+      color: #333;
+      height: 100%;
+      border: none;
+      outline: none;
+      font-family: inherit
+    }
+
+    /* ===== Grid scroll ===== */
+    .grid-scroll {
+      flex: 1;
+      overflow: auto;
+      min-height: 0;
+      position: relative;
+    }
+    .range-input-wrap { display: flex; align-items: center; border: 1.5px solid #e0e0e0; border-radius: 12px; padding: 0 12px; gap: 6px; background: #fff; transition: border-color 0.15s; cursor: text; height: 36px; box-sizing: border-box; }
+    .range-input-wrap:hover { border-color: #18a058; }
+    .range-input-wrap.active { border-color: #18a058; }
+    .range-input-wrap.active.err { border-color: #e24b4a; }
+    .range-prefix { font-size: 13px; color: #999; flex-shrink: 0; visibility: hidden; width: 0; overflow: hidden; }
+    .range-input-wrap.active .range-prefix { visibility: visible; width: auto; }
+    .range-input { flex: 1; border: none; outline: none; font-size: 14px; color: #1a1a1a; background: transparent; font-family: inherit; cursor: text; min-width: 0; }
+    .range-confirm { display: none; width: 24px; height: 24px; border: none; background: none; cursor: pointer; padding: 0; flex-shrink: 0; align-items: center; justify-content: center; transition: opacity 0.15s; }
+    .range-confirm:disabled { cursor: default; opacity: 0.35; filter: grayscale(1); }
+    .range-input-wrap.active .range-confirm { display: flex; }
+    .range-error { font-size: 12px; color: #e24b4a; min-height: 16px; margin-top: 8px; }
+    .insert-group { display: flex; flex-direction: column; gap: 8px; }
+    .insert-label { font-size: 14px; color: #1a1a1a; margin-bottom: 2px; }
+    .insert-option { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #444; cursor: pointer; }
+    .insert-option input[type="radio"] { accent-color: #18a058; width: 16px; height: 16px; cursor: pointer; flex-shrink: 0; margin: 0; }
+    .insert-group.frozen { opacity: 0.35; pointer-events: none; }
+    .sel-sidebar { width: 320px; flex-shrink: 0; border-left: 1px solid #e0e0e0; background: #fff; display: flex; flex-direction: column; overflow: hidden; }
+    .sel-sidebar-header { font-size: 16px; font-weight: 700; color: #1a1a1a; padding: 16px; flex-shrink: 0; }
+    .sel-sidebar-body { flex: 1; display: flex; flex-direction: column; padding: 16px; gap: 0; overflow: hidden; }
+    .range-label { font-size: 14px; color: #1a1a1a; margin-bottom: 8px; }
+
+    .grid {
+      border-collapse: collapse;
+      font-size: 13px;
+      table-layout: fixed
+    }
+
+    .grid th,
+    .grid td {
+      border: 1px solid #e0e0e0;
+      padding: 2px 6px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis
+    }
+
+    .grid thead th {
+      background: #fff;
+      color: #333;
+      font-weight: 400;
+      text-align: center;
+      height: 22px;
+      position: sticky;
+      top: 0;
+      z-index: 3;
+      font-size: 12px
+    }
+
+    .grid thead th:first-child {
+      z-index: 4
+    }
+
+    .grid .rn {
+      background: #fff;
+      color: #333;
+      text-align: center;
+      width: 40px;
+      min-width: 40px;
+      font-size: 12px;
+      position: sticky;
+      left: 0;
+      z-index: 2
+    }
+
+    .grid td {
+      background: #fff;
+      color: #333;
+      height: 22px;
+      min-width: 80px
+    }
+
+    .grid td.num {
+      text-align: right;
+      font-variant-numeric: tabular-nums
+    }
+
+    .pivot-sheet .grid td.pv-header {
+      background: #f0f7f0;
+      font-weight: 700;
+      color: #2e7d32
+    }
+
+    .pivot-sheet .grid td.pv-total {
+      background: #f0f7f0;
+      font-weight: 700
+    }
+
+    /* ===== Sheets bar ===== */
+    .sheets-bar {
+      grid-column: 1 / -1;
+      grid-row: 3;
+      display: flex;
+      align-items: center;
+      border-top: 1px solid #e0e0e0;
+      background: #fff;
+      padding: 0 8px;
+      overflow: hidden;
+    }
+
+    .tab-btn {
+      padding: 5px 16px;
+      font-size: 12px;
+      font-family: inherit;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      color: #555;
+      border-bottom: 2px solid transparent;
+      transition: all .15s;
+      white-space: nowrap
+    }
+
+    .tab-btn.active {
+      background: #fff;
+      color: #2e7d32;
+      border-bottom-color: #4caf50;
+      font-weight: 700
+    }
+
+    .tab-btn:hover:not(.active) {
+      background: #eee
+    }
+
+    .tab-add {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+      color: #bbb;
+      margin-left: 4px;
+      padding: 2px 6px
+    }
+
+    .tab-nav {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 13px;
+      color: #999;
+      padding: 4px 6px
+    }
+
+    /* ===== Sidebar ===== */
+    .app-sidebar {
+      grid-column: 2;
+      grid-row: 2;
+      position: relative;
+      background: #fff;
+      border-left: 1px solid #e0e0e0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    #app.sidebar-hidden .app-sidebar {
+      pointer-events: none;
+    }
+
+    /* Resize handle — left edge of sidebar */
+    .sidebar-resize-handle {
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: var(--resize-handle-size);
+      cursor: col-resize;
+      z-index: 10;
+      transition: background .15s;
+    }
+
+    .sidebar-resize-handle:hover,
+    .sidebar-resize-handle.is-dragging {
+      background: rgba(76, 175, 80, 0.5);
+    }
+
+    #app.sidebar-hidden .sidebar-resize-handle {
+      display: none;
+    }
+
+    .sidebar-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px 12px;
+      border-bottom: 1px solid #ececec
+    }
+
+    .sidebar-header h2 {
+      font-size: 17px;
+      font-weight: 700
+    }
+
+    .sidebar-close {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 18px;
+      color: #888;
+      padding: 4px;
+      border-radius: 4px;
+      line-height: 1
+    }
+
+    .sidebar-close:hover {
+      background: #f0f0f0;
+      color: #333
+    }
+
+    .data-range {
+      padding: 10px 20px 12px
+    }
+
+    .data-range-label {
+      font-size: 13px;
+      font-weight: 700;
+      color: #333;
+      margin-bottom: 6px
+    }
+
+    .data-range-box {
+      background: #f7f7f7;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-size: 13px;
+      color: #555;
+      display: flex;
+      align-items: center;
+      justify-content: space-between
+    }
+
+    /* ===== Sidebar body (zones left, fields right) ===== */
+    .sidebar-scroll {
+      flex: 1;
+      overflow-y: auto;
+      padding-bottom: 20px
+    }
+
+    .sidebar-body {
+      display: flex;
+      gap: 0;
+      min-height: 0
+    }
+
+    .zones-col {
+      flex: 1.1;
+      padding: 8px 14px 8px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px
+    }
+
+    .fields-col {
+      flex: 0.9;
+      padding: 8px 16px 8px 0
+    }
+
+    /* ===== Zone blocks ===== */
+    .zone-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 6px
+    }
+
+    .zone-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #222
+    }
+
+    .zone-add {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 18px;
+      color: #bbb;
+      transition: color .15s;
+      line-height: 1
+    }
+
+    .zone-add:hover {
+      color: #4caf50
+    }
+
+    /* Drop area — empty state */
+    .zone-drop {
+      min-height: 80px;
+      background: #f8f9f8;
+      border: 1.5px dashed #ddd;
+      border-radius: 10px;
+      padding: 8px;
+      transition: background .15s, border-color .15s
+    }
+
+    .zone-drop.drag-over {
+      background: #e8f5e9;
+      border-color: #81c784
+    }
+
+    .zone-drop.has-items {
+      min-height: 0;
+      background: #f8f9f8;
+      border-style: dashed;
+      padding: 6px 8px
+    }
+
+    .zone-empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 10px;
+      color: #bbb;
+      text-align: center
+    }
+
+    .zone-empty-icon {
+      width: 48px;
+      height: 48px;
+      margin-bottom: 6px;
+      opacity: .25
+    }
+
+    .zone-empty-icon svg {
+      width: 100%;
+      height: 100%
+    }
+
+    .zone-empty-text {
+      font-size: 12px;
+      line-height: 1.4;
+      color: #bbb
+    }
+
+    /* ===== Pills (Строки/Столбцы) ===== */
+    .pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: #3d8c40;
+      border: none;
+      border-radius: 6px;
+      padding: 6px 10px;
+      margin-bottom: 4px;
+      cursor: grab;
+      font-size: 13px;
+      color: #fff;
+      user-select: none;
+      transition: box-shadow .12s, opacity .15s
+    }
+
+    .pill:active {
+      cursor: grabbing
+    }
+
+    .pill:hover {
+      box-shadow: 0 1px 6px rgba(61, 140, 64, .25)
+    }
+
+    .pill.dragging {
+      opacity: .35
+    }
+
+    .pill .p-handle {
+      font-size: 12px;
+      color: rgba(255, 255, 255, .45);
+      flex-shrink: 0
+    }
+
+    .pill .p-badge {
+      font-size: 10px;
+      padding: 1px 4px;
+      border-radius: 3px;
+      font-weight: 700;
+      flex-shrink: 0;
+      line-height: 1.3
+    }
+
+    .pill .p-badge.t-text {
+      background: rgba(255, 255, 255, .2);
+      color: #fff
+    }
+
+    .pill .p-badge.t-number {
+      background: rgba(255, 255, 255, .2);
+      color: #fff
+    }
+
+    .pill .p-badge.t-date {
+      background: rgba(255, 255, 255, .2);
+      color: #fff
+    }
+
+    .pill .p-name {
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap
+    }
+
+    .pill .p-chevron {
+      font-size: 12px;
+      color: rgba(255, 255, 255, .55);
+      flex-shrink: 0;
+      cursor: pointer;
+      transition: color .15s
+    }
+
+    .pill .p-chevron:hover {
+      color: #fff
+    }
+
+    .pill .p-rm {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      color: rgba(255, 255, 255, .5);
+      padding: 0;
+      line-height: 1;
+      transition: color .15s
+    }
+
+    .pill .p-rm:hover {
+      color: #fff
+    }
+
+    /* ===== Value pills (white card + select) ===== */
+    .vpill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: #fff;
+      border: 1.5px dashed #ddd;
+      border-radius: 8px;
+      padding: 7px 10px;
+      margin-bottom: 5px;
+      cursor: grab;
+      font-size: 13px;
+      color: #333;
+      user-select: none;
+      transition: box-shadow .12s, opacity .15s
+    }
+
+    .vpill:active {
+      cursor: grabbing
+    }
+
+    .vpill:hover {
+      box-shadow: 0 1px 6px rgba(0, 0, 0, .06)
+    }
+
+    .vpill.dragging {
+      opacity: .35
+    }
+
+    .vpill .p-handle {
+      font-size: 12px;
+      color: #ccc;
+      flex-shrink: 0
+    }
+
+    .vpill .p-badge {
+      font-size: 10px;
+      padding: 1px 5px;
+      border-radius: 3px;
+      font-weight: 700;
+      flex-shrink: 0;
+      line-height: 1.3
+    }
+
+    .vpill .p-badge.t-number {
+      background: #e8f5e9;
+      color: #2e7d32
+    }
+
+    .vpill .p-badge.t-text {
+      background: #e3f2fd;
+      color: #1565c0
+    }
+
+    .vpill .p-badge.t-date {
+      background: #fff3e0;
+      color: #e65100
+    }
+
+    .vpill .p-name {
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-weight: 400
+    }
+
+    .vpill .p-select {
+      border: 1.5px solid #ddd;
+      border-radius: 5px;
+      padding: 3px 6px;
+      font-size: 12px;
+      font-family: inherit;
+      color: #555;
+      background: #fff;
+      cursor: pointer;
+      min-width: 80px;
+      transition: border-color .15s
+    }
+
+    .vpill .p-select:focus {
+      outline: none;
+      border-color: #1976d2;
+      box-shadow: 0 0 0 2px rgba(25, 118, 210, .15)
+    }
+
+    .vpill .p-rm {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 15px;
+      color: #ccc;
+      padding: 0 2px;
+      line-height: 1;
+      transition: color .15s
+    }
+
+    .vpill .p-rm:hover {
+      color: #e53935
+    }
+
+    /* ===== Context Menu ===== */
+    .ctx-menu {
+      position: fixed;
+      z-index: 1000;
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, .12);
+      min-width: 180px;
+      max-height: 300px;
+      overflow-y: auto;
+      padding: 4px 0
+    }
+
+    .ctx-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 14px;
+      font-size: 13px;
+      color: #333;
+      cursor: pointer;
+      transition: background .1s
+    }
+
+    .ctx-item:hover {
+      background: #f5f5f5
+    }
+
+    .ctx-item .ci-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 2px;
+      flex-shrink: 0
+    }
+
+    .ctx-item .ci-name {
+      flex: 1
+    }
+
+    .ctx-item .ci-type {
+      font-size: 11px;
+      color: #aaa;
+      font-weight: 700
+    }
+
+    .ctx-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 999
+    }
+
+    /* ===== Pill settings panel ===== */
+    .pill-settings {
+      position: fixed;
+      z-index: 1000;
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      border-radius: 12px;
+      box-shadow: 0 6px 24px rgba(0,0,0,.14);
+      width: 240px;
+      padding: 14px 16px 16px;
+      font-size: 13px;
+      color: #333
+    }
+
+    .ps-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px
+    }
+
+    .ps-title {
+      font-weight: 700;
+      font-size: 14px;
+      color: #111
+    }
+
+    .ps-close {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+      color: #aaa;
+      padding: 0;
+      line-height: 1
+    }
+
+    .ps-close:hover { color: #333 }
+
+    .ps-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: .4px;
+      margin-bottom: 5px
+    }
+
+    .ps-select {
+      width: 100%;
+      border: 1.5px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-size: 13px;
+      font-family: inherit;
+      color: #333;
+      background: #f7f7f7;
+      cursor: pointer;
+      appearance: none;
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L6 6L11 1' stroke='%23999' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      margin-bottom: 12px
+    }
+
+    .ps-select:focus {
+      outline: none;
+      border-color: #4caf50
+    }
+
+    .ps-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px
+    }
+
+    .ps-row > div { flex: 1 }
+
+    .ps-checkbox-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 4px;
+      cursor: pointer
+    }
+
+    .ps-checkbox-row input[type=checkbox] {
+      width: 16px;
+      height: 16px;
+      accent-color: #4caf50;
+      cursor: pointer;
+      flex-shrink: 0
+    }
+
+    .ps-divider {
+      border: none;
+      border-top: 1px solid #f0f0f0;
+      margin: 12px 0
+    }
+
+    .ps-remove {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 13px;
+      color: #e53935;
+      padding: 0;
+      text-align: left;
+      width: 100%
+    }
+
+    .ps-remove:hover { text-decoration: underline }
+
+    /* ===== Available fields ===== */
+    .fields-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #222;
+      padding: 0 0 8px
+    }
+
+    .fields-search {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin: 0 0 8px;
+      background: #f7f7f7;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 6px 10px;
+      transition: border-color .15s
+    }
+
+    .fields-search:focus-within {
+      border-color: #4caf50
+    }
+
+    .fields-search input {
+      background: none;
+      border: none;
+      outline: none;
+      font-family: inherit;
+      font-size: 13px;
+      color: #333;
+      width: 100%
+    }
+
+    .fields-search .s-icon {
+      display: flex;
+      align-items: center;
+      color: #bbb;
+      flex-shrink: 0;
+    }
+
+    #field-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1px
+    }
+
+    .field-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 8px;
+      border-radius: 6px;
+      cursor: default;
+      font-size: 13px;
+      color: #333;
+      user-select: none;
+      transition: background .1s
+    }
+
+    .field-item:hover {
+      background: #f5f5f5
+    }
+
+    .field-item.dragging {
+      opacity: .3
+    }
+
+    .field-item .f-handle {
+      color: #d0d0d0;
+      font-size: 14px;
+      flex-shrink: 0;
+      cursor: grab;
+      padding: 2px 3px;
+      margin: -2px -3px;
+      border-radius: 3px;
+      transition: color .15s
+    }
+
+    .field-item .f-handle:active {
+      cursor: grabbing
+    }
+
+    .field-item:hover .f-handle {
+      color: #aaa
+    }
+
+    .field-item .f-check {
+      width: 16px;
+      height: 16px;
+      border-radius: 3px;
+      border: 1.5px solid #ccc;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      color: #fff;
+      cursor: pointer;
+      transition: all .15s
+    }
+
+    .field-item .f-check:hover {
+      border-color: #4caf50
+    }
+
+    .field-item .f-check.active {
+      background: #4caf50;
+      border-color: #4caf50
+    }
+
+    .field-item .f-name {
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap
+    }
+
+    .field-item .f-type {
+      font-size: 11px;
+      color: #aaa;
+      flex-shrink: 0;
+      font-weight: 700
+    }
+
+    .sidebar-scroll::-webkit-scrollbar {
+      width: 5px
+    }
+
+    .sidebar-scroll::-webkit-scrollbar-thumb {
+      background: #d5d5d5;
+      border-radius: 3px
+    }
+
+    .ghost {
+      position: fixed;
+      top: -9999px;
+      left: -9999px;
+      background: #3d8c40;
+      border-radius: 5px;
+      padding: 5px 14px;
+      font-size: 12.5px;
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, .15);
+      pointer-events: none;
+      z-index: 9999
+    }
+
+    /* ===== Toast notifications ===== */
+    #toast-container {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      pointer-events: none
+    }
+
+    .toast {
+      background: #fff;
+      border-radius: 8px;
+      padding: 10px 16px;
+      font-size: 13px;
+      box-shadow: 0 4px 16px rgba(0,0,0,.14);
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      max-width: 420px;
+      animation: toastIn .2s ease;
+      pointer-events: all;
+      border-left: 4px solid #ff9800
+    }
+
+    .toast.toast-warn { border-left-color: #ff9800 }
+    .toast.toast-error { border-left-color: #e53935 }
+    .toast.toast-info { border-left-color: #4caf50 }
+
+    .toast-icon { font-size: 15px; flex-shrink: 0; margin-top: 1px }
+    .toast-body { flex: 1; line-height: 1.45; color: #333 }
+    .toast-close { background: none; border: none; cursor: pointer; color: #aaa; font-size: 16px; padding: 0; line-height: 1; flex-shrink: 0 }
+    .toast-close:hover { color: #555 }
+
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateY(8px) }
+      to   { opacity: 1; transform: translateY(0) }
+    }
+
+    /* ===== Validation banner ===== */
+    .validation-banner {
+      margin: 0 20px 10px;
+      background: #fff8e1;
+      border: 1px solid #ffe082;
+      border-radius: 8px;
+      padding: 9px 14px;
+      font-size: 12.5px;
+      color: #5d4037;
+      display: none;
+      gap: 8px;
+      align-items: flex-start;
+      line-height: 1.5
+    }
+
+    .validation-banner.visible { display: flex }
+    .vb-icon { flex-shrink: 0; font-size: 15px }
+    .vb-text { flex: 1 }
+    .vb-close { background: none; border: none; cursor: pointer; color: #aaa; font-size: 15px; padding: 0 }
+
+    /* ===== Field usage count badge ===== */
+    .f-count {
+      background: #4caf50;
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      border-radius: 10px;
+      padding: 1px 5px;
+      flex-shrink: 0;
+      line-height: 1.4
+    }
+
+    /* ===== Header top action buttons ===== */
+    .header-top-icon-btn {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border: none;
+      background: transparent;
+      border-radius: 10px;
+      cursor: pointer;
+      color: rgba(0, 0, 0, 0.75);
+      flex-shrink: 0;
+      transition: background 0.15s;
+    }
+    .header-top-icon-btn:hover {
+      background: rgba(0, 0, 0, 0.06);
+    }
+    .header-top-icon-btn::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      margin-top: 6px;
+      padding: 4px 8px;
+      background: rgba(0, 0, 0, 0.8);
+      color: #fff;
+      border-radius: 4px;
+      font-size: 12px;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.15s;
+      z-index: 1000;
+    }
+    .header-top-icon-btn:hover::after {
+      opacity: 1;
+    }
+    .header-share-btn {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 0 10px 0 8px;
+      height: 28px;
+      border: none;
+      background: transparent;
+      border-radius: 10px;
+      cursor: pointer;
+      color: rgba(0, 0, 0, 0.75);
+      font-size: 14px;
+      font-family: inherit;
+      flex-shrink: 0;
+      transition: background 0.15s;
+    }
+    .header-share-btn:hover {
+      background: rgba(0, 0, 0, 0.06);
+    }
+
+    /* ===== Split button ===== */
+    .split-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 1px;
+    }
+    .split-btn-main {
+      border-radius: 10px 0 0 10px !important;
+    }
+    .split-btn-arrow {
+      width: 16px !important;
+      min-width: 16px !important;
+      border-radius: 0 10px 10px 0 !important;
+      padding: 0 !important;
+      color: rgb(0 0 0 / 75%);
+    }
+    .split-btn-arrow svg {
+      width: 12px;
+      height: 12px;
+    }
+    .split-btn:hover .split-btn-main,
+    .split-btn:hover .split-btn-arrow {
+      background: rgba(0, 0, 0, 0.06);
+    }
+    .split-btn-menu {
+      position: fixed;
+      display: none;
+      flex-direction: column;
+      background: #fff;
+      border: 1px solid rgba(181, 183, 192, 0.4);
+      border-radius: 10px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+      z-index: 2000;
+      min-width: 160px;
+      padding: 4px;
+    }
+    .split-btn-menu.open {
+      display: flex;
+    }
+    .split-btn-menu-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 10px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      text-align: left;
+      font-family: inherit;
+      font-size: 13px;
+      color: rgba(0, 0, 0, 0.8);
+      border-radius: 7px;
+      width: 100%;
+    }
+    .split-btn-menu-item:hover {
+      background: rgba(0, 0, 0, 0.05);
+    }
+    .split-btn-color-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+      border: 1px solid rgba(0,0,0,0.15);
+      flex-shrink: 0;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="toast-container"></div>
+  <div class="app sidebar-hidden" id="app">
+
+    <!-- HEADER -->
+    <header class="app-header" id="appHeader"><div class="hdr-bg">
+      <img src="bg_ss.svg" alt="" width="1280" height="122">
+    </div><div class="header-top"><div class="header-circle logo"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 40 40"><path fill="url(#ya360a)" d="M20 40c11.046 0 20-8.954 20-20S31.046 0 20 0 0 8.954 0 20s8.954 20 20 20"></path><path fill="#fff" d="M20 31.6c3.755 0 6.8-5.194 6.8-11.6 0-6.407-3.045-11.6-6.8-11.6s-6.8 5.193-6.8 11.6c0 6.406 3.044 11.6 6.8 11.6"></path><path fill="#fff" fill-rule="evenodd" d="M7.251 10.8c-2.018-.104-4.45 4.12-4.45 9.198 0 5.08 2.432 9.302 4.45 9.198 2.001-.104 3.15-4.119 3.15-9.198S9.252 10.904 7.25 10.8m25.5 18.396c2.018.104 4.45-4.119 4.45-9.198s-2.432-9.302-4.45-9.198c-2.002.104-3.15 4.12-3.15 9.198 0 5.08 1.148 9.094 3.15 9.198" clip-rule="evenodd"></path><defs><radialGradient id="ya360a" cx="0" cy="0" r="1" gradientTransform="matrix(0 25.6 -33.2388 0 20 14.4)" gradientUnits="userSpaceOnUse"><stop stop-color="#FF9A6F"></stop><stop offset="0.61" stop-color="#FF6427"></stop><stop offset="1" stop-color="#EB581E"></stop></radialGradient></defs></svg></div><div class="header-circle logo"><svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12.4977 6.58733C12.8545 5.30119 14.2234 4.53793 15.5551 4.88255L26.1491 7.624C27.4808 7.96862 28.2712 9.29062 27.9143 10.5768L24.3534 23.4114C23.9965 24.6975 22.6277 25.4608 21.2959 25.1161L10.702 22.3747C9.37023 22.0301 8.57992 20.7081 8.93676 19.4219L12.4977 6.58733Z" fill="#0CBD70"></path><g filter="url(#f0)"><path d="M6.82263 18.7942C6.86381 21.5295 8.95049 23.7988 11.6728 24.0687L21.6247 25.0553C21.9643 25.089 22.2589 24.8222 22.2589 24.4809V11.7627C22.2589 11.4439 22.0005 11.1855 21.6816 11.1855H6.70807L6.82263 18.7942Z" fill="#147638"></path></g><path d="M3.99915 12.011C3.99915 10.6795 5.11682 9.6001 6.49554 9.6001H17.1031C18.4818 9.6001 19.5995 10.6795 19.5995 12.011V25.2H6.49554C5.11682 25.2 3.99915 24.1206 3.99915 22.7891V12.011Z" fill="#00D97B"></path><path d="M19.5989 23.176C19.5989 24.2941 20.8976 25.2006 22.0554 25.2006L19.5995 25.2L19.5989 23.176Z" fill="#00D97B"></path><path d="M7.59961 18.5913C7.59961 18.1012 7.99687 17.704 8.48691 17.704H10.6088C11.0988 17.704 11.4961 18.1012 11.4961 18.5913V20.7131C11.4961 21.2031 11.0988 21.6004 10.6088 21.6004H8.48691C7.99687 21.6004 7.59961 21.2031 7.59961 20.7131V18.5913Z" fill="white"></path><path d="M7.59963 14.0875C7.59963 13.5974 7.99689 13.2002 8.48693 13.2002H10.6088C11.0988 13.2002 11.4961 13.5974 11.4961 14.0875V16.2093C11.4961 16.6993 11.0988 17.0966 10.6088 17.0966H8.48693C7.99689 17.0966 7.59963 16.6993 7.59963 16.2093V14.0875Z" fill="white"></path><path d="M12.1033 18.5912C12.1033 18.1011 12.5006 17.7039 12.9906 17.7039H15.1125C15.6025 17.7039 15.9998 18.1011 15.9998 18.5912V20.713C15.9998 21.203 15.6025 21.6003 15.1125 21.6003H12.9906C12.5006 21.6003 12.1033 21.203 12.1033 20.713V18.5912Z" fill="white"></path><path d="M12.1033 14.0875C12.1033 13.5974 12.5006 13.2002 12.9906 13.2002H15.1125C15.6025 13.2002 15.9998 13.5974 15.9998 14.0875V16.2093C15.9998 16.6993 15.6025 17.0966 15.1125 17.0966H12.9906C12.5006 17.0966 12.1033 16.6993 12.1033 16.2093V14.0875Z" fill="white"></path><defs><filter id="f0" x="3.60514" y="8.08262" width="21.7567" height="20.0784" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feFlood flood-opacity="0" result="BackgroundImageFix"></feFlood><feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"></feBlend><feGaussianBlur stdDeviation="1.55147" result="effect1_foregroundBlur_47_29164"></feGaussianBlur></filter></defs></svg></div><span class="header-title" contenteditable="true" spellcheck="false">Новая таблица (5)</span><button type="button" class="header-top-icon-btn" data-tooltip="Сохранено" title="Сохранено" aria-label="Сохранено"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" d="M11.232 7.33 10.17 6.268 7 9.439 5.53 7.97 4.47 9.03 7 11.56z"></path><path fill="currentColor" fill-rule="evenodd" d="M7.5 1.5a5 5 0 0 0-4.995 4.766A4.014 4.014 0 0 0 4 14h7a5 5 0 0 0 .874-9.924A5 5 0 0 0 7.5 1.5M3.07 7.656l.89-.36.044-.96a3.5 3.5 0 0 1 6.559-1.532l.347.624.703.124A3.501 3.501 0 0 1 11 12.5H4.005a2.513 2.513 0 0 1-.936-4.843" clip-rule="evenodd"></path></svg></button><button type="button" class="header-top-icon-btn" style="margin-left:auto" data-tooltip="Все комментарии" title="Все комментарии" aria-label="Все комментарии"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" d="M11.998 2a3 3 0 0 1 3 3v3.985a3 3 0 0 1-3 3H9.572a4 4 0 0 0-2.295.724L5.37 14.045H4.003v-2.06a3.003 3.003 0 0 1-3.003-3V5a3 3 0 0 1 3-3zM4 3.5A1.5 1.5 0 0 0 2.5 5v3.985c0 .827.673 1.5 1.503 1.5h1.5v1.636l.914-.64a5.5 5.5 0 0 1 3.155-.996h2.426a1.5 1.5 0 0 0 1.5-1.5V5a1.5 1.5 0 0 0-1.5-1.5z"/></svg></button><button type="button" class="header-share-btn" style="margin-left:4px" title="Поделиться" aria-label="Поделиться"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" fill-rule="evenodd" d="M6.5 10.75q.736-.083 1.5-.083V14h1.455L16 8 9.455 2H8v3.352c-3.96.584-6.746 2.982-7.696 6.147a8.5 8.5 0 0 0-.304 1.5h1.273q.135-.125.275-.242C2.953 11.582 4.655 10.96 6.5 10.75m-4.075-.357C4.144 9.518 6.065 9.167 8 9.167h1.5v2.757L13.78 8 9.5 4.077v2.57l-1.28.188c-2.714.401-4.7 1.745-5.795 3.558" clip-rule="evenodd"/></svg>Поделиться</button><div class="header-circle" style="margin-left:8px;background:#4caf50;color:#fff;font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;">А</div></div><div class="header-menu"><button type="button" class="header-menu-btn">Файл</button><button type="button" class="header-menu-btn">Правка</button><button type="button" class="header-menu-btn">Вставка</button><button type="button" class="header-menu-btn">Формат</button><button type="button" class="header-menu-btn">Структура</button><button type="button" class="header-menu-btn">Данные</button><button type="button" class="header-menu-btn">Вид</button><button type="button" class="header-menu-btn">Справка</button></div><div class="header-bottom"><div class="header-rect header-rect-tools"><button type="button" class="header-tool-btn" data-tooltip="Отменить" title="Отменить" aria-label="Отменить"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16"><path fill="currentColor" d="m.94 5 3.53 3.53 1.06-1.06-1.72-1.72H9.5a3.25 3.25 0 0 1 0 6.5H5v1.5h4.5a4.75 4.75 0 0 0 0-9.5H3.81l1.72-1.72-1.06-1.06z"/></svg></button><button type="button" class="header-tool-btn" data-tooltip="Повторить" title="Повторить" aria-label="Повторить" disabled><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16"><path fill="currentColor" d="m14.25 5-3.53 3.53-1.06-1.06 1.719-1.72h-5.69a3.25 3.25 0 0 0 0 6.5h4.5v1.5h-4.5a4.75 4.75 0 0 1 0-9.5h5.69l-1.72-1.72 1.06-1.06z"/></svg></button></div><div class="header-rect header-rect-tools"><button type="button" class="header-tool-btn" data-tooltip="Подсказки" title="Подсказки" aria-label="Подсказки"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16"><g clip-path="url(#clip0_14331_36439)"><path fill="url(#neuro_gradient)" d="M5.66 2.62a1.1 1.1 0 0 0-1.6.92L3.92 5.5H5.5V7H3.82l-.4 5.84A2.32 2.32 0 0 1 0 14.72l.7-1.32a.82.82 0 0 0 1.2-.66L2.32 7H1V5.5h1.42l.14-2.06c.13-1.86 2.1-3 3.78-2.16z"></path><path fill="url(#paint1_linear_14331_36439)" d="M13.1 8.13c.22.61.39.92.61 1.14s.53.39 1.14.6l1.15.38v.35l-1.15.38c-.61.21-.92.38-1.14.6s-.39.53-.6 1.14l-.37 1.15h-.36L12 12.72a3 3 0 0 0-.6-1.14 3 3 0 0 0-1.15-.6L9.1 10.6v-.35l1.15-.38c.62-.21.92-.38 1.14-.6.23-.22.39-.53.6-1.14.22-.6.37-1.14.38-1.15h.34zm-2.47-2.96-.4.76c-.2.41-.26.65-.26.87s.07.46.27.87l.39.76-.18.18-.77-.39c-.41-.2-.65-.27-.87-.27s-.45.07-.87.27l-.76.4-.18-.2.4-.76c.19-.41.26-.65.26-.87s-.07-.46-.27-.87C7.2 5.5 7 5.17 7 5.17l.17-.18.77.39c.42.2.65.27.87.27s.46-.07.87-.27l.77-.4z"></path></g><defs><linearGradient id="neuro_gradient" x1="0" x2="10.52" y1="1" y2="5.76" gradientUnits="userSpaceOnUse"><stop stop-color="#f43f5e"></stop><stop offset="1" stop-color="#f7993c"></stop></linearGradient><linearGradient id="paint1_linear_14331_36439" x1="7" x2="15.88" y1="4.99" y2="13.99" gradientUnits="userSpaceOnUse"><stop stop-color="#f43f5e"></stop><stop offset="1" stop-color="#f7993c"></stop></linearGradient><clipPath id="clip0_14331_36439"><path fill="#fff" d="M0 0h16v16H0z"></path></clipPath></defs></svg></button></div><div class="header-rect header-rect-tools"><button type="button" class="header-tool-btn" data-tooltip="Копировать форматирование" title="Копировать форматирование"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" fill-rule="evenodd" d="M2.006 3.19c.012-.43.046-.714.146-.955a2 2 0 0 1 1.083-1.083C3.602 1 4.068 1 5 1h7c.932 0 1.398 0 1.765.152a2 2 0 0 1 1.083 1.083C15 2.602 15 3.068 15 4s0 1.398-.152 1.765a2 2 0 0 1-1.083 1.083C13.398 7 12.932 7 12 7H5c-.932 0-1.398 0-1.765-.152a2 2 0 0 1-.985-.88V6.5c0 .476 0 .796.017 1.043.017.241.046.358.078.435.127.307.37.55.677.677.077.032.194.061.435.078.247.017.567.017 1.043.017h6V13c0 .465 0 .697-.051.888a1.5 1.5 0 0 1-1.06 1.06C9.196 15 8.964 15 8.5 15s-.697 0-.888-.051a1.5 1.5 0 0 1-1.06-1.06C6.5 13.697 6.5 13.464 6.5 13v-2.75H4.475c-.445 0-.816 0-1.12-.02a2.8 2.8 0 0 1-.907-.19A2.75 2.75 0 0 1 .959 8.553c-.12-.29-.167-.59-.188-.907C.75 7.341.75 6.97.75 6.525V5.5c0-.968.5-1.82 1.256-2.31M5 2.5h7c.486 0 .776 0 .992.016.134.009.19.02.205.025a.5.5 0 0 1 .262.262c.004.014.016.071.025.205.015.216.016.506.016.992s0 .776-.016.992c-.009.134-.02.19-.025.205a.5.5 0 0 1-.262.262 1.3 1.3 0 0 1-.205.025c-.216.015-.506.016-.992.016H5c-.486 0-.776 0-.992-.016a1.3 1.3 0 0 1-.205-.025.5.5 0 0 1-.262-.262 1.3 1.3 0 0 1-.025-.205A17 17 0 0 1 3.5 4c0-.486 0-.776.016-.992.009-.134.02-.19.025-.205a.5.5 0 0 1 .262-.262 1.3 1.3 0 0 1 .205-.025C4.224 2.5 4.514 2.5 5 2.5m3 7.754h1V13c0 .246 0 .38-.005.479v.015l-.016.001c-.098.005-.233.005-.479.005s-.38 0-.479-.005h-.015l-.001-.016A12 12 0 0 1 8 13z" clip-rule="evenodd"/></svg></button><button type="button" class="header-tool-btn" data-tooltip="Печать" title="Печать"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16"><path fill="currentColor" d="M12 4.02c.49.026.843.082 1.148.209a3 3 0 0 1 1.624 1.623C15 6.402 15 7.102 15 8.5s0 2.097-.229 2.648a3 3 0 0 1-1.623 1.625c-.305.126-.657.182-1.148.207V15H4v-2.02c-.49-.025-.843-.08-1.148-.207a3 3 0 0 1-1.623-1.625C1 10.598 1 9.898 1 8.5s0-2.097.229-2.648a3 3 0 0 1 1.623-1.623c.305-.127.657-.183 1.148-.208V1h8zM5.5 9.5v4h5v-4zm0-4c-.72 0-1.184.001-1.54.025-.341.024-.472.063-.534.09a1.5 1.5 0 0 0-.812.81c-.026.063-.065.194-.089.536-.024.355-.025.82-.025 1.539 0 .72.001 1.185.025 1.54.024.342.063.472.09.534a1.5 1.5 0 0 0 .81.813c.063.026.194.065.536.089l.039.001V8h8v3.477l.04-.001c.341-.024.472-.063.534-.09a1.5 1.5 0 0 0 .812-.812c.026-.062.065-.192.089-.534.024-.355.025-.82.025-1.54s-.001-1.184-.025-1.54c-.024-.341-.063-.472-.09-.534a1.5 1.5 0 0 0-.81-.812c-.063-.026-.194-.065-.536-.089-.355-.024-.82-.025-1.539-.025zm0-3V4h5V2.5z"/></svg></button></div><div class="header-rect header-rect-tools"><button type="button" class="header-tool-btn" data-tooltip="Валюта" title="Валюта"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="16" height="16" viewBox="0 0 16 16"><g fill="currentColor" clip-path="url(#cash-stack-outline-sm__a)"><path d="M4 2.3h8V.8H4zM2 4.55h12v-1.5H2z"/><path fill-rule="evenodd" d="M10.5 10.3a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0m-1.5 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0" clip-rule="evenodd"/><path d="M4.25 9.75a.75.75 0 0 0-.75.75v.75h.75a.75.75 0 0 0 0-1.5m7.5 0a.75.75 0 0 0-.75.75v.75h.75a.75.75 0 0 0 0-1.5"/><path fill-rule="evenodd" d="M.5 8.286a3 3 0 0 1 3-3h9a3 3 0 0 1 3 3V12.3a3 3 0 0 1-3 3h-9a3 3 0 0 1-3-3zm3-1.5h9a1.5 1.5 0 0 1 1.5 1.5V12.3a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 2 12.3V8.286a1.5 1.5 0 0 1 1.5-1.5" clip-rule="evenodd"/></g><defs><clipPath id="cash-stack-outline-sm__a"><path fill="#fff" d="M0 0h16v16H0z"/></clipPath></defs></svg></button><button type="button" class="header-tool-btn" data-tooltip="Проценты" title="Проценты"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" fill-rule="evenodd" d="M4.25 7.5a3.25 3.25 0 1 0 0-6.5 3.25 3.25 0 0 0 0 6.5m0-1.5a1.75 1.75 0 1 0 0-3.5 1.75 1.75 0 0 0 0 3.5" clip-rule="evenodd"/><path fill="currentColor" d="m2.105 14.5 9.903-13h1.886l-9.903 13z"/><path fill="currentColor" fill-rule="evenodd" d="M15 11.75a3.25 3.25 0 1 1-6.5 0 3.25 3.25 0 0 1 6.5 0m-1.5 0a1.75 1.75 0 1 1-3.5 0 1.75 1.75 0 0 1 3.5 0" clip-rule="evenodd"/></svg></button></div><div class="header-rect header-rect-tools"><div class="font-select-wrap"><select class="font-select"><option>Arial</option><option>Inter</option><option>Georgia</option><option>Courier New</option><option>Times New Roman</option></select><span class="font-select-chevron"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="12" height="12" viewBox="0 0 12 12"><path fill="currentColor" d="M1 5.348V3.446l5 3.303 5-3.4V5.25l-5 3.4z"/></svg></span></div></div><div class="header-rect header-rect-tools"><div class="font-size-wrap"><button type="button" class="header-tool-btn" data-tooltip="Уменьшить шрифт" title="Уменьшить шрифт" aria-label="Уменьшить шрифт"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="12" height="12" viewBox="0 0 12 12"><path fill="currentColor" d="M1 5.25h10v1.5H1z"/></svg></button><span class="font-size-value">9</span><button type="button" class="header-tool-btn" data-tooltip="Увеличить шрифт" title="Увеличить шрифт" aria-label="Увеличить шрифт"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="12" height="12" viewBox="0 0 12 12"><path fill="currentColor" d="M5.25 5.25V1h1.5v4.25H11v1.5H6.75V11h-1.5V6.75H1v-1.5z"/></svg></button></div></div><div class="header-rect header-rect-tools"><button type="button" class="header-tool-btn" data-tooltip="Жирный" title="Жирный"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16"><path fill="currentColor" d="M7.85 1.5q1.198 0 2.106.163.926.163 1.544.545.618.381.926.999.327.6.327 1.453 0 1.271-.654 1.98-.655.708-1.798.998-.245.06-.505.106.615.072 1.123.203 1.126.29 1.707.962.58.672.581 1.834 0 1.018-.4 1.743a3.2 3.2 0 0 1-1.144 1.163q-.726.436-1.707.654-.98.2-2.143.2H3.4V1.5zM5.798 8.818v3.668h2.324q.78 0 1.362-.163.6-.181.926-.58.345-.419.345-1.108 0-.672-.309-1.072-.308-.4-.925-.563-.618-.182-1.58-.182zm0-2.015H8.03q.69 0 1.198-.2.528-.2.818-.582.308-.4.308-1.016 0-.58-.253-.89-.255-.327-.746-.454a5 5 0 0 0-1.198-.127h-2.36z"/></svg></button><button type="button" class="header-tool-btn" data-tooltip="Курсив" title="Курсив"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16"><path fill="currentColor" d="M8.512 3.001H6v-1.5h6.5v1.5h-2.45L7.779 13H10v1.5H3.5V13h2.74z"/></svg></button><button type="button" class="header-tool-btn" data-tooltip="Подчёркивание" title="Подчёркивание"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" d="M3.25 1.5V8c0 1.295.435 2.433 1.25 3.25.817.815 1.955 1.25 3.25 1.25h.5c1.295 0 2.433-.435 3.25-1.25.815-.817 1.25-1.955 1.25-3.25V1.5h-1.5V8c0 .955-.315 1.692-.812 2.188-.496.497-1.233.812-2.188.812h-.5c-.955 0-1.692-.315-2.188-.812C5.065 9.692 4.75 8.955 4.75 8V1.5zM2 15.5h12V14H2z"/></svg></button><button type="button" class="header-tool-btn" data-tooltip="Зачёркивание" title="Зачёркивание"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" d="M7.838 14.682a9.3 9.3 0 0 1-1.761-.164 7.4 7.4 0 0 1-1.507-.454 4 4 0 0 1-1.072-.672v-1.634q.454.399 1.162.708.727.31 1.562.49a7.6 7.6 0 0 0 1.616.182 5.3 5.3 0 0 0 1.308-.145q.58-.145.962-.418.4-.271.6-.672.218-.417.218-.926 0-.472-.146-.799a1.33 1.33 0 0 0-.472-.581q-.326-.254-.926-.454a16 16 0 0 0-1.357-.41H1v-1.5h3.513l-.004-.004H9q.008 0 .014.003H15v1.5h-3.037q.066.076.125.157.328.4.454.908.145.49.145 1.107 0 .709-.218 1.308a3.1 3.1 0 0 1-.617 1.053q-.4.454-.999.781a5.2 5.2 0 0 1-1.344.472 8 8 0 0 1-1.67.164M3.807 6.201l.01.028h2.206l-.091-.064a1.7 1.7 0 0 1-.49-.581 1.9 1.9 0 0 1-.146-.763q0-.49.182-.854a1.6 1.6 0 0 1 .58-.617q.383-.254.963-.363.6-.127 1.38-.127.745 0 1.38.108.636.091 1.181.291.544.2.999.509V2.133a5.8 5.8 0 0 0-1.108-.454 7.4 7.4 0 0 0-1.162-.272q-.6-.09-1.29-.091-1.161 0-2.07.236-.89.236-1.507.69-.6.436-.908 1.108t-.309 1.543q0 .727.2 1.308"/></svg></button><button type="button" class="header-tool-btn" data-tooltip="Цвет текста" title="Цвет текста"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg></button><div class="split-btn"><button type="button" class="header-tool-btn split-btn-main" id="fillColorBtn" data-tooltip="Заливка" title="Заливка" aria-label="Заливка"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" fill-rule="evenodd" d="m3.575 1-.78 1.276L4.832 3.45 1.094 9.922l.002.001c-.474.943.853 2.685 3.004 3.926 2.184 1.26 4.39 1.527 4.928.595a1 1 0 0 0 .049-.097l4.406-7.628zm6.858 8H3.359l2.77-4.794 5.304 3.062z" clip-rule="evenodd"/><path fill="currentColor" d="M13.25 15c.966 0 1.75-.715 1.75-1.596 0-1.349-1.604-3.07-1.604-3.07h-.292s-1.604 1.74-1.604 3.07c0 .881.784 1.596 1.75 1.596"/></svg></button><button type="button" class="header-tool-btn split-btn-arrow" id="fillArrowBtn" aria-label="Цвет заливки"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="12" height="12" viewBox="0 0 12 12"><path fill="currentColor" d="M1 5.348V3.446l5 3.303 5-3.4V5.25l-5 3.4z"/></svg></button></div><div class="split-btn-menu" id="fillMenu"><button class="split-btn-menu-item" id="fillYellow"><span class="split-btn-color-dot" style="background:#fff176"></span>Жёлтый</button><button class="split-btn-menu-item" id="fillClear"><span class="split-btn-color-dot" style="background:#fff"></span>Без заливки</button></div></div><div class="header-rect header-rect-tools"><button type="button" class="header-tool-btn" data-tooltip="Границы" title="Границы"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h18v18H3z"/><path d="M3 9h18"/><path d="M3 15h18"/><path d="M9 3v18"/><path d="M15 3v18"/></svg></button><button type="button" class="header-tool-btn" data-tooltip="По левому краю" title="По левому краю"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" d="M1 2.5h14V1H1zm9 4.167H1v-1.5h9zm-9 4.167h14v-1.5H1zM1 15h9v-1.5H1z"/></svg></button><button type="button" class="header-tool-btn" data-tooltip="По центру" title="По центру"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" d="M1 2.5h14V1H1zm11.5 4.167h-9v-1.5h9zM1 10.834h14v-1.5H1zM3.5 15h9v-1.5h-9z"/></svg></button><button type="button" class="header-tool-btn" data-tooltip="По правому краю" title="По правому краю"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" d="M15 2.502H1v-1.5h14zM6 6.668h9v-1.5H6zm9 4.166H1v-1.5h14zM15 15H6v-1.5h9z"/></svg></button><button type="button" class="header-tool-btn" data-tooltip="По верху" title="По верху"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 21V3"/><path d="M12 12H3"/><path d="M18 21V3"/></svg></button><button type="button" class="header-tool-btn" data-tooltip="По середине" title="По середине"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 21V3"/><path d="M12 12H3"/><path d="M18 21V3"/></svg></button><button type="button" class="header-tool-btn" data-tooltip="По низу" title="По низу"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3v18"/><path d="M12 12H3"/><path d="M18 3v18"/></svg></button></div><div class="header-rect header-rect-tools"><div class="split-btn"><button type="button" class="header-tool-btn split-btn-main" id="filterBtn" data-tooltip="Фильтр" title="Фильтр" aria-label="Фильтр"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" fill-rule="evenodd" d="m6.5 14.053 3-1.133V7.798a3 3 0 0 1 .75-1.985L13.176 2.5H2.825l2.924 3.313A3 3 0 0 1 6.5 7.8zM1 2.699V1h14v1.698l-3.625 4.108a1.5 1.5 0 0 0-.375.992v6.159l-5.323 2.01A.5.5 0 0 1 5 15.5V7.8a1.5 1.5 0 0 0-.375-.993z" clip-rule="evenodd"/></svg></button><button type="button" class="header-tool-btn split-btn-arrow" id="filterArrowBtn" aria-label="Параметры фильтра"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="12" height="12" viewBox="0 0 12 12"><path fill="currentColor" d="M1 5.348V3.446l5 3.303 5-3.4V5.25l-5 3.4z"/></svg></button></div><div class="split-btn-menu" id="filterMenu"><button class="split-btn-menu-item" id="filterApply">Применить фильтр</button><button class="split-btn-menu-item" id="filterClear">Очистить фильтры</button></div><button type="button" class="header-tool-btn" data-tooltip="Ссылка" title="Ссылка"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="16" height="16" viewBox="0 0 16 16"><g clip-path="url(#link-outline-sm__a)"><path fill="currentColor" fill-rule="evenodd" d="M8.706 1.99a3.75 3.75 0 0 1 5.304 5.303l-1.301 1.3-1.06-1.06 1.3-1.3A2.25 2.25 0 1 0 9.767 3.05l-2.43 2.43a2.314 2.314 0 0 0 0 3.272l.309.309-1.06 1.06-.31-.308a3.814 3.814 0 0 1 0-5.394zm.708 3.889.308.308a3.814 3.814 0 0 1 0 5.393l-2.43 2.43A3.75 3.75 0 0 1 1.99 8.707l1.3-1.301 1.062 1.06L3.05 9.769a2.25 2.25 0 1 0 3.182 3.182l2.43-2.43a2.314 2.314 0 0 0 0-3.272l-.31-.309z" clip-rule="evenodd"/></g><defs><clipPath id="link-outline-sm__a"><path fill="#fff" d="M0 0h16v16H0z"/></clipPath></defs></svg></button><button type="button" class="header-tool-btn" data-tooltip="Сумма" title="Сумма"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" d="M3.135 15v-1.451l4.627-5.784L3.331 2.47V1h9.274v1.569H6.507q-.607 0-.921-.02l4.02 4.765v.53L5.153 13.43h1.432q.705-.02 1.49-.02h4.765V15z"/></svg></button><button type="button" class="header-tool-btn" data-tooltip="Диаграмма" title="Диаграмма"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" fill-rule="evenodd" d="M1 6.1c0-1.964 0-2.946.442-3.667a3 3 0 0 1 .99-.99C3.155 1 4.137 1 6.1 1h3.8c1.964 0 2.946 0 3.668.442a3 3 0 0 1 .99.99C15 3.155 15 4.137 15 6.1v3.8c0 1.964 0 2.946-.442 3.668a3 3 0 0 1-.99.99C12.846 15 11.864 15 9.9 15H6.1c-1.964 0-2.946 0-3.667-.442a3 3 0 0 1-.99-.99C1 12.846 1 11.864 1 9.9zm5.1-3.6h3.8c1.011 0 1.664.002 2.158.049.471.044.64.12.726.172a1.5 1.5 0 0 1 .495.495c.052.086.128.255.172.726.047.494.049 1.147.049 2.158v1.15h-2.75v-2h-5.5v3.5H2.5V6.1c0-1.011.002-1.664.049-2.158.044-.471.12-.64.172-.726a1.5 1.5 0 0 1 .495-.495c.086-.052.255-.128.726-.172C4.436 2.502 5.09 2.5 6.1 2.5m-3.6 7.75c.001.816.007 1.374.049 1.808.044.471.12.64.172.726a1.5 1.5 0 0 0 .495.495c.086.052.255.128.726.172.34.033.754.044 1.308.047V10.25zm4.25 3.25h2.5V6.75h-2.5zm4-.002a16 16 0 0 0 1.308-.046c.471-.045.64-.12.726-.173a1.5 1.5 0 0 0 .495-.495c.052-.086.128-.255.172-.726.047-.494.049-1.147.049-2.158V8.75h-2.75z" clip-rule="evenodd"/></svg></button></div><div class="header-rect header-rect-tools"><button type="button" class="header-tool-btn" data-tooltip="Обновить" title="Обновить"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M21 21v-5h-5"/></svg></button><button type="button" class="header-tool-btn" data-tooltip="Таблица" title="Таблица"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M4 9h16"/><path d="M4 15h16"/></svg></button></div></div></header>
+
+    <!-- WORKSPACE: formula bar + grid + selection sidebar -->
+    <div class="app-workspace" id="appWorkspace">
+      <div class="workspace-main">
+        <div class="formula-bar" id="formulaBar">
+          <div class="fb-cell">A1</div>
+          <div class="fb-fx">fx</div>
+          <input class="fb-input" readonly>
+        </div>
+        <div class="grid-scroll" id="grid-scroll"></div>
+      </div>
+      <div class="sel-sidebar">
+        <div class="sel-sidebar-header">Сводная таблица</div>
+        <div class="sel-sidebar-body">
+          <p class="range-label">Область данных</p>
+          <div class="range-input-wrap" id="rangeInputWrap">
+            <span class="range-prefix">=</span>
+            <input type="text" class="range-input" id="rangeInput" readonly>
+            <button class="range-confirm" id="rangeConfirm" title="Подтвердить">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="16" height="16" viewBox="0 0 16 16"><path fill="#18a058" d="m15.293 4.294-9.288 9.289L.717 8.295l1.06-1.06 4.228 4.226 8.227-8.228z"/></svg>
+            </button>
+          </div>
+          <p class="range-error" id="rangeError"></p>
+          <div class="insert-group">
+            <p class="insert-label">Куда вставить</p>
+            <label class="insert-option">
+              <input type="radio" name="insertTarget" value="new" checked>
+              <span>Новый лист</span>
+            </label>
+            <label class="insert-option">
+              <input type="radio" name="insertTarget" value="existing">
+              <span>Созданный лист</span>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SIDEBAR -->
+    <aside class="app-sidebar" id="appSidebar">
+      <div class="sidebar-resize-handle" id="sidebarResizeHandle"></div>
+      <div class="sidebar-header">
+        <h2>Сводная таблица</h2>
+        <button class="sidebar-close" title="Закрыть">✕</button>
+      </div>
+      <div class="sidebar-scroll">
+        <div class="data-range">
+          <div class="data-range-label">Область данных</div>
+          <div class="data-range-box"><span>'Лист 1'!A1:E91</span><span>⊞</span></div>
+        </div>
+        <div class="validation-banner" id="validation-banner">
+          <span class="vb-icon">⚠️</span>
+          <span class="vb-text" id="validation-text"></span>
+          <button class="vb-close" onclick="document.getElementById('validation-banner').classList.remove('visible')">✕</button>
+        </div>
+        <div class="sidebar-body">
+          <div class="zones-col">
+            <!-- Строки -->
+            <div class="zone-block">
+              <div class="zone-header"><span class="zone-title">Строки</span><button class="zone-add" data-zone="rows">＋</button></div>
+              <div class="zone-drop" data-zone="rows" id="drop-rows"></div>
+            </div>
+            <!-- Столбцы -->
+            <div class="zone-block">
+              <div class="zone-header"><span class="zone-title">Столбцы</span><button class="zone-add" data-zone="columns">＋</button></div>
+              <div class="zone-drop" data-zone="columns" id="drop-columns"></div>
+            </div>
+            <!-- Значения -->
+            <div class="zone-block">
+              <div class="zone-header"><span class="zone-title">Значения</span><button class="zone-add" data-zone="values">＋</button></div>
+              <div class="zone-drop" data-zone="values" id="drop-values"></div>
+            </div>
+            <!-- Фильтры -->
+            <div class="zone-block">
+              <div class="zone-header"><span class="zone-title">Фильтры</span><button class="zone-add" data-zone="filters">＋</button></div>
+              <div class="zone-drop" data-zone="filters" id="drop-filters"></div>
+            </div>
+          </div>
+          <div class="fields-col">
+            <div class="fields-title">Доступные поля</div>
+            <div class="fields-search"><span class="s-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="12" height="12" viewBox="0 0 16 16"><path fill="currentColor" fill-rule="evenodd" d="M11.536 12.596a6.5 6.5 0 1 1 1.06-1.06l2.935 2.934-1.06 1.06zM12.5 7.5a5 5 0 1 1-10 0 5 5 0 0 1 10 0" clip-rule="evenodd"></path></svg></span><input type="text" id="search-input" placeholder="Поиск"></div>
+            <div id="field-list"></div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- SHEETS BAR -->
+    <div class="sheets-bar" id="sheetsBar">
+      <button class="tab-nav">☰</button>
+      <button class="tab-btn active" data-sheet="source">Лист 1</button>
+      <button class="tab-add">＋</button>
+    </div>
+
+  </div>
+
+  <script>
+    const DATA = [
+      ['Город', 'Категория', 'Товар', 'Количество', 'Цена за ед.'],
+      ['Новосибирск', 'Молочные продукты', 'Молоко', 5, 89],
+      ['Москва', 'Хлеб и выпечка', 'Хлеб ржаной', 12, 55],
+      ['Москва', 'Молочные продукты', 'Йогурт', 10, 49],
+      ['Москва', 'Бакалея', 'Макароны', 2, 85],
+      ['Новосибирск', 'Хлеб и выпечка', 'Хлеб ржаной', 10, 55],
+      ['Москва', 'Молочные продукты', 'Йогурт', 12, 49],
+      ['Москва', 'Снеки', 'Крекеры', 8, 89],
+      ['Москва', 'Снеки', 'Сухарики', 13, 59],
+      ['Екатеринбург', 'Хлеб и выпечка', 'Батон', 5, 69],
+      ['Екатеринбург', 'Хлеб и выпечка', 'Хлеб ржаной', 2, 55],
+      ['Москва', 'Молочные продукты', 'Творог', 6, 95],
+      ['Москва', 'Напитки', 'Лимонад', 12, 79],
+      ['Москва', 'Бакалея', 'Мука', 15, 79],
+      ['Новосибирск', 'Бакалея', 'Макароны', 5, 85],
+      ['Новосибирск', 'Снеки', 'Сухарики', 4, 59],
+      ['Новосибирск', 'Молочные продукты', 'Молоко', 4, 89],
+      ['Москва', 'Напитки', 'Сок апельсиновый', 14, 109],
+      ['Екатеринбург', 'Молочные продукты', 'Творог', 8, 95],
+      ['Екатеринбург', 'Напитки', 'Вода', 6, 39],
+      ['Новосибирск', 'Хлеб и выпечка', 'Булочка', 15, 35],
+      ['Новосибирск', 'Молочные продукты', 'Йогурт', 3, 49],
+      ['Москва', 'Снеки', 'Орехи', 8, 199],
+      ['Новосибирск', 'Бакалея', 'Гречка', 12, 119],
+      ['Новосибирск', 'Снеки', 'Орехи', 6, 199],
+      ['Москва', 'Молочные продукты', 'Кефир', 13, 75],
+      ['Екатеринбург', 'Напитки', 'Чай в бутылке', 2, 59],
+      ['Москва', 'Хлеб и выпечка', 'Булочка', 11, 35],
+      ['Новосибирск', 'Бакалея', 'Овсянка', 8, 69],
+      ['Москва', 'Хлеб и выпечка', 'Булочка', 4, 35],
+      ['Новосибирск', 'Снеки', 'Сухарики', 10, 59],
+      ['Екатеринбург', 'Бакалея', 'Мука', 6, 79],
+      ['Новосибирск', 'Хлеб и выпечка', 'Хлеб ржаной', 8, 55],
+      ['Москва', 'Молочные продукты', 'Молоко', 3, 89],
+      ['Новосибирск', 'Хлеб и выпечка', 'Батон', 2, 69],
+      ['Новосибирск', 'Бакалея', 'Овсянка', 8, 69],
+      ['Новосибирск', 'Снеки', 'Сухарики', 14, 59],
+      ['Новосибирск', 'Молочные продукты', 'Молоко', 15, 89],
+      ['Новосибирск', 'Снеки', 'Сухарики', 6, 59],
+      ['Екатеринбург', 'Молочные продукты', 'Сметана', 3, 65],
+      ['Новосибирск', 'Бакалея', 'Макароны', 15, 85],
+      ['Новосибирск', 'Напитки', 'Вода', 15, 39],
+      ['Новосибирск', 'Молочные продукты', 'Сметана', 9, 65],
+      ['Москва', 'Снеки', 'Орехи', 6, 199],
+      ['Новосибирск', 'Хлеб и выпечка', 'Батон', 6, 45],
+      ['Москва', 'Бакалея', 'Макароны', 15, 85],
+      ['Москва', 'Напитки', 'Лимонад', 1, 79],
+      ['Москва', 'Хлеб и выпечка', 'Батон', 12, 45],
+      ['Новосибирск', 'Бакалея', 'Макароны', 13, 85],
+      ['Новосибирск', 'Хлеб и выпечка', 'Хлеб ржаной', 8, 55],
+      ['Екатеринбург', 'Снеки', 'Орехи', 9, 199],
+      ['Москва', 'Снеки', 'Крекеры', 15, 89],
+      ['Новосибирск', 'Снеки', 'Орехи', 5, 199],
+      ['Екатеринбург', 'Бакалея', 'Гречка', 15, 119],
+      ['Москва', 'Снеки', 'Крекеры', 4, 89],
+      ['Екатеринбург', 'Хлеб и выпечка', 'Батон', 1, 45],
+      ['Новосибирск', 'Снеки', 'Орехи', 4, 199],
+      ['Новосибирск', 'Молочные продукты', 'Молоко', 11, 89],
+      ['Москва', 'Молочные продукты', 'Кефир', 15, 75],
+      ['Москва', 'Молочные продукты', 'Сметана', 9, 65],
+      ['Новосибирск', 'Хлеб и выпечка', 'Булочка', 8, 35],
+      ['Новосибирск', 'Хлеб и выпечка', 'Хлеб ржаной', 15, 55],
+      ['Москва', 'Снеки', 'Крекеры', 13, 89],
+      ['Москва', 'Бакалея', 'Овсянка', 2, 69],
+      ['Екатеринбург', 'Молочные продукты', 'Творог', 7, 95],
+      ['Новосибирск', 'Бакалея', 'Овсянка', 1, 69],
+      ['Екатеринбург', 'Молочные продукты', 'Молоко', 12, 89],
+      ['Москва', 'Напитки', 'Сок апельсиновый', 4, 109],
+      ['Москва', 'Хлеб и выпечка', 'Батон', 7, 69],
+      ['Екатеринбург', 'Хлеб и выпечка', 'Булочка', 4, 35],
+      ['Новосибирск', 'Молочные продукты', 'Творог', 2, 95],
+      ['Москва', 'Молочные продукты', 'Йогурт', 2, 49],
+      ['Екатеринбург', 'Хлеб и выпечка', 'Хлеб ржаной', 8, 55],
+      ['Екатеринбург', 'Бакалея', 'Рис', 15, 99],
+      ['Екатеринбург', 'Молочные продукты', 'Кефир', 1, 75],
+      ['Екатеринбург', 'Бакалея', 'Гречка', 5, 119],
+      ['Новосибирск', 'Бакалея', 'Мука', 12, 79],
+      ['Москва', 'Бакалея', 'Рис', 5, 99],
+      ['Новосибирск', 'Хлеб и выпечка', 'Батон', 12, 45],
+      ['Новосибирск', 'Снеки', 'Чипсы', 6, 129],
+      ['Новосибирск', 'Молочные продукты', 'Молоко', 8, 89],
+      ['Москва', 'Снеки', 'Орехи', 9, 199],
+      ['Москва', 'Молочные продукты', 'Кефир', 10, 75],
+      ['Екатеринбург', 'Молочные продукты', 'Кефир', 2, 75],
+      ['Новосибирск', 'Снеки', 'Орехи', 10, 199],
+      ['Москва', 'Молочные продукты', 'Йогурт', 7, 49],
+      ['Екатеринбург', 'Снеки', 'Сухарики', 4, 59],
+      ['Екатеринбург', 'Напитки', 'Вода', 7, 39],
+      ['Екатеринбург', 'Хлеб и выпечка', 'Булочка', 6, 35],
+      ['Екатеринбург', 'Молочные продукты', 'Молоко', 10, 89],
+      ['Москва', 'Снеки', 'Чипсы', 9, 129],
+    ];
+
+    const FIELDS = [
+      { id: 'f0', name: 'Город', col: 0, type: 'text', color: '#90caf9' },
+      { id: 'f1', name: 'Категория', col: 1, type: 'text', color: '#fff59d' },
+      { id: 'f2', name: 'Товар', col: 2, type: 'text', color: '#ffcc80' },
+      { id: 'f3', name: 'Количество', col: 3, type: 'number', color: '#80cbc4' },
+      { id: 'f4', name: 'Цена за ед.', col: 4, type: 'number', color: '#b0bec5' },
+    ];
+    const TYPE_ICON = { date: '📅', text: 'Аа', number: '#', mixed: '⚠' };
+    const TYPE_BADGE = { date: 't-date', text: 't-text', number: 't-number', mixed: 't-text' };
+    const COLS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const AGG_OPTIONS = ['Сумма', 'Количество', 'Среднее', 'Макс', 'Мин'];
+    const AGG_MAP = { 'Сумма': 'СУММ', 'Количество': 'СЧЁТ', 'Среднее': 'СРЕДНЕЕ', 'Макс': 'МАКС', 'Мин': 'МИН' };
+    const AGG_REV = { 'СУММ': 'Сумма', 'СЧЁТ': 'Количество', 'СРЕДНЕЕ': 'Среднее', 'МАКС': 'Макс', 'МИН': 'Мин' };
+
+    const EMPTY_SVG = `<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="18" stroke="#ccc" stroke-width="1.5" stroke-dasharray="3 3"/><circle cx="24" cy="24" r="10" stroke="#ccc" stroke-width="1.5"/><circle cx="24" cy="24" r="3" fill="#ddd"/><line x1="24" y1="6" x2="24" y2="14" stroke="#ccc" stroke-width="1.5"/><line x1="24" y1="34" x2="24" y2="42" stroke="#ccc" stroke-width="1.5"/></svg>`;
+
+    /* ====== TOAST ====== */
+    function showToast(msg, type = 'warn', duration = 5000) {
+      const icons = { warn: '⚠️', error: '🚫', info: '✅' };
+      const c = document.getElementById('toast-container');
+      const t = document.createElement('div');
+      t.className = `toast toast-${type}`;
+      t.innerHTML = `<span class="toast-icon">${icons[type]}</span><span class="toast-body">${msg}</span><button class="toast-close" onclick="this.closest('.toast').remove()">✕</button>`;
+      c.appendChild(t);
+      setTimeout(() => t.remove(), duration);
+    }
+
+    /* ====== VALIDATION ====== */
+    function validateSource() {
+      const issues = [];
+      const headers = DATA[0];
+      const rows = DATA.slice(1);
+
+      // Check mixed types per column
+      headers.forEach((h, ci) => {
+        const vals = rows.map(r => r[ci]).filter(v => v !== '' && v !== null && v !== undefined);
+        const types = new Set(vals.map(v => typeof v));
+        if (types.has('number') && types.has('string')) {
+          issues.push(`Колонка «${h}» содержит и числа, и текст — возможны ошибки агрегации`);
+        }
+      });
+
+      // Check blank header
+      headers.forEach((h, ci) => {
+        if (!h || String(h).trim() === '') issues.push(`Колонка ${ci + 1} не имеет заголовка`);
+      });
+
+      const banner = document.getElementById('validation-banner');
+      const text = document.getElementById('validation-text');
+      if (issues.length) {
+        text.textContent = issues.join(' · ');
+        banner.classList.add('visible');
+      } else {
+        banner.classList.remove('visible');
+      }
+    }
+
+    /* ====== STATE ====== */
+    const zones = { rows: [], columns: [], values: [], filters: [] };
+    let activeSheet = 'source';
+    let pivotGrid = null;
+
+    // Count how many times each field is used across all zones (multi-use allowed)
+    function fieldUsageCounts() {
+      const counts = {};
+      ['rows','columns','values','filters'].forEach(z => zones[z].forEach(e => {
+        counts[e.fid] = (counts[e.fid] || 0) + 1;
+      }));
+      return counts;
+    }
+
+    /* ====== LAYOUT CONTROLLER ====== */
+    (() => {
+      'use strict';
+      const app          = document.getElementById('app');
+      const resizeHandle = document.getElementById('sidebarResizeHandle');
+      const root         = document.documentElement;
+      const getCSSPx     = p => parseInt(getComputedStyle(root).getPropertyValue(p).trim(), 10);
+      const clamp        = (v, mn, mx) => Math.min(Math.max(v, mn), mx);
+
+      let dragging = false, dragStartX = 0, dragStartW = 0;
+
+      resizeHandle.addEventListener('mousedown', e => {
+        dragging   = true;
+        dragStartX = e.clientX;
+        dragStartW = getCSSPx('--sidebar-width');
+        resizeHandle.classList.add('is-dragging');
+        document.body.style.cursor     = 'col-resize';
+        document.body.style.userSelect = 'none';
+        e.preventDefault();
+      });
+
+      document.addEventListener('mousemove', e => {
+        if (!dragging) return;
+        const delta    = dragStartX - e.clientX;
+        const newWidth = clamp(dragStartW + delta, getCSSPx('--sidebar-min-width'), getCSSPx('--sidebar-max-width'));
+        root.style.setProperty('--sidebar-width', `${newWidth}px`);
+      });
+
+      document.addEventListener('mouseup', () => {
+        if (!dragging) return;
+        dragging = false;
+        resizeHandle.classList.remove('is-dragging');
+        document.body.style.cursor = document.body.style.userSelect = '';
+      });
+
+      window.layout = {
+        toggleSidebar(force) {
+          if (typeof force === 'boolean') app.classList.toggle('sidebar-hidden', !force);
+          else app.classList.toggle('sidebar-hidden');
+        },
+        setSidebarWidth(px) {
+          const getCSSPx = p => parseInt(getComputedStyle(root).getPropertyValue(p).trim(), 10);
+          root.style.setProperty('--sidebar-width', `${clamp(px, getCSSPx('--sidebar-min-width'), getCSSPx('--sidebar-max-width'))}px`);
+        },
+        getSidebarWidth() { return getCSSPx('--sidebar-width'); },
+      };
+    })();
+
+    /* ====== TABS ====== */
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        activeSheet = btn.dataset.sheet;
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b === btn));
+        if (activeSheet === 'pivot') { layout.toggleSidebar(true); validateSource(); }
+        else { layout.toggleSidebar(false); }
+        renderSheet();
+      });
+    });
+
+    /* ====== RENDER SHEET ====== */
+    function renderSheet() {
+      const sc = document.getElementById('grid-scroll');
+      if (activeSheet === 'source') renderSourceGrid(sc); else renderPivotGrid(sc);
+      requestAnimationFrame(selectDefaultCell);
+    }
+
+    function renderSourceGrid(c) {
+      const nc = 26, tr = 50;
+      let h = '<table class="grid"><thead><tr><th class="rn"></th>';
+      for (let i = 0; i < nc; i++) h += `<th style="min-width:${i === 0 ? 80 : i <= 1 ? 100 : i === 2 ? 130 : 90}px">${COLS[i]}</th>`;
+      h += '</tr></thead><tbody>';
+      for (let r = 0; r < tr; r++) {
+        h += '<tr>'; h += `<td class="rn">${r + 1}</td>`;
+        const row = DATA[r];
+        for (let c = 0; c < nc; c++) {
+          const v = row && row[c] !== undefined ? row[c] : ''; const isN = typeof v === 'number';
+          h += `<td class="${isN ? 'num' : ''}" style="${r === 0 ? 'font-weight:700' : ''}">${isN ? v.toLocaleString('ru-RU') : v}</td>`;
+        }
+        h += '</tr>';
+      }
+      h += '</tbody></table>'; c.innerHTML = h; c.classList.remove('pivot-sheet');
+    }
+
+    function renderPivotGrid(c) {
+      computePivot();
+      const g = pivotGrid;
+      const nc = g ? Math.max(...g.map(r => r.length), 26) : 26;
+      const tr = Math.max(g ? g.length + 5 : 0, 50);
+      let h = '<table class="grid"><thead><tr><th class="rn"></th>';
+      for (let i = 0; i < nc; i++) h += `<th>${COLS[i] || ''}</th>`;
+      h += '</tr></thead><tbody>';
+      for (let r = 0; r < tr; r++) {
+        h += '<tr>'; h += `<td class="rn">${r + 1}</td>`;
+        for (let i = 0; i < nc; i++) {
+          const v = g && g[r] ? g[r][i] : ''; const m = g && g[r] && g[r]._meta ? g[r]._meta[i] : '';
+          const isN = typeof v === 'number';
+          let cls = isN ? 'num' : ''; if (m === 'header') cls += ' pv-header'; if (m === 'total') cls += ' pv-total';
+          h += `<td class="${cls}">${v === '' || v === undefined ? '' : (isN ? v.toLocaleString('ru-RU') : v)}</td>`;
+        }
+        h += '</tr>';
+      }
+      h += '</tbody></table>'; c.innerHTML = h; c.className = 'grid-scroll pivot-sheet';
+    }
+
+    /* ====== PIVOT ====== */
+    function computePivot() {
+      const allRows = DATA.slice(1);
+      const rF = zones.rows.map(e => FIELDS.find(x => x.id === e.fid)).filter(Boolean);
+      const cF = zones.columns.map(e => FIELDS.find(x => x.id === e.fid)).filter(Boolean);
+      const vE = zones.values;
+      if (!rF.length && !cF.length && !vE.length) { pivotGrid = null; return }
+
+      // Apply zone filters
+      let filteredByFilter = allRows.filter(r => {
+        return zones.filters.every(fe => {
+          if (fe.selected === null) return true; // all selected
+          const f = FIELDS.find(x => x.id === fe.fid); if (!f) return true;
+          return fe.selected.includes(String(r[f.col]));
+        });
+      });
+
+      // Apply sort from filter zone (last filter with sortOrder wins)
+      const activeSortFilter = [...zones.filters].reverse().find(fe => fe.sortOrder && fe.sortOrder !== 'none');
+      if (activeSortFilter) {
+        const sf = FIELDS.find(x => x.id === activeSortFilter.fid);
+        if (sf) {
+          filteredByFilter = [...filteredByFilter].sort((a, b) => {
+            const av = a[sf.col], bv = b[sf.col];
+            const isNum = typeof av === 'number' && typeof bv === 'number';
+            const cmp = isNum ? av - bv : String(av).localeCompare(String(bv), 'ru');
+            return activeSortFilter.sortOrder === 'asc' ? cmp : -cmp;
+          });
+        }
+      }
+
+      // Filter blank rows — rows where ALL key fields are empty
+      const keyFields = [...rF, ...cF];
+      let blankCount = 0;
+      const rows = filteredByFilter.filter(r => {
+        if (!keyFields.length) return true;
+        const allBlank = keyFields.every(f => r[f.col] === '' || r[f.col] === null || r[f.col] === undefined);
+        if (allBlank) { blankCount++; return false; }
+        return true;
+      });
+      if (blankCount > 0) {
+        showToast(`Скрыто ${blankCount} пустых строк — они не попадают в сводную`, 'info', 4000);
+      }
+      const rMap = new Map(), cMap = new Map();
+      rows.forEach(r => {
+        const rk = rF.map(f => String(r[f.col])).join('|||');
+        const ck = cF.map(f => String(r[f.col])).join('|||');
+        if (!rMap.has(rk)) rMap.set(rk, rF.map(f => r[f.col]));
+        if (!cMap.has(ck)) cMap.set(ck, cF.map(f => r[f.col]));
+      });
+      const rKeys = [...rMap.keys()], cKeys = [...cMap.keys()], rLabels = [...rMap.values()], cLabels = [...cMap.values()];
+
+      // Apply sort from row zone settings
+      const rSorted = rKeys.map((k, i) => ({ k, label: rLabels[i] }));
+      if (zones.rows.length > 0) {
+        const rowEntry = zones.rows[0];
+        const sortOrder = rowEntry.sortOrder || 'asc';
+        const sortFieldName = rowEntry.sortField;
+        const sortField = sortFieldName ? FIELDS.find(x => x.name === sortFieldName) : null;
+
+        if (sortField && sortField.type === 'number') {
+          // Pre-aggregate to sort by value
+          const preAgg = {};
+          rKeys.forEach(rk => { preAgg[rk] = 0 });
+          rows.forEach(r => {
+            const rk = rF.map(f => String(r[f.col])).join('|||');
+            if (preAgg[rk] === undefined) return;
+            const sf = sortField; const v = r[sf.col]; const n = typeof v === 'number' ? v : parseFloat(v);
+            if (!isNaN(n)) preAgg[rk] += n;
+          });
+          rSorted.sort((a, b) => sortOrder === 'asc' ? preAgg[a.k] - preAgg[b.k] : preAgg[b.k] - preAgg[a.k]);
+        } else {
+          rSorted.sort((a, b) => {
+            const av = a.label[0] ?? '', bv = b.label[0] ?? '';
+            const cmp = String(av).localeCompare(String(bv), 'ru');
+            return sortOrder === 'asc' ? cmp : -cmp;
+          });
+        }
+      }
+      const sortedRKeys = rSorted.map(x => x.k);
+      const sortedRLabels = rSorted.map(x => x.label);
+
+      // showTotal: check any row zone entry
+      const showTotal = zones.rows.length === 0 || zones.rows[0].showTotal !== false;
+      const vc = Math.max(vE.length, 1), rhc = Math.max(rF.length, 1);
+      const agg2 = {};
+      sortedRKeys.forEach(rk => { agg2[rk] = {}; cKeys.forEach(ck => { agg2[rk][ck] = vE.map(() => ({ s: 0, c: 0, mx: -Infinity, mn: Infinity, cnt: 0 })) }) });
+      rows.forEach(r => {
+        const rk = rF.map(f => String(r[f.col])).join('|||');
+        const ck = cF.map(f => String(r[f.col])).join('|||');
+        if (!agg2[rk]) return;
+        vE.forEach((ve, vi) => {
+          const f = FIELDS.find(x => x.id === ve.fid); if (!f) return;
+          const v = r[f.col], n = typeof v === 'number' ? v : parseFloat(v);
+          const b = agg2[rk][ck][vi]; if (!isNaN(n)) { b.s += n; b.mx = Math.max(b.mx, n); b.mn = Math.min(b.mn, n); b.cnt++ } b.c += 1;
+        });
+      });
+      function gv(b, a) { if (!b) return 0; switch (a) { case 'СУММ': return b.s; case 'СЧЁТ': return b.c; case 'СРЕДНЕЕ': return b.cnt ? Math.round(b.s / b.cnt * 100) / 100 : 0; case 'МАКС': return b.mx === -Infinity ? 0 : b.mx; case 'МИН': return b.mn === Infinity ? 0 : b.mn; default: return b.s } }
+
+      const grid = [];
+      if (cF.length) cF.forEach((cf, cfi) => { const row = new Array(rhc).fill(''); row._meta = new Array(rhc).fill('header'); cLabels.forEach(cl => { for (let vi = 0; vi < vc; vi++) { row.push(cl[cfi] ?? ''); row._meta.push('header') } }); grid.push(row) });
+      const lr = []; lr._meta = [];
+      rF.forEach(f => { lr.push(f.name); lr._meta.push('header') }); if (!rF.length) { lr.push(''); lr._meta.push('header') }
+      const colsI = cKeys.length ? cKeys : [''];
+      colsI.forEach(() => { vE.forEach(ve => { const f = FIELDS.find(x => x.id === ve.fid); const a = ve.agg || (f && f.type === 'number' ? 'СУММ' : 'СЧЁТ'); lr.push(`${f ? f.name : '?'} (${AGG_REV[a] || a})`); lr._meta.push('header') }) });
+      if (!vE.length && !cKeys.length) { lr.push(''); lr._meta.push('header') }
+      grid.push(lr);
+      sortedRKeys.forEach((rk, ri) => {
+        const dr = []; dr._meta = []; const rl = sortedRLabels[ri];
+        for (let i = 0; i < rhc; i++) { dr.push(rl && i < rl.length ? rl[i] : ''); dr._meta.push('') }
+        colsI.forEach(ck => { vE.forEach((ve, vi) => { const f = FIELDS.find(x => x.id === ve.fid); const a = ve.agg || (f && f.type === 'number' ? 'СУММ' : 'СЧЁТ'); dr.push(gv(agg2[rk] && agg2[rk][ck] ? agg2[rk][ck][vi] : null, a)); dr._meta.push('') }) }); grid.push(dr)
+      });
+      if (showTotal && sortedRKeys.length > 1 && vE.length) {
+        const tr = []; tr._meta = [];
+        for (let i = 0; i < rhc; i++) { tr.push(i === 0 ? 'Итого' : ''); tr._meta.push('total') }
+        colsI.forEach(ck => { vE.forEach((ve, vi) => { const f = FIELDS.find(x => x.id === ve.fid); const a = ve.agg || (f && f.type === 'number' ? 'СУММ' : 'СЧЁТ'); let t = 0; sortedRKeys.forEach(rk => { t += gv(agg2[rk] && agg2[rk][ck] ? agg2[rk][ck][vi] : null, a) }); tr.push(t); tr._meta.push('total') }) }); grid.push(tr)
+      }
+      pivotGrid = grid;
+    }
+
+    /* ====== RESIZE handled by layout controller ====== */
+
+    /* ====== CONTEXT MENU ====== */
+    function showCtxMenu(zoneName, anchor) {
+      closeCtxMenu(); const rect = anchor.getBoundingClientRect();
+      const ov = document.createElement('div'); ov.className = 'ctx-overlay'; ov.addEventListener('click', closeCtxMenu); document.body.appendChild(ov);
+      const menu = document.createElement('div'); menu.className = 'ctx-menu';
+      FIELDS.forEach(f => {
+        const it = document.createElement('div'); it.className = 'ctx-item';
+        it.innerHTML = `<span class="ci-name">${f.name}</span><span class="ci-type">${TYPE_ICON[f.type]}</span>`;
+        it.addEventListener('click', () => {
+          const defaultAgg = zoneName === 'values' ? (f.type === 'number' ? 'СУММ' : 'СЧЁТ') : undefined;
+          if (zoneName === 'values' && f.type !== 'number') {
+            showToast(`«${f.name}» — текстовое поле. Применено «Количество» — суммировать текст невозможно`, 'warn');
+          }
+          if ((zoneName === 'rows' || zoneName === 'columns') && f.type === 'number') {
+            showToast(`«${f.name}» — числовое поле. В строках/столбцах создаст группу для каждого уникального значения`, 'warn');
+          }
+          if (zoneName === 'filters') {
+            const col = f.col;
+            const allVals = [...new Set(DATA.slice(1).map(r => String(r[col])).filter(v => v !== '' && v !== 'undefined'))];
+            zones.filters.push({ fid: f.id, selected: null, allVals });
+          } else {
+            zones[zoneName].push({ fid: f.id, agg: defaultAgg });
+          }
+          closeCtxMenu(); renderAll();
+        });
+        menu.appendChild(it);
+      });
+      menu.style.top = (rect.bottom + 4) + 'px'; menu.style.left = Math.max(4, rect.left - 100) + 'px';
+      document.body.appendChild(menu);
+      requestAnimationFrame(() => { const mr = menu.getBoundingClientRect(); if (mr.bottom > window.innerHeight) menu.style.top = (rect.top - mr.height - 4) + 'px'; if (mr.right > window.innerWidth) menu.style.left = (window.innerWidth - mr.width - 8) + 'px' });
+    }
+    function closeCtxMenu() { document.querySelectorAll('.ctx-menu,.ctx-overlay,.filter-popup,.pill-settings').forEach(el => el.remove()) }
+    function initZoneAddButtons() { document.querySelectorAll('.zone-add').forEach(b => { const nb = b.cloneNode(true); b.parentNode.replaceChild(nb, b); nb.addEventListener('click', e => { e.stopPropagation(); showCtxMenu(nb.dataset.zone, nb) }); }); }
+
+    /* ====== REORDER within zone ====== */
+    function clearReorderIndicators() {
+      document.querySelectorAll('.pill, .vpill, .filter-pill').forEach(p => {
+        p.style.borderTop = '';
+        p.style.borderBottom = '';
+      });
+    }
+
+    function addReorderDragover(pill, zone, idx) {
+      pill.addEventListener('dragover', e => {
+        const d = window._currentDragData;
+        if (!d || d.src !== 'zone' || d.sz !== zone) return;
+        e.preventDefault();
+        e.stopPropagation(); // prevent zone handler from also firing
+        e.dataTransfer.dropEffect = 'move';
+        clearReorderIndicators();
+        const rect = pill.getBoundingClientRect();
+        const after = e.clientY > rect.top + rect.height / 2;
+        pill.style.borderTop = after ? '' : '2px solid #4caf50';
+        pill.style.borderBottom = after ? '2px solid #4caf50' : '';
+        pill._reorderAfter = after;
+      });
+
+      pill.addEventListener('dragleave', e => {
+        if (!pill.contains(e.relatedTarget)) {
+          pill.style.borderTop = '';
+          pill.style.borderBottom = '';
+        }
+      });
+
+      pill.addEventListener('drop', e => {
+        e.preventDefault();
+        e.stopPropagation();
+        clearReorderIndicators();
+        let d; try { d = JSON.parse(e.dataTransfer.getData('text/plain')); } catch { return; }
+        if (!d || d.src !== 'zone' || d.sz !== zone || d.si === idx) return;
+        const item = zones[zone].splice(d.si, 1)[0];
+        const after = pill._reorderAfter;
+        // Adjust index after removal
+        let insertAt = idx;
+        if (d.si < idx) insertAt--; // shift left because we removed before target
+        if (after) insertAt++;
+        zones[zone].splice(Math.max(0, Math.min(zones[zone].length, insertAt)), 0, item);
+        renderAll();
+      });
+    }
+
+    /* ====== RENDER ZONES ====== */
+    const ZONE_HINT = { rows: 'Перетащите поле сюда, чтобы добавить строки', columns: 'Перетащите поле сюда, чтобы добавить столбцы', values: 'Перетащите поле сюда, чтобы добавить значения', filters: 'Перетащите поле для фильтрации' };
+
+    function renderZones() {
+      ['rows', 'columns', 'values', 'filters'].forEach(z => {
+        const drop = document.getElementById('drop-' + z);
+        const items = zones[z];
+        if (!items.length) {
+          drop.classList.remove('has-items');
+          drop.innerHTML = `<div class="zone-empty"><div class="zone-empty-icon">${EMPTY_SVG}</div><div class="zone-empty-text">${ZONE_HINT[z]}</div></div>`;
+          return;
+        }
+        drop.classList.add('has-items');
+        drop.innerHTML = '';
+        items.forEach((entry, i) => {
+          const f = FIELDS.find(x => x.id === entry.fid); if (!f) return;
+
+          if (z === 'values') {
+            // Value pill with select dropdown
+            const p = document.createElement('div'); p.className = 'vpill'; p.draggable = true;
+            const curAgg = entry.agg || (f.type === 'number' ? 'СУММ' : 'СЧЁТ');
+            const curLabel = AGG_REV[curAgg] || curAgg;
+            let opts = AGG_OPTIONS.map(a => `<option${a === curLabel ? ' selected' : ''}>${a}</option>`).join('');
+            p.innerHTML = `<span class="p-handle">⠿</span><span class="p-badge ${TYPE_BADGE[f.type]}">${TYPE_ICON[f.type]}</span><span class="p-name">${f.name}</span><select class="p-select">${opts}</select><button class="p-rm">✕</button>`;
+            p.querySelector('.p-select').addEventListener('change', e => { e.stopPropagation(); zones[z][i].agg = AGG_MAP[e.target.value] || 'СУММ'; renderSheet() });
+            p.querySelector('.p-select').addEventListener('mousedown', e => e.stopPropagation());
+            p.querySelector('.p-rm').addEventListener('click', e => { e.stopPropagation(); zones[z].splice(i, 1); renderAll() });
+            p.addEventListener('dragstart', e => { const d = { fid: entry.fid, src: 'zone', sz: z, si: i }; e.dataTransfer.setData('text/plain', JSON.stringify(d)); e.dataTransfer.effectAllowed = 'move'; p.classList.add('dragging'); window._currentDragData = d; mkGhost(e, f.name) });
+            p.addEventListener('dragend', () => { p.classList.remove('dragging'); window._currentDragData = null; });
+            addReorderDragover(p, z, i);
+            drop.appendChild(p);
+          } else {
+            // Standard green pill
+            const p = document.createElement('div'); p.className = 'pill'; p.draggable = true;
+            p.innerHTML = `<span class="p-handle">⠿</span><span class="p-badge ${TYPE_BADGE[f.type]}">${TYPE_ICON[f.type]}</span><span class="p-name">${f.name}</span><span class="p-chevron">▾</span><button class="p-rm">✕</button>`;
+            p.querySelector('.p-rm').addEventListener('click', e => { e.stopPropagation(); zones[z].splice(i, 1); renderAll() });
+            p.querySelector('.p-chevron').addEventListener('click', e => { e.stopPropagation(); showPillMenu(z, i, f, e.target) });
+            p.addEventListener('dragstart', e => { const d = { fid: entry.fid, src: 'zone', sz: z, si: i }; e.dataTransfer.setData('text/plain', JSON.stringify(d)); e.dataTransfer.effectAllowed = 'move'; p.classList.add('dragging'); window._currentDragData = d; mkGhost(e, f.name) });
+            p.addEventListener('dragend', () => { p.classList.remove('dragging'); window._currentDragData = null; });
+            addReorderDragover(p, z, i);
+            drop.appendChild(p);
+          }
+        });
+      });
+
+      initZoneAddButtons();
+
+      // Render filter pills separately
+      const fdrop = document.getElementById('drop-filters');
+      if (fdrop) {
+        const fitems = zones.filters;
+        if (!fitems.length) {
+          fdrop.classList.remove('has-items');
+          fdrop.innerHTML = `<div class="zone-empty"><div class="zone-empty-icon">${EMPTY_SVG}</div><div class="zone-empty-text">${ZONE_HINT['filters']}</div></div>`;
+        } else {
+          fdrop.classList.add('has-items');
+          fdrop.innerHTML = '';
+          fitems.forEach((entry, i) => {
+            const f = FIELDS.find(x => x.id === entry.fid); if (!f) return;
+            const activeCount = entry.selected ? entry.selected.length : (entry.allVals || []).length;
+            const totalCount = (entry.allVals || []).length;
+            const isFiltered = entry.selected !== null;
+            const hasSortOrder = entry.sortOrder && entry.sortOrder !== 'none';
+            const sortIcon = entry.sortOrder === 'asc' ? ' ↑' : entry.sortOrder === 'desc' ? ' ↓' : '';
+            const p = document.createElement('div'); p.className = 'filter-pill'; p.draggable = true;
+            p.innerHTML = `
+              <span class="fp-handle">⠿</span>
+              <span class="fp-badge ${TYPE_BADGE[f.type]}">${TYPE_ICON[f.type]}</span>
+              <span class="fp-name">${f.name}</span>
+              <span class="fp-count" style="color:${isFiltered || hasSortOrder ? '#e65100' : '#aaa'}">${activeCount}/${totalCount}${sortIcon}</span>
+              <span class="fp-chevron" title="Настроить фильтр">▾</span>
+              <button class="fp-rm" title="Убрать">✕</button>`;
+            p.querySelector('.fp-chevron').addEventListener('click', e => { e.stopPropagation(); showFilterPopup(i, e.target); });
+            p.querySelector('.fp-name').addEventListener('click', e => { e.stopPropagation(); showFilterPopup(i, e.target); });
+            p.querySelector('.fp-rm').addEventListener('click', e => { e.stopPropagation(); zones.filters.splice(i, 1); renderAll(); });
+            p.addEventListener('dragstart', e => { e.dataTransfer.setData('text/plain', JSON.stringify({ fid: entry.fid, src: 'zone', sz: 'filters', si: i })); e.dataTransfer.effectAllowed = 'move'; p.classList.add('dragging'); mkGhost(e, f.name); });
+            p.addEventListener('dragend', () => p.classList.remove('dragging'));
+            fdrop.appendChild(p);
+          });
+        }
+      }
+    }
+
+    function showPillMenu(z, i, f, anchor) {
+      closeCtxMenu();
+      const entry = zones[z][i];
+      const rect = anchor.getBoundingClientRect();
+
+      const ov = document.createElement('div'); ov.className = 'ctx-overlay'; ov.addEventListener('click', closeCtxMenu); document.body.appendChild(ov);
+
+      const panel = document.createElement('div'); panel.className = 'pill-settings';
+
+      // Sort field options: own name + numeric value fields
+      const sortFieldOptions = [f.name, ...FIELDS.filter(x => x.type === 'number' && x.id !== f.id).map(x => x.name)];
+
+      panel.innerHTML = `
+        <div class="ps-header">
+          <span class="ps-title">${f.name}</span>
+          <button class="ps-close">✕</button>
+        </div>
+        <div class="ps-label">Сортировка по</div>
+        <select class="ps-select" id="ps-sort-field">
+          ${sortFieldOptions.map(n => `<option${(entry.sortField || f.name) === n ? ' selected' : ''}>${n}</option>`).join('')}
+        </select>
+        <div class="ps-label">Порядок</div>
+        <select class="ps-select" id="ps-sort-order">
+          <option${(entry.sortOrder || 'asc') === 'asc' ? ' selected' : ''}>По возрастанию</option>
+          <option${entry.sortOrder === 'desc' ? ' selected' : ''}>По убыванию</option>
+        </select>
+        <label class="ps-checkbox-row">
+          <input type="checkbox" id="ps-show-total" ${entry.showTotal !== false ? 'checked' : ''}>
+          <span>Показывать итог</span>
+        </label>
+        <hr class="ps-divider">
+        <button class="ps-remove">Убрать поле</button>
+      `;
+
+      // Position
+      panel.style.top = (rect.bottom + 6) + 'px';
+      panel.style.left = Math.max(4, rect.left - 80) + 'px';
+      document.body.appendChild(panel);
+
+      // Clamp to viewport
+      requestAnimationFrame(() => {
+        const pr = panel.getBoundingClientRect();
+        if (pr.bottom > window.innerHeight - 8) panel.style.top = (rect.top - pr.height - 6) + 'px';
+        if (pr.right > window.innerWidth - 8) panel.style.left = (window.innerWidth - pr.width - 8) + 'px';
+      });
+
+      panel.querySelector('.ps-close').addEventListener('click', closeCtxMenu);
+
+      panel.querySelector('#ps-sort-field').addEventListener('change', e => {
+        zones[z][i].sortField = e.target.value; renderSheet();
+      });
+
+      panel.querySelector('#ps-sort-order').addEventListener('change', e => {
+        zones[z][i].sortOrder = e.target.value === 'По возрастанию' ? 'asc' : 'desc'; renderSheet();
+      });
+
+      panel.querySelector('#ps-show-total').addEventListener('change', e => {
+        zones[z][i].showTotal = e.target.checked; renderSheet();
+      });
+
+      panel.querySelector('.ps-remove').addEventListener('click', () => {
+        zones[z].splice(i, 1); closeCtxMenu(); renderAll();
+      });
+
+      // Prevent overlay click from firing when clicking inside panel
+      panel.addEventListener('click', e => e.stopPropagation());
+    }
+
+    /* ====== FIELDS ====== */
+    // Default zone to add field when checkbox clicked
+    function defaultZoneForField(f) {
+      return f.type === 'number' ? 'values' : 'rows';
+    }
+
+    function toggleFieldByCheckbox(f) {
+      const counts = fieldUsageCounts();
+      if (counts[f.id]) {
+        // Remove from ALL zones
+        ['rows', 'columns', 'values', 'filters'].forEach(z => {
+          zones[z] = zones[z].filter(e => e.fid !== f.id);
+        });
+      } else {
+        // Add to default zone
+        const z = defaultZoneForField(f);
+        const defaultAgg = z === 'values' ? (f.type === 'number' ? 'СУММ' : 'СЧЁТ') : undefined;
+        if (z === 'values' && f.type !== 'number') {
+          showToast(`«${f.name}» — текстовое поле. Применено «Количество»`, 'warn');
+        }
+        zones[z].push({ fid: f.id, agg: defaultAgg });
+      }
+      renderAll();
+    }
+
+    function renderFields(filter = '') {
+      const c = document.getElementById('field-list'); c.innerHTML = '';
+      const lf = filter.toLowerCase(), counts = fieldUsageCounts();
+      FIELDS.forEach(f => {
+        if (lf && !f.name.toLowerCase().includes(lf)) return;
+        const el = document.createElement('div'); el.className = 'field-item';
+        const cnt = counts[f.id] || 0;
+        const isActive = cnt > 0;
+
+        // Checkbox
+        const chk = document.createElement('span');
+        chk.className = 'f-check' + (isActive ? ' active' : '');
+        chk.innerHTML = isActive ? '✓' : '';
+        chk.addEventListener('click', e => { e.stopPropagation(); toggleFieldByCheckbox(f); });
+
+        // Handle (drag-only)
+        const handle = document.createElement('span');
+        handle.className = 'f-handle';
+        handle.textContent = '⠿';
+
+        // Name
+        const name = document.createElement('span');
+        name.className = 'f-name';
+        name.textContent = f.name;
+
+        // Type
+        const type = document.createElement('span');
+        type.className = 'f-type';
+        type.textContent = TYPE_ICON[f.type];
+
+        // Usage count badge (replaces checkbox when multi-used)
+        if (cnt > 1) {
+          const badge = document.createElement('span');
+          badge.className = 'f-count';
+          badge.textContent = cnt;
+          el.append(handle, chk, name, type, badge);
+        } else {
+          el.append(handle, chk, name, type);
+        }
+
+        // Drag only from handle
+        handle.addEventListener('mousedown', () => { el.draggable = true; });
+        el.addEventListener('dragstart', e => {
+          e.dataTransfer.setData('text/plain', JSON.stringify({ fid: f.id, src: 'field' }));
+          e.dataTransfer.effectAllowed = 'copy';
+          el.classList.add('dragging');
+          mkGhost(e, f.name);
+        });
+        el.addEventListener('dragend', () => { el.classList.remove('dragging'); el.draggable = false; });
+
+        c.appendChild(el);
+      });
+    }
+    function mkGhost(e, t) { const g = document.createElement('div'); g.className = 'ghost'; g.textContent = t; document.body.appendChild(g); e.dataTransfer.setDragImage(g, 0, 0); requestAnimationFrame(() => g.remove()) }
+
+    /* ====== DROP ====== */
+    function initDrop() {
+      document.querySelectorAll('.zone-drop').forEach(el => {
+        const z = el.dataset.zone;
+        el.addEventListener('dragover', e => { e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; el.classList.add('drag-over') });
+        el.addEventListener('dragleave', e => { if (!el.contains(e.relatedTarget)) { el.classList.remove('drag-over'); } });
+        el.addEventListener('drop', e => {
+          e.preventDefault(); el.classList.remove('drag-over');
+          let d; try { d = JSON.parse(e.dataTransfer.getData('text/plain')) } catch { return }
+          const f = FIELDS.find(x => x.id === d.fid); if (!f) return;
+
+          clearReorderIndicators();
+
+          // Remove from source zone if moved (not copied from sidebar)
+          if (d.src === 'zone' && d.sz) zones[d.sz].splice(d.si, 1);
+
+          // Auto-aggregation + warning for text in values
+          const defaultAgg = z === 'values'
+            ? (f.type === 'number' ? 'СУММ' : 'СЧЁТ')
+            : undefined;
+
+          if (z === 'values' && f.type !== 'number') {
+            showToast(`«${f.name}» — текстовое поле. Применено «Количество» — суммировать текст невозможно`, 'warn');
+          }
+
+          // Warn if number dropped into rows/columns
+          if ((z === 'rows' || z === 'columns') && f.type === 'number') {
+            showToast(`«${f.name}» — числовое поле. В строках/столбцах создаст группу для каждого уникального значения`, 'warn');
+          }
+
+          if (z === 'filters') {
+            const col = FIELDS.find(x => x.id === d.fid)?.col;
+            const allVals = col !== undefined ? [...new Set(DATA.slice(1).map(r => String(r[col])).filter(v => v !== '' && v !== 'undefined'))] : [];
+            zones.filters.push({ fid: f.id, selected: null, allVals });
+          } else {
+            zones[z].push({ fid: f.id, agg: defaultAgg });
+          }
+          renderAll();
+        });
+      });
+
+      // Drop back to field list = remove
+      const fl = document.getElementById('field-list');
+      fl.addEventListener('dragover', e => { e.preventDefault(); e.dataTransfer.dropEffect = 'move' });
+      fl.addEventListener('drop', e => {
+        e.preventDefault(); let d; try { d = JSON.parse(e.dataTransfer.getData('text/plain')) } catch { return }
+        if (d.src === 'zone' && d.sz) { zones[d.sz].splice(d.si, 1); renderAll() }
+      });
+    }
+
+    function renderAll() { renderZones(); renderFields(document.getElementById('search-input').value); renderSheet() }
+
+    document.getElementById('search-input').addEventListener('input', e => renderFields(e.target.value));
+
+    /* ====== FILTER POPUP ====== */
+    function showFilterPopup(i, anchor) {
+      closeCtxMenu();
+      const entry = zones.filters[i];
+      const f = FIELDS.find(x => x.id === entry.fid); if (!f) return;
+      const allVals = entry.allVals || [];
+      let selected = entry.selected ? new Set(entry.selected) : new Set(allVals);
+      let filtered = [...allVals];
+
+      const ov = document.createElement('div'); ov.className = 'ctx-overlay'; ov.addEventListener('click', closeCtxMenu); document.body.appendChild(ov);
+      const popup = document.createElement('div'); popup.className = 'filter-popup';
+
+      function render() {
+        const searchVal = popup.querySelector('#fpp-search-inp')?.value || '';
+        const allChecked = filtered.every(v => selected.has(v));
+        const sortOrder = entry.sortOrder || 'none';
+        const isNum = f.type === 'number';
+        const sortLabel = {
+          none: isNum ? '— Порядок' : '— Порядок',
+          asc:  isNum ? '↑ По возрастанию' : '↑ А → Я',
+          desc: isNum ? '↓ По убыванию'   : '↓ Я → А',
+        };
+        popup.innerHTML = `
+          <div class="fpp-title">${f.name}</div>
+          <div class="fpp-sort">
+            <span class="fpp-sort-label">Сортировка</span>
+            <div class="fpp-sort-btns">
+              <button class="fpp-sort-btn${sortOrder === 'asc'  ? ' active' : ''}" data-sort="asc">${isNum ? '↑ Меньше→Больше' : '↑ А → Я'}</button>
+              <button class="fpp-sort-btn${sortOrder === 'desc' ? ' active' : ''}" data-sort="desc">${isNum ? '↓ Больше→Меньше' : '↓ Я → А'}</button>
+            </div>
+          </div>
+          <div class="fpp-search"><span>🔍</span><input type="text" id="fpp-search-inp" placeholder="Поиск..." value="${searchVal}"></div>
+          <label class="fpp-all"><input type="checkbox" id="fpp-all" ${allChecked ? 'checked' : ''}><span>Выбрать все</span></label>
+          <div class="fpp-values">${filtered.map(v => `<label class="fpp-val"><input type="checkbox" value="${v}" ${selected.has(v) ? 'checked' : ''}><span>${v}</span></label>`).join('')}</div>
+          <div class="fpp-actions">
+            <button class="fpp-btn" id="fpp-cancel">Отмена</button>
+            <button class="fpp-btn primary" id="fpp-ok">Применить</button>
+          </div>`;
+        popup.querySelectorAll('.fpp-sort-btn').forEach(btn => {
+          btn.addEventListener('click', e => {
+            e.stopPropagation();
+            const newSort = btn.dataset.sort;
+            entry.sortOrder = entry.sortOrder === newSort ? 'none' : newSort;
+            render();
+          });
+        });
+        popup.querySelector('#fpp-search-inp').addEventListener('input', e => {
+          const q = e.target.value.toLowerCase();
+          filtered = allVals.filter(v => v.toLowerCase().includes(q));
+          render();
+          popup.querySelector('#fpp-search-inp').focus();
+        });
+        popup.querySelector('#fpp-all').addEventListener('change', e => {
+          if (e.target.checked) filtered.forEach(v => selected.add(v));
+          else filtered.forEach(v => selected.delete(v));
+          render();
+        });
+        popup.querySelectorAll('.fpp-val input').forEach(cb => {
+          cb.addEventListener('change', e => {
+            if (e.target.checked) selected.add(e.target.value);
+            else selected.delete(e.target.value);
+          });
+        });
+        popup.querySelector('#fpp-cancel').addEventListener('click', e => {
+          e.stopPropagation();
+          document.querySelectorAll('.filter-popup, .ctx-overlay').forEach(el => el.remove());
+        });
+        popup.querySelector('#fpp-ok').addEventListener('click', () => {
+          zones.filters[i].selected = selected.size === allVals.length ? null : [...selected];
+          zones.filters[i].sortOrder = entry.sortOrder || 'none';
+          document.querySelectorAll('.filter-popup, .ctx-overlay').forEach(el => el.remove());
+          renderAll();
+        });
+        popup.addEventListener('click', e => e.stopPropagation());
+      }
+
+      render();
+      const rect = anchor.getBoundingClientRect();
+      popup.style.top = (rect.bottom + 6) + 'px';
+      popup.style.left = Math.max(4, rect.left - 40) + 'px';
+      document.body.appendChild(popup);
+      requestAnimationFrame(() => {
+        const pr = popup.getBoundingClientRect();
+        if (pr.bottom > window.innerHeight - 8) popup.style.top = (rect.top - pr.height - 6) + 'px';
+        if (pr.right > window.innerWidth - 8) popup.style.left = (window.innerWidth - pr.width - 8) + 'px';
+      });
+    }
+
+    /* ====== DRAG ZONE HIGHLIGHT ====== */
+    // Highlight only the zone being hovered — not all zones simultaneously
+    // We patch initDrop to add per-zone enter/leave highlighting
+    function initZoneHighlight() {
+      document.querySelectorAll('.zone-drop').forEach(zone => {
+        zone.addEventListener('dragenter', e => {
+          if (e.dataTransfer.types.includes('text/plain')) {
+            zone.classList.add('drag-ready');
+          }
+        });
+        zone.addEventListener('dragleave', e => {
+          if (!zone.contains(e.relatedTarget)) {
+            zone.classList.remove('drag-ready');
+          }
+        });
+        zone.addEventListener('drop', () => zone.classList.remove('drag-ready'));
+      });
+    }
+
+    document.addEventListener('dragend', () => {
+      document.querySelectorAll('.zone-drop').forEach(z => z.classList.remove('drag-ready'));
+      clearReorderIndicators();
+    });
+
+    /* ====== DUAL-MODE RANGE SELECTION ====== */
+    const SEL_GREEN = '#1a73e8';
+    const SEL_GREEN_FILL = 'rgba(26,115,232,0.07)';
+    let selStartRow = 0, selStartCol = 0, selEndRow = 0, selEndCol = 0;
+    let selActiveCellRow = 0, selActiveCellCol = 0;
+    let selDragging = false;
+    let selValidationMode = false;
+    let selInteracted = false;
+    let selErrorState = false;
+    let selErrorMsg = '';
+    let selSvgEl = null, selRangeEl = null, selActiveEl = null, selHandleEl = null;
+
+    function initGridSvg() {
+      const gs = document.getElementById('grid-scroll');
+      if (!gs) return;
+      const existing = gs.querySelector('.grid-sel-svg');
+      if (existing) existing.remove();
+      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svg.className = 'grid-sel-svg';
+      svg.style.cssText = 'position:absolute;top:0;left:0;pointer-events:none;overflow:visible;width:1px;height:1px;z-index:5;';
+      const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+      const pat = document.createElementNS('http://www.w3.org/2000/svg', 'pattern');
+      pat.setAttribute('id', 'gErrPat'); pat.setAttribute('width', '8'); pat.setAttribute('height', '8'); pat.setAttribute('patternUnits', 'userSpaceOnUse');
+      const pr1 = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      pr1.setAttribute('width', '4'); pr1.setAttribute('height', '4'); pr1.setAttribute('fill', '#EF4444'); pr1.setAttribute('fill-opacity', '0.1');
+      const pr2 = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      pr2.setAttribute('width', '4'); pr2.setAttribute('height', '4'); pr2.setAttribute('x', '4'); pr2.setAttribute('y', '4'); pr2.setAttribute('fill', '#EF4444'); pr2.setAttribute('fill-opacity', '0.1');
+      pat.append(pr1, pr2); defs.append(pat); svg.append(defs);
+      const rangeRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      rangeRect.setAttribute('x', '0'); rangeRect.setAttribute('y', '0'); rangeRect.setAttribute('width', '0'); rangeRect.setAttribute('height', '0');
+      const activeRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      activeRect.setAttribute('x', '0'); activeRect.setAttribute('y', '0'); activeRect.setAttribute('width', '0'); activeRect.setAttribute('height', '0');
+      activeRect.style.display = 'none';
+      const handleDot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      handleDot.setAttribute('r', '4'); handleDot.setAttribute('fill', '#1a8a40');
+      handleDot.style.display = 'none';
+      svg.append(rangeRect, activeRect, handleDot);
+      gs.appendChild(svg);
+      selSvgEl = svg; selRangeEl = rangeRect; selActiveEl = activeRect; selHandleEl = handleDot;
+    }
+
+    function getCellCoords(td) {
+      const row = td.parentElement;
+      const tbody = row.parentElement;
+      const rowIndex = [...tbody.children].indexOf(row);
+      const cells = [...row.querySelectorAll('td')].filter(t => !t.classList.contains('rn'));
+      const colIndex = cells.indexOf(td);
+      return { r: rowIndex, c: colIndex };
+    }
+
+    function getSelRect(r1, c1, r2, c2) {
+      const gs = document.getElementById('grid-scroll');
+      const table = gs && gs.querySelector('.grid');
+      if (!table || !gs) return null;
+      const rows = table.querySelectorAll('tbody tr');
+      const tr1 = rows[r1], tr2 = rows[r2];
+      if (!tr1 || !tr2) return null;
+      const cells1 = [...tr1.querySelectorAll('td')].filter(t => !t.classList.contains('rn'));
+      const cells2 = [...tr2.querySelectorAll('td')].filter(t => !t.classList.contains('rn'));
+      const cell1 = cells1[c1], cell2 = cells2[c2];
+      if (!cell1 || !cell2) return null;
+      const gsR = gs.getBoundingClientRect();
+      const c1R = cell1.getBoundingClientRect();
+      const c2R = cell2.getBoundingClientRect();
+      return { x: c1R.left - gsR.left + gs.scrollLeft, y: c1R.top - gsR.top + gs.scrollTop, w: c2R.right - c1R.left, h: c2R.bottom - c1R.top };
+    }
+
+    function selRangeLabel(r1, c1, r2, c2) {
+      const cols = c2 - c1 + 1, rows = r2 - r1 + 1;
+      const colL = String.fromCharCode(65 + c1), colR = String.fromCharCode(65 + c2);
+      const range = cols === 1 && rows === 1 ? colL + (r1 + 1) : colL + (r1 + 1) + ':' + colR + (r2 + 1);
+      return { range, cols, rows };
+    }
+
+    function selValidate(r1, c1, r2, c2) {
+      if (!selValidationMode || !selInteracted) { selErrorState = false; selErrorMsg = ''; return; }
+      let dataCells = 0;
+      for (let r = r1; r <= r2; r++) {
+        for (let c = c1; c <= c2; c++) {
+          const row = DATA[r];
+          if (row && row[c] !== undefined && row[c] !== '' && row[c] !== null) dataCells++;
+        }
+      }
+      if (dataCells <= 1) {
+        selErrorState = true;
+        selErrorMsg = dataCells === 0 ? 'Диапазон\u00a0не\u00a0может\u00a0быть\u00a0пустым' : 'В\u00a0диапазоне должно\u00a0быть от\u00a0двух ячеек\u00a0с\u00a0данными';
+        return;
+      }
+      selErrorState = false; selErrorMsg = '';
+    }
+
+    function selApplyGreen() {
+      if (!selRangeEl || !selActiveEl) return;
+      selRangeEl.setAttribute('stroke', SEL_GREEN); selRangeEl.setAttribute('stroke-width', '1');
+      selRangeEl.setAttribute('stroke-dasharray', 'none'); selRangeEl.setAttribute('fill', SEL_GREEN_FILL);
+      // Active cell
+      const ACT_COLOR = '#1a8a40';
+      selActiveEl.style.display = 'block';
+      selActiveEl.setAttribute('stroke', ACT_COLOR); selActiveEl.setAttribute('stroke-width', '2');
+      selActiveEl.setAttribute('fill', 'none'); selActiveEl.setAttribute('stroke-dasharray', 'none');
+      const ar = getSelRect(selActiveCellRow, selActiveCellCol, selActiveCellRow, selActiveCellCol);
+      if (ar) {
+        selActiveEl.setAttribute('x', ar.x + 0.5); selActiveEl.setAttribute('y', ar.y + 0.5);
+        selActiveEl.setAttribute('width', ar.w); selActiveEl.setAttribute('height', ar.h);
+        if (selHandleEl) {
+          selHandleEl.style.display = 'block';
+          selHandleEl.setAttribute('cx', ar.x + ar.w + 0.5);
+          selHandleEl.setAttribute('cy', ar.y + ar.h + 0.5);
+        }
+      }
+    }
+
+    function selApplyGray() {
+      if (!selRangeEl || !selActiveEl) return;
+      selActiveEl.style.display = 'none';
+      if (selHandleEl) selHandleEl.style.display = 'none';
+      selRangeEl.setAttribute('stroke-dasharray', '5,5'); selRangeEl.setAttribute('stroke-width', '1');
+      selRangeEl.setAttribute('stroke', '#b4b2a9'); selRangeEl.setAttribute('fill', 'rgba(181,183,192,0.1)');
+    }
+
+    function selApplyValidation() {
+      if (!selRangeEl || !selActiveEl) return;
+      selActiveEl.style.display = 'none';
+      if (selHandleEl) selHandleEl.style.display = 'none';
+      selRangeEl.setAttribute('stroke-dasharray', '5,5'); selRangeEl.setAttribute('stroke-width', '1');
+      if (selErrorState) { selRangeEl.setAttribute('stroke', '#e24b4a'); selRangeEl.setAttribute('fill', 'url(#gErrPat)'); }
+      else { selRangeEl.setAttribute('stroke', '#b4b2a9'); selRangeEl.setAttribute('fill', 'rgba(181,183,192,0.1)'); }
+    }
+
+    function selRender() {
+      const r1 = Math.min(selStartRow, selEndRow), c1 = Math.min(selStartCol, selEndCol);
+      const r2 = Math.max(selStartRow, selEndRow), c2 = Math.max(selStartCol, selEndCol);
+      if (!selRangeEl) return;
+      const rect = getSelRect(r1, c1, r2, c2);
+      if (rect) { selRangeEl.setAttribute('x', rect.x + 0.5); selRangeEl.setAttribute('y', rect.y + 0.5); selRangeEl.setAttribute('width', rect.w); selRangeEl.setAttribute('height', rect.h); }
+      const { range, cols, rows } = selRangeLabel(r1, c1, r2, c2);
+      const rangeInput = document.getElementById('rangeInput');
+      const rangeWrap = document.getElementById('rangeInputWrap');
+      const rangeError = document.getElementById('rangeError');
+      if (rangeInput) rangeInput.value = range;
+      if (!selValidationMode) {
+        selApplyGreen();
+        if (rangeWrap) rangeWrap.classList.remove('active', 'err');
+        if (rangeError) rangeError.textContent = '';
+      } else if (!selInteracted) {
+        selApplyGray();
+        if (rangeError) rangeError.textContent = '';
+      } else {
+        selApplyValidation();
+        if (rangeWrap) rangeWrap.classList.toggle('err', selErrorState);
+        if (rangeError) rangeError.textContent = selErrorState ? selErrorMsg : '';
+        const confirmBtn = document.getElementById('rangeConfirm');
+        if (confirmBtn) confirmBtn.disabled = selErrorState;
+      }
+      const fbCell = document.querySelector('.fb-cell');
+      const { range: fbActiveName } = selRangeLabel(selActiveCellRow, selActiveCellCol, selActiveCellRow, selActiveCellCol);
+      if (fbCell) fbCell.textContent = fbActiveName;
+      const fbInput = document.querySelector('.fb-input');
+      if (fbInput) { const row = DATA[selActiveCellRow]; fbInput.value = row && row[selActiveCellCol] !== undefined ? row[selActiveCellCol] : ''; }
+    }
+
+    function selReset() {
+      selStartRow = 0; selStartCol = 0; selEndRow = 0; selEndCol = 0;
+      selErrorState = false; selErrorMsg = ''; selInteracted = false;
+      if (selRangeEl) { selRangeEl.setAttribute('width', '0'); selRangeEl.setAttribute('height', '0'); }
+      if (selActiveEl) selActiveEl.style.display = 'none';
+      const rangeInput = document.getElementById('rangeInput');
+      if (rangeInput) rangeInput.value = '';
+      const rangeError = document.getElementById('rangeError');
+      if (rangeError) rangeError.textContent = '';
+      const rangeWrap = document.getElementById('rangeInputWrap');
+      if (rangeWrap) rangeWrap.classList.remove('active', 'err');
+      const fbCell = document.querySelector('.fb-cell');
+      if (fbCell) fbCell.textContent = 'A1';
+      const fbInput = document.querySelector('.fb-input');
+      if (fbInput) fbInput.value = '';
+    }
+
+    document.getElementById('grid-scroll').addEventListener('mousedown', function(e) {
+      const td = e.target.closest('td');
+      if (!td || td.classList.contains('rn')) return;
+      const { r, c } = getCellCoords(td);
+      if (r < 0 || c < 0) return;
+      e.preventDefault();
+      if (!selValidationMode) {
+        // Normal mode: only move the active cell indicator, keep blue range unchanged
+        selActiveCellRow = r; selActiveCellCol = c;
+        selApplyGreen();
+        const fbCell = document.querySelector('.fb-cell');
+        const { range: fbName } = selRangeLabel(r, c, r, c);
+        if (fbCell) fbCell.textContent = fbName;
+        const fbInput = document.querySelector('.fb-input');
+        if (fbInput) { const row = DATA[r]; fbInput.value = row && row[c] !== undefined ? row[c] : ''; }
+        return;
+      }
+      // Dashed mode: full drag to select new range
+      selErrorState = false; selErrorMsg = '';
+      if (selRangeEl) { selRangeEl.setAttribute('width', '0'); selRangeEl.setAttribute('height', '0'); }
+      selStartRow = r; selStartCol = c; selEndRow = r; selEndCol = c;
+      selDragging = true;
+      selApplyGray();
+      const rect = getSelRect(r, c, r, c);
+      if (rect && selRangeEl) { selRangeEl.setAttribute('x', rect.x + 0.5); selRangeEl.setAttribute('y', rect.y + 0.5); selRangeEl.setAttribute('width', rect.w); selRangeEl.setAttribute('height', rect.h); }
+      const ri = document.getElementById('rangeInput');
+      if (ri) ri.value = String.fromCharCode(65 + c) + (r + 1);
+    });
+
+    document.addEventListener('mousemove', function(e) {
+      if (!selDragging) return;
+      const el = document.elementFromPoint(e.clientX, e.clientY);
+      const td = el && el.closest('td');
+      if (!td || td.classList.contains('rn')) return;
+      const { r, c } = getCellCoords(td);
+      if (r < 0 || c < 0) return;
+      selEndRow = r; selEndCol = c;
+      if (selValidationMode) {
+        selApplyGray();
+        const r1 = Math.min(selStartRow, selEndRow), c1 = Math.min(selStartCol, selEndCol);
+        const r2 = Math.max(selStartRow, selEndRow), c2 = Math.max(selStartCol, selEndCol);
+        const rect = getSelRect(r1, c1, r2, c2);
+        if (rect && selRangeEl) { selRangeEl.setAttribute('x', rect.x + 0.5); selRangeEl.setAttribute('y', rect.y + 0.5); selRangeEl.setAttribute('width', rect.w); selRangeEl.setAttribute('height', rect.h); }
+        const { range } = selRangeLabel(r1, c1, r2, c2);
+        const ri = document.getElementById('rangeInput'); if (ri) ri.value = range;
+      } else { selRender(); }
+    });
+
+    document.addEventListener('mouseup', function() {
+      if (!selDragging) return;
+      selDragging = false;
+      if (selValidationMode) selInteracted = true;
+      const r1 = Math.min(selStartRow, selEndRow), c1 = Math.min(selStartCol, selEndCol);
+      const r2 = Math.max(selStartRow, selEndRow), c2 = Math.max(selStartCol, selEndCol);
+      selValidate(r1, c1, r2, c2);
+      selRender();
+    });
+
+    function setDashedMode(on) {
+      selValidationMode = on;
+      selInteracted = false; selErrorState = false; selErrorMsg = '';
+      const wrap = document.getElementById('rangeInputWrap');
+      if (wrap) { wrap.classList.toggle('active', on); if (!on) wrap.classList.remove('err'); }
+      const header = document.getElementById('appHeader');
+      if (header) header.classList.toggle('header-frozen', on);
+      const insertGroup = document.querySelector('.insert-group');
+      if (insertGroup) insertGroup.classList.toggle('frozen', on);
+      selRender();
+    }
+
+    document.getElementById('rangeInput').addEventListener('click', function() {
+      if (!selValidationMode) setDashedMode(true);
+      this.blur();
+    });
+
+    document.getElementById('rangeConfirm').addEventListener('click', function() {
+      selActiveCellRow = Math.min(selStartRow, selEndRow);
+      selActiveCellCol = Math.min(selStartCol, selEndCol);
+      setDashedMode(false);
+    });
+
+    function selectDefaultCell() {
+      initGridSvg();
+      selStartRow = 0; selStartCol = 0; selEndRow = 49; selEndCol = 4;
+      selActiveCellRow = 0; selActiveCellCol = 0;
+      selRender();
+    }
+
+    /* ====== SIDEBAR CLOSE ====== */
+    document.querySelector('.sidebar-close').addEventListener('click', () => {
+      layout.toggleSidebar(false);
+      // Switch back to source tab
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.sheet === 'source'));
+      activeSheet = 'source';
+      renderSheet();
+    });
+
+    /* ====== FILL SPLIT-BUTTON ====== */
+    (function() {
+      const fillColorBtn = document.getElementById('fillColorBtn');
+      const fillArrowBtn = document.getElementById('fillArrowBtn');
+      const fillMenu     = document.getElementById('fillMenu');
+      const fillYellow   = document.getElementById('fillYellow');
+      const fillClear    = document.getElementById('fillClear');
+      if (!fillColorBtn || !fillArrowBtn || !fillMenu) return;
+
+      function applyFill(color) {
+        const cell = document.querySelector('td.selected');
+        if (cell) cell.style.background = color;
+        fillMenu.classList.remove('open');
+      }
+
+      fillColorBtn.addEventListener('click', function() {
+        applyFill('#fff176');
+      });
+
+      fillArrowBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const r = fillArrowBtn.getBoundingClientRect();
+        fillMenu.style.left = r.left + 'px';
+        fillMenu.style.top  = (r.bottom + 4) + 'px';
+        fillMenu.classList.toggle('open');
+      });
+
+      fillYellow.addEventListener('click', function(e) {
+        e.stopPropagation();
+        applyFill('#fff176');
+      });
+
+      fillClear.addEventListener('click', function(e) {
+        e.stopPropagation();
+        applyFill('');
+      });
+
+      document.addEventListener('click', function() {
+        fillMenu.classList.remove('open');
+      });
+    })();
+
+    /* ====== FILTER SPLIT-BUTTON ====== */
+    (function() {
+      const filterArrowBtn = document.getElementById('filterArrowBtn');
+      const filterMenu     = document.getElementById('filterMenu');
+      if (!filterArrowBtn || !filterMenu) return;
+
+      filterArrowBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const r = filterArrowBtn.getBoundingClientRect();
+        filterMenu.style.left = r.left + 'px';
+        filterMenu.style.top  = (r.bottom + 4) + 'px';
+        filterMenu.classList.toggle('open');
+      });
+
+      filterMenu.querySelectorAll('.split-btn-menu-item').forEach(function(item) {
+        item.addEventListener('click', function(e) {
+          e.stopPropagation();
+          filterMenu.classList.remove('open');
+        });
+      });
+
+      document.addEventListener('click', function() {
+        filterMenu.classList.remove('open');
+      });
+    })();
+
+    /* ====== INIT ====== */
+    renderFields(); renderZones(); initDrop(); initZoneHighlight(); renderSheet(); initZoneAddButtons();
+  </script>
+</body>
+
+</html>
