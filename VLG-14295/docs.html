@@ -1,0 +1,485 @@
+<html lang="ru">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Яндекс Документы</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Unbounded:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0
+    }
+
+    html,
+    body {
+      height: 100%;
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-size: 14px;
+      background: #f4f6f8;
+      color: #1a1a1a;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+    }
+
+    :root {
+      --orb-spacing-m:        4px;
+      --orb-spacing-2-m:      8px;
+      --orb-rounding-6-m:     12px;
+      --orb-line-generiс:     rgba(181, 183, 192, 0.30);
+      --orb-misc-surface-meeting: rgba(255, 255, 255, 0.18);
+    }
+
+    /* ===== App header ===== */
+    .app-header {
+      background: #e3f2fd;
+      overflow: visible;
+      padding: 12px 16px 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      min-height: 0;
+      position: relative;
+      z-index: 10;
+    }
+
+    .hdr-bg {
+      position: absolute;
+      right: 0;
+      top: 0;
+      pointer-events: none;
+      line-height: 0;
+      z-index: 0;
+    }
+
+    .header-top,
+    .header-menu,
+    .header-bottom {
+      position: relative;
+      z-index: 1;
+    }
+
+    .header-top {
+      z-index: 10;
+    }
+
+    .header-top {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      flex-shrink: 0;
+    }
+
+    .header-bottom {
+      display: flex;
+      align-items: flex-end;
+      gap: 4px;
+      flex: 1;
+      overflow: visible;
+      min-width: 0;
+      min-height: 32px;
+      flex-shrink: 0;
+    }
+
+    .header-circle {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #d0d0d0;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .header-circle.logo {
+      background: transparent;
+      cursor: pointer;
+      transition: background .15s;
+      border-radius: 50%;
+    }
+
+    .header-circle.logo:hover {
+      background: rgba(0, 0, 0, 0.08);
+    }
+
+    .header-top .header-circle.logo:nth-child(2):hover {
+      background: transparent;
+      cursor: default;
+    }
+
+    .header-menu {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      flex-shrink: 0;
+      margin-top: 2px;
+      margin-bottom: 8px;
+    }
+
+    .header-menu-btn {
+      height: 28px;
+      padding: 0 8px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 14px;
+      color: #333;
+      transition: background .15s;
+      border-radius: 10px;
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .header-menu-btn:hover {
+      background: rgba(0, 0, 0, 0.08);
+    }
+
+    .header-title {
+      font-family: 'Inter', 'Google Sans', sans-serif;
+      font-weight: 400;
+      font-size: 15px;
+      color: #3d3d3d;
+      margin-left: 4px;
+      flex-shrink: 0;
+      border-radius: 4px;
+      padding: 2px 4px;
+      cursor: text;
+    }
+    .header-title:focus {
+      outline: none;
+      background: rgba(0,0,0,0.05);
+    }
+
+    .header-rect {
+      display: flex;
+      height: 32px;
+      padding: var(--orb-spacing-2-m);
+      justify-content: center;
+      align-items: center;
+      gap: var(--orb-spacing-m);
+      border-radius: var(--orb-rounding-6-m);
+      border: 1px solid var(--orb-line-generiс);
+      background: var(--orb-misc-surface-meeting);
+      backdrop-filter: blur(2.5px);
+      flex-shrink: 0;
+    }
+
+    .header-rect.header-rect-tools {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      padding: 2px;
+      border-radius: 12px;
+      width: fit-content;
+    }
+
+    .header-tool-btn {
+      position: relative;
+      width: 28px;
+      height: 28px;
+      min-width: 28px;
+      min-height: 28px;
+      flex-shrink: 0;
+      padding: 0;
+      border: none;
+      background: transparent;
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: rgb(0 0 0 / 75%);
+    }
+    .header-tool-btn::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      margin-top: 6px;
+      padding: 4px 8px;
+      background: rgba(0, 0, 0, 0.8);
+      color: #fff;
+      border-radius: 4px;
+      font-size: 12px;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.15s;
+      z-index: 1000;
+    }
+    .header-tool-btn:hover {
+      background: rgba(0, 0, 0, 0.06);
+    }
+    .header-tool-btn:hover::after {
+      opacity: 1;
+    }
+    .header-tool-btn:active {
+      background: rgba(0, 0, 0, 0.1);
+    }
+    .header-tool-btn:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+      pointer-events: auto;
+    }
+    .header-tool-btn:disabled:hover {
+      background: transparent;
+    }
+    .header-tool-btn:disabled::after {
+      display: none;
+    }
+    .header-tool-btn svg {
+      width: 15px;
+      height: 15px;
+    }
+    .header-tool-btn svg [stroke] {
+      stroke-width: 1.5;
+    }
+
+    /* ===== Font dropdown ===== */
+    .font-select-wrap {
+      position: relative;
+      width: 110px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      border-radius: 10px;
+      transition: background .15s;
+    }
+    .font-select-wrap:hover {
+      background: rgba(0, 0, 0, 0.06);
+    }
+    .font-select {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      appearance: none;
+      -webkit-appearance: none;
+      background: transparent;
+      border: none;
+      padding: 0 22px 0 8px;
+      font-family: inherit;
+      font-size: 14px;
+      color: rgb(0 0 0 / 75%);
+      cursor: pointer;
+      outline: none;
+    }
+    .font-select-chevron {
+      position: absolute;
+      right: 6px;
+      top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+      color: rgb(0 0 0 / 75%);
+      display: flex;
+    }
+
+    /* ===== Font size control ===== */
+    .font-size-wrap {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      height: 28px;
+      border-radius: 10px;
+    }
+    .font-size-value {
+      font-size: 14px;
+      color: rgb(0 0 0 / 75%);
+      min-width: 16px;
+      text-align: center;
+      user-select: none;
+      cursor: default;
+    }
+    .font-size-wrap .header-tool-btn svg {
+      width: 12px;
+      height: 12px;
+    }
+
+    /* ===== Header top action buttons ===== */
+    .header-top-icon-btn {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border: none;
+      background: transparent;
+      border-radius: 10px;
+      cursor: pointer;
+      color: rgba(0, 0, 0, 0.75);
+      flex-shrink: 0;
+      transition: background 0.15s;
+    }
+    .header-top-icon-btn:hover {
+      background: rgba(0, 0, 0, 0.06);
+    }
+    .header-top-icon-btn::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      margin-top: 6px;
+      padding: 4px 8px;
+      background: rgba(0, 0, 0, 0.8);
+      color: #fff;
+      border-radius: 4px;
+      font-size: 12px;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.15s;
+      z-index: 1000;
+    }
+    .header-top-icon-btn:hover::after {
+      opacity: 1;
+    }
+    .header-share-btn {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 0 10px 0 8px;
+      height: 28px;
+      border: none;
+      background: transparent;
+      border-radius: 10px;
+      cursor: pointer;
+      color: rgba(0, 0, 0, 0.75);
+      font-size: 14px;
+      font-family: inherit;
+      flex-shrink: 0;
+      transition: background 0.15s;
+    }
+    .header-share-btn:hover {
+      background: rgba(0, 0, 0, 0.06);
+    }
+
+    /* ===== Split button ===== */
+    .split-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 1px;
+    }
+    .split-btn-main {
+      border-radius: 10px 0 0 10px !important;
+    }
+    .split-btn-arrow {
+      width: 16px !important;
+      min-width: 16px !important;
+      border-radius: 0 10px 10px 0 !important;
+      padding: 0 !important;
+      color: rgb(0 0 0 / 75%);
+    }
+    .split-btn-arrow svg {
+      width: 12px;
+      height: 12px;
+    }
+    .split-btn:hover .split-btn-main,
+    .split-btn:hover .split-btn-arrow {
+      background: rgba(0, 0, 0, 0.06);
+    }
+    .split-btn-menu {
+      position: fixed;
+      display: none;
+      flex-direction: column;
+      background: #fff;
+      border: 1px solid rgba(181, 183, 192, 0.4);
+      border-radius: 10px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+      z-index: 2000;
+      min-width: 160px;
+      padding: 4px;
+    }
+    .split-btn-menu.open {
+      display: flex;
+    }
+    .split-btn-menu-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 10px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      text-align: left;
+      font-family: inherit;
+      font-size: 13px;
+      color: rgba(0, 0, 0, 0.8);
+      border-radius: 7px;
+      width: 100%;
+    }
+    .split-btn-menu-item:hover {
+      background: rgba(0, 0, 0, 0.05);
+    }
+    .split-btn-color-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+      border: 1px solid rgba(0,0,0,0.15);
+      flex-shrink: 0;
+    }
+
+    /* ===== Document workspace ===== */
+    .doc-main {
+      flex: 1;
+      overflow: auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 32px 24px 64px;
+      background: #fafafa;
+      min-height: 0;
+    }
+
+    .doc-sheet {
+      box-sizing: border-box;
+      width: 794px;
+      min-height: 1123px;
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      box-shadow: 0 1px 3px rgba(0,0,0,.08), 0 2px 8px rgba(0,0,0,.06);
+      padding: 96px 96px;
+      font-family: 'Inter', Arial, sans-serif;
+      font-size: 11pt;
+      line-height: 1.6;
+      color: #1d1b20;
+      outline: none;
+      caret-color: #444;
+    }
+
+    .doc-sheet:focus { outline: none; }
+
+    .doc-sheet p { margin: 0 0 0.5em; }
+
+    .doc-sheet h1 { font-size: 2em; font-weight: 700; margin: 0 0 0.5em; }
+    .doc-sheet h2 { font-size: 1.5em; font-weight: 600; margin: 0 0 0.5em; }
+    .doc-sheet h3 { font-size: 1.2em; font-weight: 600; margin: 0 0 0.5em; }
+  </style>
+</head>
+
+<body>
+  <header class="app-header" id="appHeader"><div class="hdr-bg">
+    <svg width="1280" height="122" viewBox="0 0 1280 122" fill="none" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_7911_148118)"><rect width="1280" height="122" fill="#F2F4FA"></rect><mask id="mask0_7911_148118" maskUnits="userSpaceOnUse" x="970" y="-25" width="412" height="426" style="mask-type: alpha;"><ellipse cx="1176.07" cy="187.766" rx="205.736" ry="212.343" transform="rotate(3.31996 1176.07 187.766)" fill="#C9E5FF"></ellipse></mask><g mask="url(#mask0_7911_148118)"><ellipse cx="1176.07" cy="187.766" rx="205.736" ry="212.343" transform="rotate(3.31996 1176.07 187.766)" fill="#C9E5FF"></ellipse><g filter="url(#filter0_f_7911_148118)"><ellipse cx="1370.17" cy="134.695" rx="182.252" ry="127.393" transform="rotate(-23.3141 1370.17 134.695)" fill="#EBF6FF"></ellipse></g></g><mask id="mask1_7911_148118" maskUnits="userSpaceOnUse" x="970" y="-25" width="408" height="425" style="mask-type: alpha;"><ellipse cx="1173.92" cy="187.642" rx="203.584" ry="212.343" transform="rotate(3.31996 1173.92 187.642)" fill="#C7E4FF"></ellipse></mask><g mask="url(#mask1_7911_148118)"><ellipse cx="1173.92" cy="187.642" rx="203.584" ry="212.343" transform="rotate(3.31996 1173.92 187.642)" fill="#F3F9FF"></ellipse><g filter="url(#filter1_f_7911_148118)"><ellipse cx="1309.4" cy="247.23" rx="198.169" ry="206.809" transform="rotate(20.0049 1309.4 247.23)" fill="#E1F1FF"></ellipse></g><ellipse cx="1420.99" cy="350.289" rx="198.169" ry="206.809" transform="rotate(30.7318 1420.99 350.289)" fill="#B7DDFF"></ellipse><path d="M1376.67 199.403C1369.89 316.224 1273.61 405.623 1161.65 399.129C1049.7 392.635 964.402 292.702 971.179 175.881C977.956 59.0594 1074.24 -30.3399 1186.19 -23.8457C1298.14 -17.3514 1383.44 82.5814 1376.67 199.403Z" stroke="url(#paint0_linear_7911_148118)"></path></g><mask id="mask2_7911_148118" maskUnits="userSpaceOnUse" x="804" y="-55" width="427" height="438" style="mask-type: alpha;"><ellipse cx="1017.78" cy="164.245" rx="212.666" ry="218.692" transform="rotate(-16.1142 1017.78 164.245)" fill="#CDE7FF"></ellipse></mask><g mask="url(#mask2_7911_148118)"><ellipse cx="1017.78" cy="164.245" rx="212.666" ry="218.692" transform="rotate(-16.1142 1017.78 164.245)" fill="#CDE7FF"></ellipse><g filter="url(#filter3_f_7911_148118)"><ellipse cx="1155.38" cy="41.5511" rx="182.252" ry="113.325" transform="rotate(-23.3141 1155.38 41.5511)" fill="#EBF6FF"></ellipse></g></g><mask id="mask3_7911_148118" maskUnits="userSpaceOnUse" x="804" y="-53" width="421" height="437" style="mask-type: alpha;"><ellipse cx="1014.63" cy="165.153" rx="209.396" ry="218.692" transform="rotate(-16.1142 1014.63 165.153)" fill="#F1F8FF"></ellipse></mask><g mask="url(#mask3_7911_148118)"><ellipse cx="1014.63" cy="165.153" rx="209.396" ry="218.692" transform="rotate(-16.1142 1014.63 165.153)" fill="#F1F8FF"></ellipse><g filter="url(#filter4_f_7911_148118)"><ellipse cx="1172.81" cy="187.577" rx="202.471" ry="212.343" transform="rotate(3.31996 1172.81 187.577)" fill="#D7EBFF"></ellipse></g><g filter="url(#filter5_f_7911_148118)"><ellipse cx="1309.4" cy="247.23" rx="198.169" ry="206.809" transform="rotate(20.0049 1309.4 247.23)" fill="#C9E4FF"></ellipse></g><path d="M1215.32 107.174C1248.77 222.963 1186.01 342.757 1075.19 374.773C964.376 406.788 847.397 338.922 813.945 223.133C780.493 107.343 843.256 -12.4506 954.073 -44.4662C1064.89 -76.4819 1181.87 -8.61595 1215.32 107.174Z" stroke="url(#paint1_linear_7911_148118)"></path></g><mask id="mask4_7911_148118" maskUnits="userSpaceOnUse" x="628" y="-43" width="435" height="445" style="mask-type: alpha;"><ellipse cx="845.409" cy="179.557" rx="213.425" ry="224.95" transform="rotate(-31.5332 845.409 179.557)" fill="#CBE6FF"></ellipse></mask><g mask="url(#mask4_7911_148118)"><ellipse cx="845.409" cy="179.557" rx="213.425" ry="224.95" transform="rotate(-31.5332 845.409 179.557)" fill="#CBE6FF"></ellipse><g filter="url(#filter6_f_7911_148118)"><ellipse cx="963.062" cy="60.2646" rx="243.322" ry="88.1135" transform="rotate(-36.7593 963.062 60.2646)" fill="#EBF6FF"></ellipse></g><g filter="url(#filter7_f_7911_148118)"><ellipse cx="742.869" cy="-46.017" rx="243.322" ry="88.1135" transform="rotate(-29.1496 742.869 -46.017)" fill="#EBF6FF"></ellipse></g></g><mask id="mask5_7911_148118" maskUnits="userSpaceOnUse" x="628" y="-40" width="428" height="443" style="mask-type: alpha;"><ellipse cx="842.095" cy="181.591" rx="209.536" ry="224.95" transform="rotate(-31.5332 842.095 181.591)" fill="#EEF7FF"></ellipse></mask><g mask="url(#mask5_7911_148118)"><ellipse cx="842.095" cy="181.591" rx="209.536" ry="224.95" transform="rotate(-31.5332 842.095 181.591)" fill="#EEF7FF"></ellipse><g filter="url(#filter8_f_7911_148118)"><ellipse cx="1014.63" cy="165.155" rx="209.396" ry="218.692" transform="rotate(-16.1142 1014.63 165.155)" fill="#D8ECFF"></ellipse></g><g filter="url(#filter9_f_7911_148118)"><ellipse cx="1172.81" cy="187.577" rx="202.471" ry="212.343" transform="rotate(3.31996 1172.81 187.577)" fill="#C5E3FF"></ellipse></g><path d="M1020.26 72.2661C1085.11 177.951 1057.85 312.536 959.48 372.897C861.108 433.258 728.773 396.6 663.925 290.915C599.077 185.23 626.337 50.6447 724.709 -9.71634C823.082 -70.0774 955.416 -33.4187 1020.26 72.2661Z" stroke="url(#paint2_linear_7911_148118)"></path><g filter="url(#filter10_f_7911_148118)"><path d="M990.405 192.903C990.494 226.344 994.157 269.899 988.559 269.914C982.961 269.929 970.221 226.398 970.132 192.957C970.042 159.516 981.401 117.706 986.999 117.691C992.598 117.676 990.315 159.462 990.405 192.903Z" fill="#ABD7FF"></path></g></g><mask id="mask6_7911_148118" maskUnits="userSpaceOnUse" x="438" y="15" width="444" height="441" style="mask-type: alpha;"><ellipse cx="660.394" cy="235.681" rx="209.093" ry="231.725" transform="rotate(-46.7591 660.394 235.681)" fill="#C7E4FF"></ellipse></mask><g mask="url(#mask6_7911_148118)"><ellipse cx="660.394" cy="235.681" rx="209.093" ry="231.725" transform="rotate(-46.7591 660.394 235.681)" fill="#C7E5FF"></ellipse><g filter="url(#filter11_f_7911_148118)"><ellipse cx="527.296" cy="31.5286" rx="160.17" ry="39.5907" transform="rotate(-37.5224 527.296 31.5286)" fill="#EBF6FF"></ellipse></g><g filter="url(#filter12_f_7911_148118)"><ellipse cx="806.907" cy="234.384" rx="160.17" ry="48.1107" transform="rotate(-37.5224 806.907 234.384)" fill="#EBF6FF"></ellipse></g></g><mask id="mask7_7911_148118" maskUnits="userSpaceOnUse" x="437" y="22" width="439" height="435" style="mask-type: alpha;"><ellipse cx="656.762" cy="239.545" rx="203.791" ry="231.725" transform="rotate(-46.7591 656.762 239.545)" fill="#E9F4FF"></ellipse></mask><g mask="url(#mask7_7911_148118)"><ellipse cx="656.762" cy="239.545" rx="203.791" ry="231.725" transform="rotate(-46.7591 656.762 239.545)" fill="#E9F4FF"></ellipse><g filter="url(#filter13_f_7911_148118)"><ellipse cx="485.84" cy="72.889" rx="160.17" ry="39.5907" transform="rotate(-45.4116 485.84 72.889)" fill="#EBF6FF"></ellipse></g><g filter="url(#filter14_f_7911_148118)"><ellipse cx="849.946" cy="176.773" rx="200.325" ry="224.95" transform="rotate(-31.5332 849.946 176.773)" fill="#D2EAFF"></ellipse></g><g filter="url(#filter15_f_7911_148118)"><ellipse cx="1014.63" cy="165.155" rx="209.396" ry="218.692" transform="rotate(-16.1142 1014.63 165.155)" fill="#B7DDFF"></ellipse></g><path d="M796.03 91.4512C889.104 178.978 902.08 316.202 825.205 397.949C748.329 479.697 610.567 475.166 517.494 387.639C424.42 300.112 411.444 162.888 488.319 81.1404C565.195 -0.606928 702.956 3.92414 796.03 91.4512Z" stroke="url(#paint3_linear_7911_148118)"></path></g><mask id="mask8_7911_148118" maskUnits="userSpaceOnUse" x="246" y="123" width="448" height="416" style="mask-type: alpha;"><ellipse cx="469.859" cy="331.208" rx="191.408" ry="237.743" transform="rotate(-55.0765 469.859 331.208)" fill="#B3DBFF"></ellipse></mask><g mask="url(#mask8_7911_148118)"></g><mask id="mask9_7911_148118" maskUnits="userSpaceOnUse" x="239" y="134" width="448" height="416" style="mask-type: alpha;"><ellipse cx="462.601" cy="341.913" rx="190.932" ry="237.77" transform="rotate(-55.0765 462.601 341.913)" fill="#E2F1FF"></ellipse></mask><g mask="url(#mask9_7911_148118)"></g></g><defs><filter id="filter0_f_7911_148118" x="1130.32" y="-67.7637" width="479.693" height="404.918" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feFlood flood-opacity="0" result="BackgroundImageFix"></feFlood><feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"></feBlend><feGaussianBlur stdDeviation="32.5" result="effect1_foregroundBlur_7911_148118"></feGaussianBlur></filter><filter id="filter1_f_7911_148118" x="1080.15" y="11.3574" width="458.506" height="471.744" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feFlood flood-opacity="0" result="BackgroundImageFix"></feFlood><feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"></feBlend><feGaussianBlur stdDeviation="15" result="effect1_foregroundBlur_7911_148118"></feGaussianBlur></filter><filter id="filter3_f_7911_148118" x="917.058" y="-150.084" width="476.639" height="383.271" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feFlood flood-opacity="0" result="BackgroundImageFix"></feFlood><feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"></feBlend><feGaussianBlur stdDeviation="32.5" result="effect1_foregroundBlur_7911_148118"></feGaussianBlur></filter><filter id="filter4_f_7911_148118" x="940.3" y="-54.7383" width="465.023" height="484.631" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feFlood flood-opacity="0" result="BackgroundImageFix"></feFlood><feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"></feBlend><feGaussianBlur stdDeviation="15" result="effect1_foregroundBlur_7911_148118"></feGaussianBlur></filter><filter id="filter5_f_7911_148118" x="1090.15" y="21.3574" width="438.506" height="451.744" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feFlood flood-opacity="0" result="BackgroundImageFix"></feFlood><feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"></feBlend><feGaussianBlur stdDeviation="10" result="effect1_foregroundBlur_7911_148118"></feGaussianBlur></filter><filter id="filter6_f_7911_148118" x="696.066" y="-166.598" width="533.991" height="453.725" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feFlood flood-opacity="0" result="BackgroundImageFix"></feFlood><feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"></feBlend><feGaussianBlur stdDeviation="32.5" result="effect1_foregroundBlur_7911_148118"></feGaussianBlur></filter><filter id="filter7_f_7911_148118" x="461.03" y="-252.346" width="563.677" height="412.656" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feFlood flood-opacity="0" result="BackgroundImageFix"></feFlood><feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"></feBlend><feGaussianBlur stdDeviation="32.5" result="effect1_foregroundBlur_7911_148118"></feGaussianBlur></filter><filter id="filter8_f_7911_148118" x="774.452" y="-82.8906" width="480.363" height="496.092" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feFlood flood-opacity="0" result="BackgroundImageFix"></feFlood><feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"></feBlend><feGaussianBlur stdDeviation="15" result="effect1_foregroundBlur_7911_148118"></feGaussianBlur></filter><filter id="filter9_f_7911_148118" x="950.3" y="-44.7383" width="445.023" height="464.631" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feFlood flood-opacity="0" result="BackgroundImageFix"></feFlood><feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"></feBlend><feGaussianBlur stdDeviation="10" result="effect1_foregroundBlur_7911_148118"></feGaussianBlur></filter><filter id="filter10_f_7911_148118" x="950.131" y="97.6914" width="61.5332" height="192.223" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feFlood flood-opacity="0" result="BackgroundImageFix"></feFlood><feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"></feBlend><feGaussianBlur stdDeviation="10" result="effect1_foregroundBlur_7911_148118"></feGaussianBlur></filter><filter id="filter11_f_7911_148118" x="332.971" y="-135.982" width="388.65" height="335.023" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feFlood flood-opacity="0" result="BackgroundImageFix"></feFlood><feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"></feBlend><feGaussianBlur stdDeviation="32.5" result="effect1_foregroundBlur_7911_148118"></feGaussianBlur></filter><filter id="filter12_f_7911_148118" x="611.509" y="64.6035" width="390.796" height="339.561" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feFlood flood-opacity="0" result="BackgroundImageFix"></feFlood><feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"></feBlend><feGaussianBlur stdDeviation="32.5" result="effect1_foregroundBlur_7911_148118"></feGaussianBlur></filter><filter id="filter13_f_7911_148118" x="304.89" y="-109.543" width="361.899" height="364.865" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feFlood flood-opacity="0" result="BackgroundImageFix"></feFlood><feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"></feBlend><feGaussianBlur stdDeviation="32.5" result="effect1_foregroundBlur_7911_148118"></feGaussianBlur></filter><filter id="filter14_f_7911_148118" x="612.576" y="-71.7578" width="474.741" height="497.062" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feFlood flood-opacity="0" result="BackgroundImageFix"></feFlood><feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"></feBlend><feGaussianBlur stdDeviation="15" result="effect1_foregroundBlur_7911_148118"></feGaussianBlur></filter><filter id="filter15_f_7911_148118" x="784.453" y="-72.8906" width="460.363" height="476.092" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feFlood flood-opacity="0" result="BackgroundImageFix"></feFlood><feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"></feBlend><feGaussianBlur stdDeviation="10" result="effect1_foregroundBlur_7911_148118"></feGaussianBlur></filter><linearGradient id="paint0_linear_7911_148118" x1="1277.72" y1="463.782" x2="1267.09" y2="-97.7304" gradientUnits="userSpaceOnUse"><stop offset="0.270281" stop-color="white" stop-opacity="0.43"></stop><stop offset="0.451468" stop-color="#86C5FF" stop-opacity="0.659142"></stop><stop offset="0.72099" stop-color="#86C5FF"></stop><stop offset="0.917779" stop-color="white"></stop></linearGradient><linearGradient id="paint1_linear_7911_148118" x1="1191.15" y1="302.108" x2="979.095" y2="-76.246" gradientUnits="userSpaceOnUse"><stop stop-color="white" stop-opacity="0.43"></stop><stop offset="0.584233" stop-color="#86C5FF"></stop><stop offset="0.917779" stop-color="white"></stop></linearGradient><linearGradient id="paint2_linear_7911_148118" x1="1051.45" y1="271.041" x2="736.211" y2="-43.731" gradientUnits="userSpaceOnUse"><stop offset="0.0802524" stop-color="white" stop-opacity="0.43"></stop><stop offset="0.364521" stop-color="#86C5FF"></stop><stop offset="0.659357" stop-color="#86C5FF"></stop><stop offset="0.917779" stop-color="white"></stop></linearGradient><linearGradient id="paint3_linear_7911_148118" x1="796.373" y1="91.087" x2="543.894" y2="89.9343" gradientUnits="userSpaceOnUse"><stop offset="0.60104" stop-color="#86C5FF"></stop><stop offset="0.917779" stop-color="white"></stop></linearGradient><clipPath id="clip0_7911_148118"><rect width="1280" height="122" fill="white"></rect></clipPath></defs></svg>
+  </div><div class="header-top"><div class="header-circle logo"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 40 40"><path fill="url(#ya360a)" d="M20 40c11.046 0 20-8.954 20-20S31.046 0 20 0 0 8.954 0 20s8.954 20 20 20"></path><path fill="#fff" d="M20 31.6c3.755 0 6.8-5.194 6.8-11.6 0-6.407-3.045-11.6-6.8-11.6s-6.8 5.193-6.8 11.6c0 6.406 3.044 11.6 6.8 11.6"></path><path fill="#fff" fill-rule="evenodd" d="M7.251 10.8c-2.018-.104-4.45 4.12-4.45 9.198 0 5.08 2.432 9.302 4.45 9.198 2.001-.104 3.15-4.119 3.15-9.198S9.252 10.904 7.25 10.8m25.5 18.396c2.018.104 4.45-4.119 4.45-9.198s-2.432-9.302-4.45-9.198c-2.002.104-3.15 4.12-3.15 9.198 0 5.08 1.148 9.094 3.15 9.198" clip-rule="evenodd"></path><defs><radialGradient id="ya360a" cx="0" cy="0" r="1" gradientTransform="matrix(0 25.6 -33.2388 0 20 14.4)" gradientUnits="userSpaceOnUse"><stop stop-color="#FF9A6F"></stop><stop offset="0.61" stop-color="#FF6427"></stop><stop offset="1" stop-color="#EB581E"></stop></radialGradient></defs></svg></div><div class="header-circle logo"><svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12.4565 6.47772C12.8143 5.17471 14.1868 4.40144 15.5221 4.75058L26.1443 7.52799C27.4796 7.87713 28.272 9.21647 27.9142 10.5195L24.3438 23.5224C23.986 24.8255 22.6134 25.5987 21.2782 25.2496L10.6559 22.4722C9.32065 22.123 8.52823 20.7837 8.88602 19.4807L12.4565 6.47772Z" fill="#2976F4"></path><path d="M12.4565 6.47738C12.8143 5.17436 13.6666 4.33333 15.5221 4.75024L26.1443 7.52765C27.4796 7.87679 28.3333 8.66641 27.9142 10.5191L24.3438 23.5221C23.986 24.8251 22.6134 25.5984 21.2782 25.2492L10.6559 22.4718C9.32065 22.1227 8.52823 20.7834 8.88602 19.4803L12.4565 6.47738Z" fill="#0061FF"></path><g filter="url(#filter0_f_282_10945)"><path d="M6.79393 18.9444C6.83099 21.3552 8.75202 23.3577 11.2637 23.6039L22.0781 24.664C22.393 24.6949 22.6667 24.459 22.6667 24.1568V11.1767C22.6667 10.8951 22.4276 10.6667 22.1327 10.6667H6.66669L6.79393 18.9444Z" fill="#25395B"></path></g><path d="M4 12.4665C4 11.1043 5.10358 10 6.46492 10H17.2943C18.6557 10 19.7592 11.1043 19.7592 12.4665V25.3328H6.46492C5.10358 25.3328 4 24.2285 4 22.8662V12.4665Z" fill="#3380FF"></path><path d="M19.7586 23.262C19.7586 24.406 20.6854 25.3333 21.8286 25.3333H19.7586V23.262Z" fill="#3380FF"></path><path d="M7.33331 14.9769C7.33331 14.4511 7.77517 14.0249 8.32023 14.0249L14.9411 14C15.4862 14 15.9281 14.4262 15.9281 14.9521C15.9281 15.4779 15.4862 15.9041 14.9411 15.9041L8.32023 15.929C7.77517 15.929 7.33331 15.5027 7.33331 14.9769Z" fill="white"></path><path d="M7.40524 20.2854C7.40524 19.7596 7.8471 19.3333 8.39216 19.3333L15.0131 19.3085C15.5581 19.3085 16 19.7347 16 20.2605C16 20.7863 15.5581 21.2126 15.0131 21.2126L8.39216 21.2374C7.8471 21.2374 7.40524 20.8112 7.40524 20.2854Z" fill="white"></path><path d="M7.40524 17.6436C7.40524 17.1178 7.8471 16.6915 8.39216 16.6915L15.0131 16.6667C15.5581 16.6667 16 17.0929 16 17.6187C16 18.1445 15.5581 18.5708 15.0131 18.5708L8.39216 18.5956C7.8471 18.5956 7.40524 18.1694 7.40524 17.6436Z" fill="white"></path><defs><filter id="filter0_f_282_10945" x="3.21335" y="7.21341" width="22.9067" height="20.9067" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feFlood flood-opacity="0" result="BackgroundImageFix"></feFlood><feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"></feBlend><feGaussianBlur stdDeviation="1.72667" result="effect1_foregroundBlur_282_10945"></feGaussianBlur></filter></defs></svg></div><span class="header-title" contenteditable="true" spellcheck="false">Новый документ</span><button type="button" class="header-top-icon-btn" data-tooltip="Сохранено" title="Сохранено" aria-label="Сохранено"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" d="M11.232 7.33 10.17 6.268 7 9.439 5.53 7.97 4.47 9.03 7 11.56z"></path><path fill="currentColor" fill-rule="evenodd" d="M7.5 1.5a5 5 0 0 0-4.995 4.766A4.014 4.014 0 0 0 4 14h7a5 5 0 0 0 .874-9.924A5 5 0 0 0 7.5 1.5M3.07 7.656l.89-.36.044-.96a3.5 3.5 0 0 1 6.559-1.532l.347.624.703.124A3.501 3.501 0 0 1 11 12.5H4.005a2.513 2.513 0 0 1-.936-4.843" clip-rule="evenodd"></path></svg></button><button type="button" class="header-top-icon-btn" style="margin-left:auto" data-tooltip="Все комментарии" title="Все комментарии" aria-label="Все комментарии"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" d="M11.998 2a3 3 0 0 1 3 3v3.985a3 3 0 0 1-3 3H9.572a4 4 0 0 0-2.295.724L5.37 14.045H4.003v-2.06a3.003 3.003 0 0 1-3.003-3V5a3 3 0 0 1 3-3zM4 3.5A1.5 1.5 0 0 0 2.5 5v3.985c0 .827.673 1.5 1.503 1.5h1.5v1.636l.914-.64a5.5 5.5 0 0 1 3.155-.996h2.426a1.5 1.5 0 0 0 1.5-1.5V5a1.5 1.5 0 0 0-1.5-1.5z"/></svg></button><button type="button" class="header-share-btn" style="margin-left:4px" title="Поделиться" aria-label="Поделиться"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" fill-rule="evenodd" d="M6.5 10.75q.736-.083 1.5-.083V14h1.455L16 8 9.455 2H8v3.352c-3.96.584-6.746 2.982-7.696 6.147a8.5 8.5 0 0 0-.304 1.5h1.273q.135-.125.275-.242C2.953 11.582 4.655 10.96 6.5 10.75m-4.075-.357C4.144 9.518 6.065 9.167 8 9.167h1.5v2.757L13.78 8 9.5 4.077v2.57l-1.28.188c-2.714.401-4.7 1.745-5.795 3.558" clip-rule="evenodd"/></svg>Поделиться</button><div class="header-circle" style="margin-left:8px;background:#1976d2;color:#fff;font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;">А</div></div><div class="header-menu"><button type="button" class="header-menu-btn">Файл</button><button type="button" class="header-menu-btn">Правка</button><button type="button" class="header-menu-btn">Вставка</button><button type="button" class="header-menu-btn">Формат</button><button type="button" class="header-menu-btn">Структура</button><button type="button" class="header-menu-btn">Данные</button><button type="button" class="header-menu-btn">Вид</button><button type="button" class="header-menu-btn">Справка</button></div><div class="header-bottom"><div class="header-rect header-rect-tools"><button type="button" class="header-tool-btn" data-tooltip="Отменить" title="Отменить" aria-label="Отменить"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16"><path fill="currentColor" d="m.94 5 3.53 3.53 1.06-1.06-1.72-1.72H9.5a3.25 3.25 0 0 1 0 6.5H5v1.5h4.5a4.75 4.75 0 0 0 0-9.5H3.81l1.72-1.72-1.06-1.06z"/></svg></button><button type="button" class="header-tool-btn" data-tooltip="Повторить" title="Повторить" aria-label="Повторить" disabled><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16"><path fill="currentColor" d="m14.25 5-3.53 3.53-1.06-1.06 1.719-1.72h-5.69a3.25 3.25 0 0 0 0 6.5h4.5v1.5h-4.5a4.75 4.75 0 0 1 0-9.5h5.69l-1.72-1.72 1.06-1.06z"/></svg></button></div><div class="header-rect header-rect-tools"><button type="button" class="header-tool-btn" data-tooltip="Подсказки" title="Подсказки" aria-label="Подсказки"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M11 5L16 7.5V8.5L11 11L8.5 16H7.5L5 11L0 8.5V7.5L5 5L7.5 0H8.5L11 5ZM6.11816 6.11816L2.35449 8L6.11816 9.88184L8 13.6455L9.88184 9.88184L13.6455 8L9.88184 6.11816L8 2.35449L6.11816 6.11816Z" fill="url(#paint0_linear_174_38409)"></path><defs><linearGradient id="paint0_linear_174_38409" x1="0" y1="0" x2="16" y2="16.0001" gradientUnits="userSpaceOnUse"><stop stop-color="#F43F5E"></stop><stop offset="1" stop-color="#F7993C"></stop></linearGradient></defs></svg></button><button type="button" class="header-tool-btn" data-tooltip="ИИ" title="ИИ" aria-label="ИИ"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="14" viewBox="0 0 12 14" fill="none"><path d="M6.18359 11.9336C6.99112 10.7223 8.79659 10.8569 9.43945 12.1426C9.53281 12.3285 9.78342 12.3427 9.89844 12.1895L10.4678 11.4297L11.7598 12.3984L11.1904 13.1582C10.3451 14.2853 8.6178 14.1095 7.99512 12.8643C7.89863 12.6713 7.63697 12.6649 7.52734 12.8291L7.33008 13.125C6.57308 14.2603 4.87209 14.154 4.26172 12.9336C4.20186 12.8139 4.03057 12.8139 3.9707 12.9336L3.94531 12.9844C3.34492 14.1846 1.69099 14.3334 0.885742 13.2598L0.240234 12.3984L1.53223 11.4297L2.17773 12.291C2.26276 12.4044 2.43761 12.3885 2.50098 12.2617L2.52637 12.2109C3.18152 10.9014 5.05103 10.9013 5.70605 12.2109C5.76183 12.3225 5.91715 12.3323 5.98633 12.2285L6.18359 11.9336ZM6.07422 0.0175781C7.23333 0.0175781 8.12728 0.263758 8.74414 0.767578C9.36532 1.2631 9.66986 2.0337 9.66992 3.0625V8.43164C9.68156 8.56309 9.68741 8.70014 9.6875 8.84277C9.69914 8.98466 9.71102 9.08083 9.72266 9.21094C9.73431 9.32937 9.74531 9.42962 9.75684 9.51172L9.76855 9.5957H8.2168L8.2041 9.53711C8.19412 9.48975 8.18473 9.43726 8.1748 9.37988C8.14906 9.23102 8.12313 9.08879 8.09766 8.87305V8.87012C8.07416 8.55963 8.06258 8.28921 8.0625 8.06055L8.06152 8.05176C7.97778 8.20016 7.88127 8.35368 7.77246 8.51172L7.77148 8.51367C7.60268 8.74651 7.39187 8.95966 7.14062 9.1543C6.88714 9.35065 6.58669 9.50933 6.24023 9.63086C5.90171 9.75373 5.50501 9.81445 5.05273 9.81445C4.21652 9.81439 3.38413 9.60718 2.86328 9.12695C2.3401 8.63215 2.08301 7.9299 2.08301 7.03223C2.08303 5.99922 2.43758 5.22741 3.1543 4.7334C3.87557 4.24454 4.75158 3.96194 6.31934 3.93848H7.95508L7.97363 3.27734C7.97358 2.6435 7.81193 2.20987 7.50684 1.95508C7.19854 1.69774 6.65735 1.56055 5.86328 1.56055C5.30814 1.56055 4.78238 1.65407 4.28613 1.8418L4.28516 1.84277C3.78432 2.0204 3.33678 2.22706 2.94238 2.46289L2.83105 2.5293V0.945312L2.86621 0.923828C3.20111 0.717101 3.64677 0.518076 4.20117 0.326172C4.77332 0.120215 5.39785 0.0176173 6.07422 0.0175781ZM6.47852 5.33789C5.32103 5.34102 4.76582 5.54195 4.36133 5.80469C3.97412 6.05226 3.77941 6.42754 3.7793 6.94238C3.7793 7.3446 3.89726 7.66622 4.12891 7.91309C4.35628 8.15526 4.87005 8.2539 5.3877 8.25391C5.85865 8.25391 6.25606 8.15476 6.58301 7.95996C6.91693 7.76095 7.18569 7.5337 7.39062 7.2793C7.59829 7.00942 7.74718 6.75351 7.83789 6.51172C7.93197 6.2486 7.97362 6.07451 7.97363 5.98145L7.95508 5.33789H6.47852Z" fill="url(#paint0_linear_174_38414)"></path><defs><linearGradient id="paint0_linear_174_38414" x1="0.240234" y1="0.0175781" x2="13.9501" y2="11.327" gradientUnits="userSpaceOnUse"><stop stop-color="#F43F5E"></stop><stop offset="1" stop-color="#F7993C"></stop></linearGradient></defs></svg></button></div><div class="header-rect header-rect-tools"><button type="button" class="header-tool-btn" data-tooltip="Копировать форматирование" title="Копировать форматирование"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" fill-rule="evenodd" d="M2.006 3.19c.012-.43.046-.714.146-.955a2 2 0 0 1 1.083-1.083C3.602 1 4.068 1 5 1h7c.932 0 1.398 0 1.765.152a2 2 0 0 1 1.083 1.083C15 2.602 15 3.068 15 4s0 1.398-.152 1.765a2 2 0 0 1-1.083 1.083C13.398 7 12.932 7 12 7H5c-.932 0-1.398 0-1.765-.152a2 2 0 0 1-.985-.88V6.5c0 .476 0 .796.017 1.043.017.241.046.358.078.435.127.307.37.55.677.677.077.032.194.061.435.078.247.017.567.017 1.043.017h6V13c0 .465 0 .697-.051.888a1.5 1.5 0 0 1-1.06 1.06C9.196 15 8.964 15 8.5 15s-.697 0-.888-.051a1.5 1.5 0 0 1-1.06-1.06C6.5 13.697 6.5 13.464 6.5 13v-2.75H4.475c-.445 0-.816 0-1.12-.02a2.8 2.8 0 0 1-.907-.19A2.75 2.75 0 0 1 .959 8.553c-.12-.29-.167-.59-.188-.907C.75 7.341.75 6.97.75 6.525V5.5c0-.968.5-1.82 1.256-2.31M5 2.5h7c.486 0 .776 0 .992.016.134.009.19.02.205.025a.5.5 0 0 1 .262.262c.004.014.016.071.025.205.015.216.016.506.016.992s0 .776-.016.992c-.009.134-.02.19-.025.205a.5.5 0 0 1-.262.262 1.3 1.3 0 0 1-.205.025c-.216.015-.506.016-.992.016H5c-.486 0-.776 0-.992-.016a1.3 1.3 0 0 1-.205-.025.5.5 0 0 1-.262-.262 1.3 1.3 0 0 1-.025-.205A17 17 0 0 1 3.5 4c0-.486 0-.776.016-.992.009-.134.02-.19.025-.205a.5.5 0 0 1 .262-.262 1.3 1.3 0 0 1 .205-.025C4.224 2.5 4.514 2.5 5 2.5m3 7.754h1V13c0 .246 0 .38-.005.479v.015l-.016.001c-.098.005-.233.005-.479.005s-.38 0-.479-.005h-.015l-.001-.016A12 12 0 0 1 8 13z" clip-rule="evenodd"/></svg></button><button type="button" class="header-tool-btn" data-tooltip="Печать" title="Печать"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16"><path fill="currentColor" d="M12 4.02c.49.026.843.082 1.148.209a3 3 0 0 1 1.624 1.623C15 6.402 15 7.102 15 8.5s0 2.097-.229 2.648a3 3 0 0 1-1.623 1.625c-.305.126-.657.182-1.148.207V15H4v-2.02c-.49-.025-.843-.08-1.148-.207a3 3 0 0 1-1.623-1.625C1 10.598 1 9.898 1 8.5s0-2.097.229-2.648a3 3 0 0 1 1.623-1.623c.305-.127.657-.183 1.148-.208V1h8zM5.5 9.5v4h5v-4zm0-4c-.72 0-1.184.001-1.54.025-.341.024-.472.063-.534.09a1.5 1.5 0 0 0-.812.81c-.026.063-.065.194-.089.536-.024.355-.025.82-.025 1.539 0 .72.001 1.185.025 1.54.024.342.063.472.09.534a1.5 1.5 0 0 0 .81.813c.063.026.194.065.536.089l.039.001V8h8v3.477l.04-.001c.341-.024.472-.063.534-.09a1.5 1.5 0 0 0 .812-.812c.026-.062.065-.192.089-.534.024-.355.025-.82.025-1.54s-.001-1.184-.025-1.54c-.024-.341-.063-.472-.09-.534a1.5 1.5 0 0 0-.81-.812c-.063-.026-.194-.065-.536-.089-.355-.024-.82-.025-1.539-.025zm0-3V4h5V2.5z"/></svg></button><button type="button" class="header-tool-btn" data-tooltip="Экспорт" title="Экспорт" aria-label="Экспорт"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" fill-rule="evenodd" d="m9.004 13.5.51-.508 3.477-3.478c1.055-1.054 1.582-1.581 1.81-2.176a3 3 0 0 0 0-2.152c-.228-.595-.755-1.122-1.81-2.176-1.054-1.055-1.581-1.582-2.176-1.81a3 3 0 0 0-2.151 0c-.595.228-1.122.755-2.177 1.81L3.01 6.488C1.955 7.542 1.428 8.069 1.2 8.664a3 3 0 0 0 0 2.152c.229.595.756 1.122 1.81 2.176s1.582 1.582 2.177 1.81A3 3 0 0 0 6.372 15H15v-1.5zM5.755 5.863 7.548 4.07c.543-.542.894-.892 1.18-1.14.277-.239.406-.304.473-.33a1.5 1.5 0 0 1 1.076 0c.068.026.197.091.473.33.287.248.638.598 1.18 1.14.543.543.893.894 1.141 1.181.239.276.304.405.33.473a1.5 1.5 0 0 1 0 1.076c-.026.067-.091.197-.33.473-.248.287-.598.638-1.14 1.18l-1.793 1.793zm-1.06 1.06-.625.626c-.543.542-.892.893-1.14 1.18-.24.276-.304.405-.33.473a1.5 1.5 0 0 0 0 1.076c.026.068.09.197.33.473.248.287.597.638 1.14 1.18.543.543.894.893 1.18 1.141.277.239.406.304.473.33a1.5 1.5 0 0 0 .532.1V13.5h.083q.237-.011.461-.098c.068-.026.197-.091.473-.33.287-.248.638-.598 1.18-1.14l.625-.625z" clip-rule="evenodd"></path></svg></button></div><div class="header-rect header-rect-tools"><button type="button" class="header-tool-btn" data-tooltip="Валюта" title="Валюта"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="16" height="16" viewBox="0 0 16 16"><g fill="currentColor" clip-path="url(#cash-stack-outline-sm__a)"><path d="M4 2.3h8V.8H4zM2 4.55h12v-1.5H2z"/><path fill-rule="evenodd" d="M10.5 10.3a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0m-1.5 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0" clip-rule="evenodd"/><path d="M4.25 9.75a.75.75 0 0 0-.75.75v.75h.75a.75.75 0 0 0 0-1.5m7.5 0a.75.75 0 0 0-.75.75v.75h.75a.75.75 0 0 0 0-1.5"/><path fill-rule="evenodd" d="M.5 8.286a3 3 0 0 1 3-3h9a3 3 0 0 1 3 3V12.3a3 3 0 0 1-3 3h-9a3 3 0 0 1-3-3zm3-1.5h9a1.5 1.5 0 0 1 1.5 1.5V12.3a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 2 12.3V8.286a1.5 1.5 0 0 1 1.5-1.5" clip-rule="evenodd"/></g><defs><clipPath id="cash-stack-outline-sm__a"><path fill="#fff" d="M0 0h16v16H0z"/></clipPath></defs></svg></button><button type="button" class="header-tool-btn" data-tooltip="Проценты" title="Проценты"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" fill-rule="evenodd" d="M4.25 7.5a3.25 3.25 0 1 0 0-6.5 3.25 3.25 0 0 0 0 6.5m0-1.5a1.75 1.75 0 1 0 0-3.5 1.75 1.75 0 0 0 0 3.5" clip-rule="evenodd"/><path fill="currentColor" d="m2.105 14.5 9.903-13h1.886l-9.903 13z"/><path fill="currentColor" fill-rule="evenodd" d="M15 11.75a3.25 3.25 0 1 1-6.5 0 3.25 3.25 0 0 1 6.5 0m-1.5 0a1.75 1.75 0 1 1-3.5 0 1.75 1.75 0 0 1 3.5 0" clip-rule="evenodd"/></svg></button></div><div class="header-rect header-rect-tools"><div class="font-select-wrap"><select class="font-select"><option>Arial</option><option>Inter</option><option>Georgia</option><option>Courier New</option><option>Times New Roman</option></select><span class="font-select-chevron"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="12" height="12" viewBox="0 0 12 12"><path fill="currentColor" d="M1 5.348V3.446l5 3.303 5-3.4V5.25l-5 3.4z"/></svg></span></div></div><div class="header-rect header-rect-tools"><div class="font-size-wrap"><button type="button" class="header-tool-btn" data-tooltip="Уменьшить шрифт" title="Уменьшить шрифт" aria-label="Уменьшить шрифт"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="12" height="12" viewBox="0 0 12 12"><path fill="currentColor" d="M1 5.25h10v1.5H1z"/></svg></button><span class="font-size-value">9</span><button type="button" class="header-tool-btn" data-tooltip="Увеличить шрифт" title="Увеличить шрифт" aria-label="Увеличить шрифт"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="12" height="12" viewBox="0 0 12 12"><path fill="currentColor" d="M5.25 5.25V1h1.5v4.25H11v1.5H6.75V11h-1.5V6.75H1v-1.5z"/></svg></button></div></div><div class="header-rect header-rect-tools"><button type="button" class="header-tool-btn" data-tooltip="Жирный" title="Жирный"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16"><path fill="currentColor" d="M7.85 1.5q1.198 0 2.106.163.926.163 1.544.545.618.381.926.999.327.6.327 1.453 0 1.271-.654 1.98-.655.708-1.798.998-.245.06-.505.106.615.072 1.123.203 1.126.29 1.707.962.58.672.581 1.834 0 1.018-.4 1.743a3.2 3.2 0 0 1-1.144 1.163q-.726.436-1.707.654-.98.2-2.143.2H3.4V1.5zM5.798 8.818v3.668h2.324q.78 0 1.362-.163.6-.181.926-.58.345-.419.345-1.108 0-.672-.309-1.072-.308-.4-.925-.563-.618-.182-1.58-.182zm0-2.015H8.03q.69 0 1.198-.2.528-.2.818-.582.308-.4.308-1.016 0-.58-.253-.89-.255-.327-.746-.454a5 5 0 0 0-1.198-.127h-2.36z"/></svg></button><button type="button" class="header-tool-btn" data-tooltip="Курсив" title="Курсив"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16"><path fill="currentColor" d="M8.512 3.001H6v-1.5h6.5v1.5h-2.45L7.779 13H10v1.5H3.5V13h2.74z"/></svg></button><button type="button" class="header-tool-btn" data-tooltip="Подчёркивание" title="Подчёркивание"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" d="M3.25 1.5V8c0 1.295.435 2.433 1.25 3.25.817.815 1.955 1.25 3.25 1.25h.5c1.295 0 2.433-.435 3.25-1.25.815-.817 1.25-1.955 1.25-3.25V1.5h-1.5V8c0 .955-.315 1.692-.812 2.188-.496.497-1.233.812-2.188.812h-.5c-.955 0-1.692-.315-2.188-.812C5.065 9.692 4.75 8.955 4.75 8V1.5zM2 15.5h12V14H2z"/></svg></button><button type="button" class="header-tool-btn" data-tooltip="Зачёркивание" title="Зачёркивание"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" d="M7.838 14.682a9.3 9.3 0 0 1-1.761-.164 7.4 7.4 0 0 1-1.507-.454 4 4 0 0 1-1.072-.672v-1.634q.454.399 1.162.708.727.31 1.562.49a7.6 7.6 0 0 0 1.616.182 5.3 5.3 0 0 0 1.308-.145q.58-.145.962-.418.4-.271.6-.672.218-.417.218-.926 0-.472-.146-.799a1.33 1.33 0 0 0-.472-.581q-.326-.254-.926-.454a16 16 0 0 0-1.357-.41H1v-1.5h3.513l-.004-.004H9q.008 0 .014.003H15v1.5h-3.037q.066.076.125.157.328.4.454.908.145.49.145 1.107 0 .709-.218 1.308a3.1 3.1 0 0 1-.617 1.053q-.4.454-.999.781a5.2 5.2 0 0 1-1.344.472 8 8 0 0 1-1.67.164M3.807 6.201l.01.028h2.206l-.091-.064a1.7 1.7 0 0 1-.49-.581 1.9 1.9 0 0 1-.146-.763q0-.49.182-.854a1.6 1.6 0 0 1 .58-.617q.383-.254.963-.363.6-.127 1.38-.127.745 0 1.38.108.636.091 1.181.291.544.2.999.509V2.133a5.8 5.8 0 0 0-1.108-.454 7.4 7.4 0 0 0-1.162-.272q-.6-.09-1.29-.091-1.161 0-2.07.236-.89.236-1.507.69-.6.436-.908 1.108t-.309 1.543q0 .727.2 1.308"/></svg></button><button type="button" class="header-tool-btn" data-tooltip="Цвет текста" title="Цвет текста"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg></button><div class="split-btn"><button type="button" class="header-tool-btn split-btn-main" id="fillColorBtn" data-tooltip="Заливка" title="Заливка" aria-label="Заливка"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" fill-rule="evenodd" d="m3.575 1-.78 1.276L4.832 3.45 1.094 9.922l.002.001c-.474.943.853 2.685 3.004 3.926 2.184 1.26 4.39 1.527 4.928.595a1 1 0 0 0 .049-.097l4.406-7.628zm6.858 8H3.359l2.77-4.794 5.304 3.062z" clip-rule="evenodd"/><path fill="currentColor" d="M13.25 15c.966 0 1.75-.715 1.75-1.596 0-1.349-1.604-3.07-1.604-3.07h-.292s-1.604 1.74-1.604 3.07c0 .881.784 1.596 1.75 1.596"/></svg></button><button type="button" class="header-tool-btn split-btn-arrow" id="fillArrowBtn" aria-label="Цвет заливки"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="12" height="12" viewBox="0 0 12 12"><path fill="currentColor" d="M1 5.348V3.446l5 3.303 5-3.4V5.25l-5 3.4z"/></svg></button></div><div class="split-btn-menu" id="fillMenu"><button class="split-btn-menu-item" id="fillYellow"><span class="split-btn-color-dot" style="background:#fff176"></span>Жёлтый</button><button class="split-btn-menu-item" id="fillClear"><span class="split-btn-color-dot" style="background:#fff"></span>Без заливки</button></div></div><div class="header-rect header-rect-tools"><button type="button" class="header-tool-btn" data-tooltip="Границы" title="Границы"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h18v18H3z"/><path d="M3 9h18"/><path d="M3 15h18"/><path d="M9 3v18"/><path d="M15 3v18"/></svg></button><button type="button" class="header-tool-btn" data-tooltip="По левому краю" title="По левому краю"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" d="M1 2.5h14V1H1zm9 4.167H1v-1.5h9zm-9 4.167h14v-1.5H1zM1 15h9v-1.5H1z"/></svg></button><button type="button" class="header-tool-btn" data-tooltip="По центру" title="По центру"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" d="M1 2.5h14V1H1zm11.5 4.167h-9v-1.5h9zM1 10.834h14v-1.5H1zM3.5 15h9v-1.5h-9z"/></svg></button><button type="button" class="header-tool-btn" data-tooltip="По правому краю" title="По правому краю"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" d="M15 2.502H1v-1.5h14zM6 6.668h9v-1.5H6zm9 4.166H1v-1.5h14zM15 15H6v-1.5h9z"/></svg></button><button type="button" class="header-tool-btn" data-tooltip="По верху" title="По верху"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 21V3"/><path d="M12 12H3"/><path d="M18 21V3"/></svg></button><button type="button" class="header-tool-btn" data-tooltip="По середине" title="По середине"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 21V3"/><path d="M12 12H3"/><path d="M18 21V3"/></svg></button><button type="button" class="header-tool-btn" data-tooltip="По низу" title="По низу"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3v18"/><path d="M12 12H3"/><path d="M18 3v18"/></svg></button></div><div class="header-rect header-rect-tools"><div class="split-btn"><button type="button" class="header-tool-btn split-btn-main" id="filterBtn" data-tooltip="Фильтр" title="Фильтр" aria-label="Фильтр"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" fill-rule="evenodd" d="m6.5 14.053 3-1.133V7.798a3 3 0 0 1 .75-1.985L13.176 2.5H2.825l2.924 3.313A3 3 0 0 1 6.5 7.8zM1 2.699V1h14v1.698l-3.625 4.108a1.5 1.5 0 0 0-.375.992v6.159l-5.323 2.01A.5.5 0 0 1 5 15.5V7.8a1.5 1.5 0 0 0-.375-.993z" clip-rule="evenodd"/></svg></button><button type="button" class="header-tool-btn split-btn-arrow" id="filterArrowBtn" aria-label="Параметры фильтра"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="12" height="12" viewBox="0 0 12 12"><path fill="currentColor" d="M1 5.348V3.446l5 3.303 5-3.4V5.25l-5 3.4z"/></svg></button></div><div class="split-btn-menu" id="filterMenu"><button class="split-btn-menu-item" id="filterApply">Применить фильтр</button><button class="split-btn-menu-item" id="filterClear">Очистить фильтры</button></div><button type="button" class="header-tool-btn" data-tooltip="Ссылка" title="Ссылка"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="16" height="16" viewBox="0 0 16 16"><g clip-path="url(#link-outline-sm__a)"><path fill="currentColor" fill-rule="evenodd" d="M8.706 1.99a3.75 3.75 0 0 1 5.304 5.303l-1.301 1.3-1.06-1.06 1.3-1.3A2.25 2.25 0 1 0 9.767 3.05l-2.43 2.43a2.314 2.314 0 0 0 0 3.272l.309.309-1.06 1.06-.31-.308a3.814 3.814 0 0 1 0-5.394zm.708 3.889.308.308a3.814 3.814 0 0 1 0 5.393l-2.43 2.43A3.75 3.75 0 0 1 1.99 8.707l1.3-1.301 1.062 1.06L3.05 9.769a2.25 2.25 0 1 0 3.182 3.182l2.43-2.43a2.314 2.314 0 0 0 0-3.272l-.31-.309z" clip-rule="evenodd"/></g><defs><clipPath id="link-outline-sm__a"><path fill="#fff" d="M0 0h16v16H0z"/></clipPath></defs></svg></button><button type="button" class="header-tool-btn" data-tooltip="Сумма" title="Сумма"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" d="M3.135 15v-1.451l4.627-5.784L3.331 2.47V1h9.274v1.569H6.507q-.607 0-.921-.02l4.02 4.765v.53L5.153 13.43h1.432q.705-.02 1.49-.02h4.765V15z"/></svg></button><button type="button" class="header-tool-btn" data-tooltip="Диаграмма" title="Диаграмма"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" fill-rule="evenodd" d="M1 6.1c0-1.964 0-2.946.442-3.667a3 3 0 0 1 .99-.99C3.155 1 4.137 1 6.1 1h3.8c1.964 0 2.946 0 3.668.442a3 3 0 0 1 .99.99C15 3.155 15 4.137 15 6.1v3.8c0 1.964 0 2.946-.442 3.668a3 3 0 0 1-.99.99C12.846 15 11.864 15 9.9 15H6.1c-1.964 0-2.946 0-3.667-.442a3 3 0 0 1-.99-.99C1 12.846 1 11.864 1 9.9zm5.1-3.6h3.8c1.011 0 1.664.002 2.158.049.471.044.64.12.726.172a1.5 1.5 0 0 1 .495.495c.052.086.128.255.172.726.047.494.049 1.147.049 2.158v1.15h-2.75v-2h-5.5v3.5H2.5V6.1c0-1.011.002-1.664.049-2.158.044-.471.12-.64.172-.726a1.5 1.5 0 0 1 .495-.495c.086-.052.255-.128.726-.172C4.436 2.502 5.09 2.5 6.1 2.5m-3.6 7.75c.001.816.007 1.374.049 1.808.044.471.12.64.172.726a1.5 1.5 0 0 0 .495.495c.086.052.255.128.726.172.34.033.754.044 1.308.047V10.25zm4.25 3.25h2.5V6.75h-2.5zm4-.002a16 16 0 0 0 1.308-.046c.471-.045.64-.12.726-.173a1.5 1.5 0 0 0 .495-.495c.052-.086.128-.255.172-.726.047-.494.049-1.147.049-2.158V8.75h-2.75z" clip-rule="evenodd"/></svg></button></div><div class="header-rect header-rect-tools"><button type="button" class="header-tool-btn" data-tooltip="Обновить" title="Обновить"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M21 21v-5h-5"/></svg></button><button type="button" class="header-tool-btn" data-tooltip="Таблица" title="Таблица"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M4 9h16"/><path d="M4 15h16"/></svg></button></div></div></header>
+  <main class="doc-main">
+    <div class="doc-sheet" contenteditable="true" spellcheck="true">
+      <p></p>
+    </div>
+  </main>
+</body>
+
+</html>

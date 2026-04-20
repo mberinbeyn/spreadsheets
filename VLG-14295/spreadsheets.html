@@ -1,0 +1,1500 @@
+<html lang="ru">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Яндекс Таблицы</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Unbounded:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0
+    }
+
+    html,
+    body {
+      height: 100%;
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-size: 14px;
+      background: #f4f6f8;
+      color: #1a1a1a;
+      overflow: hidden
+    }
+
+    /* ============================================================
+       DESIGN TOKENS
+       ============================================================ */
+    :root {
+      --header-height:      130px;
+      --formula-bar-height:  32px;
+      --sheets-bar-height:   30px;
+      /* Orb design tokens */
+      --orb-spacing-m:        4px;
+      --orb-spacing-2-m:      8px;
+      --orb-rounding-6-m:     12px;
+      --orb-line-generiс:     rgba(181, 183, 192, 0.30);
+      --orb-misc-surface-meeting: rgba(255, 255, 255, 0.18);
+    }
+
+    /* ===== App shell — CSS Grid ===== */
+    #app {
+      display: grid;
+      grid-template-columns: 1fr;
+      grid-template-rows:
+        var(--header-height)
+        1fr
+        var(--sheets-bar-height);
+      height: 100vh;
+      width: 100%;
+    }
+
+    /* ===== App header ===== */
+    .app-header {
+      grid-column: 1 / -1;
+      grid-row: 1;
+      background: #e8f5e9;
+      border-bottom: 1px solid #c8e6c9;
+      overflow: visible;
+      padding: 12px 16px 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      min-height: 0;
+      position: relative;
+      z-index: 10;
+    }
+    /* Background SVG pinned to top-right of header */
+    .hdr-bg {
+      position: absolute;
+      right: 0;
+      top: 0;
+      pointer-events: none;
+      line-height: 0;
+      z-index: 0;
+    }
+
+    /* Ensure header content sits above the background */
+    .header-top,
+    .header-menu,
+    .header-bottom {
+      position: relative;
+      z-index: 1;
+    }
+
+    .header-top { z-index: 10; }
+
+    .header-top {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      flex-shrink: 0;
+    }
+
+    .header-bottom {
+      display: flex;
+      align-items: flex-end;
+      gap: 4px;
+      flex: 1;
+      overflow: visible;
+      min-width: 0;
+      min-height: 32px;
+      flex-shrink: 0;
+    }
+
+    .header-rect.hidden-overflow {
+      display: none;
+    }
+
+    .header-circle {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #d0d0d0;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .header-circle.logo {
+      background: transparent;
+      cursor: pointer;
+      transition: background .15s;
+      border-radius: 50%;
+    }
+
+    .header-circle.logo:hover {
+      background: rgba(0, 0, 0, 0.08);
+    }
+    .header-top .header-circle.logo:nth-child(2):hover {
+      background: transparent;
+      cursor: default;
+    }
+
+    .header-menu {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      flex-shrink: 0;
+      margin-top: 2px;
+      margin-bottom: 8px;
+    }
+
+    .header-menu-btn {
+      height: 28px;
+      padding: 0 8px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 14px;
+      color: #333;
+      transition: background .15s;
+      border-radius: 10px;
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .header-menu-btn:hover {
+      background: rgba(0, 0, 0, 0.08);
+    }
+
+    .header-title {
+      font-family: 'Inter', 'Google Sans', sans-serif;
+      font-weight: 400;
+      font-size: 15px;
+      color: #3d3d3d;
+      margin-left: 4px;
+      flex-shrink: 0;
+      border-radius: 4px;
+      padding: 2px 4px;
+      cursor: text;
+    }
+    .header-title:focus {
+      outline: none;
+      background: rgba(0,0,0,0.05);
+    }
+
+    .header-tool-btn-sparkles {
+      color: #e65100;
+    }
+    .header-tool-btn-sparkles:hover {
+      color: #bf360c;
+    }
+
+    .header-rect {
+      display: flex;
+      height: 32px;
+      padding: var(--orb-spacing-2-m);
+      justify-content: center;
+      align-items: center;
+      gap: var(--orb-spacing-m);
+      border-radius: var(--orb-rounding-6-m);
+      border: 1px solid var(--orb-line-generiс);
+      background: var(--orb-misc-surface-meeting);
+      backdrop-filter: blur(2.5px);
+      flex-shrink: 0;
+    }
+
+    .header-rect.header-rect-tools {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      padding: 2px;
+      border-radius: 12px;
+      width: fit-content;
+    }
+
+    .header-tool-btn {
+      position: relative;
+      width: 28px;
+      height: 28px;
+      min-width: 28px;
+      min-height: 28px;
+      flex-shrink: 0;
+      padding: 0;
+      border: none;
+      background: transparent;
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: rgb(0 0 0 / 75%);
+    }
+    .header-tool-btn::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      margin-top: 6px;
+      padding: 4px 8px;
+      background: rgba(0, 0, 0, 0.8);
+      color: #fff;
+      border-radius: 4px;
+      font-size: 12px;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.15s;
+      z-index: 1000;
+    }
+    .header-tool-btn:hover {
+      background: rgba(0, 0, 0, 0.06);
+    }
+    .header-tool-btn:hover::after {
+      opacity: 1;
+    }
+    .header-tool-btn:active {
+      background: rgba(0, 0, 0, 0.1);
+    }
+    .header-tool-btn:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+      pointer-events: auto;
+    }
+    .header-tool-btn:disabled:hover {
+      background: transparent;
+    }
+    .header-tool-btn:disabled::after {
+      display: none;
+    }
+    .header-tool-btn svg {
+      width: 15px;
+      height: 15px;
+    }
+    .header-tool-btn svg [stroke] {
+      stroke-width: 1.5;
+    }
+
+    /* ===== Font dropdown ===== */
+    .font-select-wrap {
+      position: relative;
+      width: 110px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      border-radius: 10px;
+      transition: background .15s;
+    }
+    .font-select-wrap:hover {
+      background: rgba(0, 0, 0, 0.06);
+    }
+    .font-select {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      appearance: none;
+      -webkit-appearance: none;
+      background: transparent;
+      border: none;
+      padding: 0 22px 0 8px;
+      font-family: inherit;
+      font-size: 14px;
+      color: rgb(0 0 0 / 75%);
+      cursor: pointer;
+      outline: none;
+    }
+    .font-select-chevron {
+      position: absolute;
+      right: 6px;
+      top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+      color: rgb(0 0 0 / 75%);
+      display: flex;
+    }
+
+    /* ===== Font size control ===== */
+    .font-size-wrap {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      height: 28px;
+      border-radius: 10px;
+    }
+    .font-size-value {
+      font-size: 14px;
+      color: rgb(0 0 0 / 75%);
+      min-width: 16px;
+      text-align: center;
+      user-select: none;
+      cursor: default;
+    }
+    .font-size-wrap .header-tool-btn svg {
+      width: 12px;
+      height: 12px;
+    }
+
+    /* ===== Workspace ===== */
+    .app-workspace {
+      grid-column: 1;
+      grid-row: 2;
+      display: flex;
+      flex-direction: row;
+      overflow: hidden;
+      min-width: 0;
+    }
+    .workspace-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-width: 0;
+      position: relative;
+    }
+
+    /* ===== Cell selection ===== */
+    .grid td.selected {
+      outline: 2px solid #4caf50;
+      outline-offset: -2px;
+      background: transparent !important
+    }
+    .grid thead th.col-highlight {
+      background: #e8f5e9 !important;
+      color: rgba(0, 0, 0, 0.9)
+    }
+    .grid .rn.row-highlight {
+      background: #e8f5e9 !important;
+      color: rgba(0, 0, 0, 0.9)
+    }
+
+    /* ===== Formula bar ===== */
+    .formula-bars {
+      flex-shrink: 0;
+    }
+    .formula-bar {
+      display: flex;
+      align-items: center;
+      border-bottom: 1px solid #e0e0e0;
+      flex: 0 0 var(--formula-bar-height);
+      height: 32px;
+      background: #fff;
+    }
+    .fb-variant {
+      width: 64px;
+      border-right: 1px solid #e0e0e0;
+      padding: 0 8px;
+      font-size: 11px;
+      color: #999;
+      display: flex;
+      align-items: center;
+      height: 100%;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .fb-cell {
+      width: 60px;
+      border-right: 1px solid #e0e0e0;
+      padding: 0 8px;
+      font-size: 12px;
+      color: #555;
+      display: flex;
+      align-items: center;
+      height: 100%
+    }
+
+    .fb-fx {
+      width: 28px;
+      border-right: 1px solid #e0e0e0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      color: #888;
+      font-style: italic;
+      height: 100%
+    }
+
+    .fb-input {
+      flex: 1;
+      padding: 0 8px;
+      font-size: 12px;
+      color: #333;
+      height: 24px;
+      box-sizing: border-box;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      outline: none;
+      font-family: Arial, sans-serif;
+      white-space: nowrap;
+      overflow-x: auto;
+      overflow-y: hidden;
+      cursor: text;
+      line-height: 22px;
+      align-self: center;
+      margin: 0 8px;
+    }
+    .fb-input::-webkit-scrollbar { height: 0; }
+    .fb-input:empty::before {
+      content: attr(data-placeholder);
+      color: #bbb;
+      pointer-events: none;
+    }
+    .fb-input:focus { outline: none; }
+    .fb-input .fxeq { color: #888; }
+    .fb-ref { font-weight: 400; }
+    .fx-paren.hl { background: rgba(0,0,0,0.09); border-radius: 2px; outline: 1px solid rgba(0,0,0,0.20); outline-offset: 0; }
+
+    /* ===== Grid scroll ===== */
+    .grid-scroll {
+      flex: 1;
+      overflow: auto;
+      min-height: 0;
+      position: relative;
+    }
+    .grid {
+      border-collapse: collapse;
+      font-size: 13px;
+      table-layout: fixed
+    }
+
+    .grid th,
+    .grid td {
+      border: 1px solid #e0e0e0;
+      padding: 2px 6px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis
+    }
+
+    .grid thead th {
+      background: #fff;
+      color: #333;
+      font-weight: 400;
+      text-align: center;
+      height: 22px;
+      position: sticky;
+      top: 0;
+      z-index: 3;
+      font-size: 12px
+    }
+
+    .grid thead th:first-child {
+      z-index: 4
+    }
+
+    .grid .rn {
+      background: #fff;
+      color: #333;
+      text-align: center;
+      width: 40px;
+      min-width: 40px;
+      font-size: 12px;
+      position: sticky;
+      left: 0;
+      z-index: 2
+    }
+
+    .grid td {
+      background: #fff;
+      color: #333;
+      height: 22px;
+      min-width: 80px
+    }
+
+    .grid td.num {
+      text-align: right;
+      font-variant-numeric: tabular-nums
+    }
+
+    /* ===== Sheets bar ===== */
+    .sheets-bar {
+      grid-column: 1 / -1;
+      grid-row: 3;
+      display: flex;
+      align-items: center;
+      border-top: 1px solid #e0e0e0;
+      background: #fff;
+      padding: 0 8px;
+      overflow: hidden;
+    }
+
+    .tab-btn {
+      padding: 5px 16px;
+      font-size: 12px;
+      font-family: inherit;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      color: #555;
+      border-bottom: 2px solid transparent;
+      transition: all .15s;
+      white-space: nowrap
+    }
+
+    .tab-btn.active {
+      background: #fff;
+      color: #2e7d32;
+      border-bottom-color: #4caf50;
+      font-weight: 700
+    }
+
+    .tab-btn:hover:not(.active) {
+      background: #eee
+    }
+
+    .tab-add {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+      color: #bbb;
+      margin-left: 4px;
+      padding: 2px 6px
+    }
+
+    .tab-nav {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 13px;
+      color: #999;
+      padding: 4px 6px
+    }
+
+    /* ===== Header top action buttons ===== */
+    .header-top-icon-btn {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border: none;
+      background: transparent;
+      border-radius: 10px;
+      cursor: pointer;
+      color: rgba(0, 0, 0, 0.75);
+      flex-shrink: 0;
+      transition: background 0.15s;
+    }
+    .header-top-icon-btn:hover {
+      background: rgba(0, 0, 0, 0.06);
+    }
+    .header-top-icon-btn::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      margin-top: 6px;
+      padding: 4px 8px;
+      background: rgba(0, 0, 0, 0.8);
+      color: #fff;
+      border-radius: 4px;
+      font-size: 12px;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.15s;
+      z-index: 1000;
+    }
+    .header-top-icon-btn:hover::after {
+      opacity: 1;
+    }
+    .header-share-btn {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 0 10px 0 8px;
+      height: 28px;
+      border: none;
+      background: transparent;
+      border-radius: 10px;
+      cursor: pointer;
+      color: rgba(0, 0, 0, 0.75);
+      font-size: 14px;
+      font-family: inherit;
+      flex-shrink: 0;
+      transition: background 0.15s;
+    }
+    .header-share-btn:hover {
+      background: rgba(0, 0, 0, 0.06);
+    }
+
+    /* ===== Split button ===== */
+    .split-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 1px;
+    }
+    .split-btn-main {
+      border-radius: 10px 0 0 10px !important;
+    }
+    .split-btn-arrow {
+      width: 16px !important;
+      min-width: 16px !important;
+      border-radius: 0 10px 10px 0 !important;
+      padding: 0 !important;
+      color: rgb(0 0 0 / 75%);
+    }
+    .split-btn-arrow svg {
+      width: 12px;
+      height: 12px;
+    }
+    .split-btn:hover .split-btn-main,
+    .split-btn:hover .split-btn-arrow {
+      background: rgba(0, 0, 0, 0.06);
+    }
+    .split-btn-menu {
+      position: fixed;
+      display: none;
+      flex-direction: column;
+      background: #fff;
+      border: 1px solid rgba(181, 183, 192, 0.4);
+      border-radius: 10px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+      z-index: 2000;
+      min-width: 160px;
+      padding: 4px;
+    }
+    .split-btn-menu.open {
+      display: flex;
+    }
+    .split-btn-menu-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 10px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      text-align: left;
+      font-family: inherit;
+      font-size: 13px;
+      color: rgba(0, 0, 0, 0.8);
+      border-radius: 7px;
+      width: 100%;
+    }
+    .split-btn-menu-item:hover {
+      background: rgba(0, 0, 0, 0.05);
+    }
+    .split-btn-color-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+      border: 1px solid rgba(0,0,0,0.15);
+      flex-shrink: 0;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="toast-container"></div>
+  <div class="app" id="app">
+
+    <!-- HEADER -->
+    <header class="app-header" id="appHeader"><div class="hdr-bg">
+      <img src="bg_ss.svg" alt="" width="1280" height="122">
+    </div><div class="header-top"><div class="header-circle logo"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 40 40"><path fill="url(#ya360a)" d="M20 40c11.046 0 20-8.954 20-20S31.046 0 20 0 0 8.954 0 20s8.954 20 20 20"></path><path fill="#fff" d="M20 31.6c3.755 0 6.8-5.194 6.8-11.6 0-6.407-3.045-11.6-6.8-11.6s-6.8 5.193-6.8 11.6c0 6.406 3.044 11.6 6.8 11.6"></path><path fill="#fff" fill-rule="evenodd" d="M7.251 10.8c-2.018-.104-4.45 4.12-4.45 9.198 0 5.08 2.432 9.302 4.45 9.198 2.001-.104 3.15-4.119 3.15-9.198S9.252 10.904 7.25 10.8m25.5 18.396c2.018.104 4.45-4.119 4.45-9.198s-2.432-9.302-4.45-9.198c-2.002.104-3.15 4.12-3.15 9.198 0 5.08 1.148 9.094 3.15 9.198" clip-rule="evenodd"></path><defs><radialGradient id="ya360a" cx="0" cy="0" r="1" gradientTransform="matrix(0 25.6 -33.2388 0 20 14.4)" gradientUnits="userSpaceOnUse"><stop stop-color="#FF9A6F"></stop><stop offset="0.61" stop-color="#FF6427"></stop><stop offset="1" stop-color="#EB581E"></stop></radialGradient></defs></svg></div><div class="header-circle logo"><svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12.4977 6.58733C12.8545 5.30119 14.2234 4.53793 15.5551 4.88255L26.1491 7.624C27.4808 7.96862 28.2712 9.29062 27.9143 10.5768L24.3534 23.4114C23.9965 24.6975 22.6277 25.4608 21.2959 25.1161L10.702 22.3747C9.37023 22.0301 8.57992 20.7081 8.93676 19.4219L12.4977 6.58733Z" fill="#0CBD70"></path><g filter="url(#f0)"><path d="M6.82263 18.7942C6.86381 21.5295 8.95049 23.7988 11.6728 24.0687L21.6247 25.0553C21.9643 25.089 22.2589 24.8222 22.2589 24.4809V11.7627C22.2589 11.4439 22.0005 11.1855 21.6816 11.1855H6.70807L6.82263 18.7942Z" fill="#147638"></path></g><path d="M3.99915 12.011C3.99915 10.6795 5.11682 9.6001 6.49554 9.6001H17.1031C18.4818 9.6001 19.5995 10.6795 19.5995 12.011V25.2H6.49554C5.11682 25.2 3.99915 24.1206 3.99915 22.7891V12.011Z" fill="#00D97B"></path><path d="M19.5989 23.176C19.5989 24.2941 20.8976 25.2006 22.0554 25.2006L19.5995 25.2L19.5989 23.176Z" fill="#00D97B"></path><path d="M7.59961 18.5913C7.59961 18.1012 7.99687 17.704 8.48691 17.704H10.6088C11.0988 17.704 11.4961 18.1012 11.4961 18.5913V20.7131C11.4961 21.2031 11.0988 21.6004 10.6088 21.6004H8.48691C7.99687 21.6004 7.59961 21.2031 7.59961 20.7131V18.5913Z" fill="white"></path><path d="M7.59963 14.0875C7.59963 13.5974 7.99689 13.2002 8.48693 13.2002H10.6088C11.0988 13.2002 11.4961 13.5974 11.4961 14.0875V16.2093C11.4961 16.6993 11.0988 17.0966 10.6088 17.0966H8.48693C7.99689 17.0966 7.59963 16.6993 7.59963 16.2093V14.0875Z" fill="white"></path><path d="M12.1033 18.5912C12.1033 18.1011 12.5006 17.7039 12.9906 17.7039H15.1125C15.6025 17.7039 15.9998 18.1011 15.9998 18.5912V20.713C15.9998 21.203 15.6025 21.6003 15.1125 21.6003H12.9906C12.5006 21.6003 12.1033 21.203 12.1033 20.713V18.5912Z" fill="white"></path><path d="M12.1033 14.0875C12.1033 13.5974 12.5006 13.2002 12.9906 13.2002H15.1125C15.6025 13.2002 15.9998 13.5974 15.9998 14.0875V16.2093C15.9998 16.6993 15.6025 17.0966 15.1125 17.0966H12.9906C12.5006 17.0966 12.1033 16.6993 12.1033 16.2093V14.0875Z" fill="white"></path><defs><filter id="f0" x="3.60514" y="8.08262" width="21.7567" height="20.0784" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feFlood flood-opacity="0" result="BackgroundImageFix"></feFlood><feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"></feBlend><feGaussianBlur stdDeviation="1.55147" result="effect1_foregroundBlur_47_29164"></feGaussianBlur></filter></defs></svg></div><span class="header-title" contenteditable="true" spellcheck="false">Подсветка типов данных</span><button type="button" class="header-top-icon-btn" data-tooltip="Сохранено" title="Сохранено" aria-label="Сохранено"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" d="M11.232 7.33 10.17 6.268 7 9.439 5.53 7.97 4.47 9.03 7 11.56z"></path><path fill="currentColor" fill-rule="evenodd" d="M7.5 1.5a5 5 0 0 0-4.995 4.766A4.014 4.014 0 0 0 4 14h7a5 5 0 0 0 .874-9.924A5 5 0 0 0 7.5 1.5M3.07 7.656l.89-.36.044-.96a3.5 3.5 0 0 1 6.559-1.532l.347.624.703.124A3.501 3.501 0 0 1 11 12.5H4.005a2.513 2.513 0 0 1-.936-4.843" clip-rule="evenodd"></path></svg></button><button type="button" class="header-top-icon-btn" style="margin-left:auto" data-tooltip="Все комментарии" title="Все комментарии" aria-label="Все комментарии"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" d="M11.998 2a3 3 0 0 1 3 3v3.985a3 3 0 0 1-3 3H9.572a4 4 0 0 0-2.295.724L5.37 14.045H4.003v-2.06a3.003 3.003 0 0 1-3.003-3V5a3 3 0 0 1 3-3zM4 3.5A1.5 1.5 0 0 0 2.5 5v3.985c0 .827.673 1.5 1.503 1.5h1.5v1.636l.914-.64a5.5 5.5 0 0 1 3.155-.996h2.426a1.5 1.5 0 0 0 1.5-1.5V5a1.5 1.5 0 0 0-1.5-1.5z"/></svg></button><button type="button" class="header-share-btn" style="margin-left:4px" title="Поделиться" aria-label="Поделиться"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" fill-rule="evenodd" d="M6.5 10.75q.736-.083 1.5-.083V14h1.455L16 8 9.455 2H8v3.352c-3.96.584-6.746 2.982-7.696 6.147a8.5 8.5 0 0 0-.304 1.5h1.273q.135-.125.275-.242C2.953 11.582 4.655 10.96 6.5 10.75m-4.075-.357C4.144 9.518 6.065 9.167 8 9.167h1.5v2.757L13.78 8 9.5 4.077v2.57l-1.28.188c-2.714.401-4.7 1.745-5.795 3.558" clip-rule="evenodd"/></svg>Поделиться</button><div class="header-circle" style="margin-left:8px;background:#4caf50;color:#fff;font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;">А</div></div><div class="header-menu"><button type="button" class="header-menu-btn">Файл</button><button type="button" class="header-menu-btn">Правка</button><button type="button" class="header-menu-btn">Вставка</button><button type="button" class="header-menu-btn">Формат</button><button type="button" class="header-menu-btn">Структура</button><button type="button" class="header-menu-btn">Данные</button><button type="button" class="header-menu-btn">Вид</button><button type="button" class="header-menu-btn">Справка</button></div><div class="header-bottom"><div class="header-rect header-rect-tools"><button type="button" class="header-tool-btn" data-tooltip="Отменить" title="Отменить" aria-label="Отменить"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16"><path fill="currentColor" d="m.94 5 3.53 3.53 1.06-1.06-1.72-1.72H9.5a3.25 3.25 0 0 1 0 6.5H5v1.5h4.5a4.75 4.75 0 0 0 0-9.5H3.81l1.72-1.72-1.06-1.06z"/></svg></button><button type="button" class="header-tool-btn" data-tooltip="Повторить" title="Повторить" aria-label="Повторить" disabled><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16"><path fill="currentColor" d="m14.25 5-3.53 3.53-1.06-1.06 1.719-1.72h-5.69a3.25 3.25 0 0 0 0 6.5h4.5v1.5h-4.5a4.75 4.75 0 0 1 0-9.5h5.69l-1.72-1.72 1.06-1.06z"/></svg></button></div><div class="header-rect header-rect-tools"><button type="button" class="header-tool-btn" data-tooltip="Подсказки" title="Подсказки" aria-label="Подсказки"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16"><g clip-path="url(#clip0_14331_36439)"><path fill="url(#neuro_gradient)" d="M5.66 2.62a1.1 1.1 0 0 0-1.6.92L3.92 5.5H5.5V7H3.82l-.4 5.84A2.32 2.32 0 0 1 0 14.72l.7-1.32a.82.82 0 0 0 1.2-.66L2.32 7H1V5.5h1.42l.14-2.06c.13-1.86 2.1-3 3.78-2.16z"></path><path fill="url(#paint1_linear_14331_36439)" d="M13.1 8.13c.22.61.39.92.61 1.14s.53.39 1.14.6l1.15.38v.35l-1.15.38c-.61.21-.92.38-1.14.6s-.39.53-.6 1.14l-.37 1.15h-.36L12 12.72a3 3 0 0 0-.6-1.14 3 3 0 0 0-1.15-.6L9.1 10.6v-.35l1.15-.38c.62-.21.92-.38 1.14-.6.23-.22.39-.53.6-1.14.22-.6.37-1.14.38-1.15h.34zm-2.47-2.96-.4.76c-.2.41-.26.65-.26.87s.07.46.27.87l.39.76-.18.18-.77-.39c-.41-.2-.65-.27-.87-.27s-.45.07-.87.27l-.76.4-.18-.2.4-.76c.19-.41.26-.65.26-.87s-.07-.46-.27-.87C7.2 5.5 7 5.17 7 5.17l.17-.18.77.39c.42.2.65.27.87.27s.46-.07.87-.27l.77-.4z"></path></g><defs><linearGradient id="neuro_gradient" x1="0" x2="10.52" y1="1" y2="5.76" gradientUnits="userSpaceOnUse"><stop stop-color="#f43f5e"></stop><stop offset="1" stop-color="#f7993c"></stop></linearGradient><linearGradient id="paint1_linear_14331_36439" x1="7" x2="15.88" y1="4.99" y2="13.99" gradientUnits="userSpaceOnUse"><stop stop-color="#f43f5e"></stop><stop offset="1" stop-color="#f7993c"></stop></linearGradient><clipPath id="clip0_14331_36439"><path fill="#fff" d="M0 0h16v16H0z"></path></clipPath></defs></svg></button></div><div class="header-rect header-rect-tools"><button type="button" class="header-tool-btn" data-tooltip="Копировать форматирование" title="Копировать форматирование"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" fill-rule="evenodd" d="M2.006 3.19c.012-.43.046-.714.146-.955a2 2 0 0 1 1.083-1.083C3.602 1 4.068 1 5 1h7c.932 0 1.398 0 1.765.152a2 2 0 0 1 1.083 1.083C15 2.602 15 3.068 15 4s0 1.398-.152 1.765a2 2 0 0 1-1.083 1.083C13.398 7 12.932 7 12 7H5c-.932 0-1.398 0-1.765-.152a2 2 0 0 1-.985-.88V6.5c0 .476 0 .796.017 1.043.017.241.046.358.078.435.127.307.37.55.677.677.077.032.194.061.435.078.247.017.567.017 1.043.017h6V13c0 .465 0 .697-.051.888a1.5 1.5 0 0 1-1.06 1.06C9.196 15 8.964 15 8.5 15s-.697 0-.888-.051a1.5 1.5 0 0 1-1.06-1.06C6.5 13.697 6.5 13.464 6.5 13v-2.75H4.475c-.445 0-.816 0-1.12-.02a2.8 2.8 0 0 1-.907-.19A2.75 2.75 0 0 1 .959 8.553c-.12-.29-.167-.59-.188-.907C.75 7.341.75 6.97.75 6.525V5.5c0-.968.5-1.82 1.256-2.31M5 2.5h7c.486 0 .776 0 .992.016.134.009.19.02.205.025a.5.5 0 0 1 .262.262c.004.014.016.071.025.205.015.216.016.506.016.992s0 .776-.016.992c-.009.134-.02.19-.025.205a.5.5 0 0 1-.262.262 1.3 1.3 0 0 1-.205.025c-.216.015-.506.016-.992.016H5c-.486 0-.776 0-.992-.016a1.3 1.3 0 0 1-.205-.025.5.5 0 0 1-.262-.262 1.3 1.3 0 0 1-.025-.205A17 17 0 0 1 3.5 4c0-.486 0-.776.016-.992.009-.134.02-.19.025-.205a.5.5 0 0 1 .262-.262 1.3 1.3 0 0 1 .205-.025C4.224 2.5 4.514 2.5 5 2.5m3 7.754h1V13c0 .246 0 .38-.005.479v.015l-.016.001c-.098.005-.233.005-.479.005s-.38 0-.479-.005h-.015l-.001-.016A12 12 0 0 1 8 13z" clip-rule="evenodd"/></svg></button><button type="button" class="header-tool-btn" data-tooltip="Печать" title="Печать"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16"><path fill="currentColor" d="M12 4.02c.49.026.843.082 1.148.209a3 3 0 0 1 1.624 1.623C15 6.402 15 7.102 15 8.5s0 2.097-.229 2.648a3 3 0 0 1-1.623 1.625c-.305.126-.657.182-1.148.207V15H4v-2.02c-.49-.025-.843-.08-1.148-.207a3 3 0 0 1-1.623-1.625C1 10.598 1 9.898 1 8.5s0-2.097.229-2.648a3 3 0 0 1 1.623-1.623c.305-.127.657-.183 1.148-.208V1h8zM5.5 9.5v4h5v-4zm0-4c-.72 0-1.184.001-1.54.025-.341.024-.472.063-.534.09a1.5 1.5 0 0 0-.812.81c-.026.063-.065.194-.089.536-.024.355-.025.82-.025 1.539 0 .72.001 1.185.025 1.54.024.342.063.472.09.534a1.5 1.5 0 0 0 .81.813c.063.026.194.065.536.089l.039.001V8h8v3.477l.04-.001c.341-.024.472-.063.534-.09a1.5 1.5 0 0 0 .812-.812c.026-.062.065-.192.089-.534.024-.355.025-.82.025-1.54s-.001-1.184-.025-1.54c-.024-.341-.063-.472-.09-.534a1.5 1.5 0 0 0-.81-.812c-.063-.026-.194-.065-.536-.089-.355-.024-.82-.025-1.539-.025zm0-3V4h5V2.5z"/></svg></button></div><div class="header-rect header-rect-tools"><button type="button" class="header-tool-btn" data-tooltip="Валюта" title="Валюта"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="16" height="16" viewBox="0 0 16 16"><g fill="currentColor" clip-path="url(#cash-stack-outline-sm__a)"><path d="M4 2.3h8V.8H4zM2 4.55h12v-1.5H2z"/><path fill-rule="evenodd" d="M10.5 10.3a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0m-1.5 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0" clip-rule="evenodd"/><path d="M4.25 9.75a.75.75 0 0 0-.75.75v.75h.75a.75.75 0 0 0 0-1.5m7.5 0a.75.75 0 0 0-.75.75v.75h.75a.75.75 0 0 0 0-1.5"/><path fill-rule="evenodd" d="M.5 8.286a3 3 0 0 1 3-3h9a3 3 0 0 1 3 3V12.3a3 3 0 0 1-3 3h-9a3 3 0 0 1-3-3zm3-1.5h9a1.5 1.5 0 0 1 1.5 1.5V12.3a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 2 12.3V8.286a1.5 1.5 0 0 1 1.5-1.5" clip-rule="evenodd"/></g><defs><clipPath id="cash-stack-outline-sm__a"><path fill="#fff" d="M0 0h16v16H0z"/></clipPath></defs></svg></button><button type="button" class="header-tool-btn" data-tooltip="Проценты" title="Проценты"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" fill-rule="evenodd" d="M4.25 7.5a3.25 3.25 0 1 0 0-6.5 3.25 3.25 0 0 0 0 6.5m0-1.5a1.75 1.75 0 1 0 0-3.5 1.75 1.75 0 0 0 0 3.5" clip-rule="evenodd"/><path fill="currentColor" d="m2.105 14.5 9.903-13h1.886l-9.903 13z"/><path fill="currentColor" fill-rule="evenodd" d="M15 11.75a3.25 3.25 0 1 1-6.5 0 3.25 3.25 0 0 1 6.5 0m-1.5 0a1.75 1.75 0 1 1-3.5 0 1.75 1.75 0 0 1 3.5 0" clip-rule="evenodd"/></svg></button></div><div class="header-rect header-rect-tools"><div class="font-select-wrap"><select class="font-select"><option>Arial</option><option>Inter</option><option>Georgia</option><option>Courier New</option><option>Times New Roman</option></select><span class="font-select-chevron"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="12" height="12" viewBox="0 0 12 12"><path fill="currentColor" d="M1 5.348V3.446l5 3.303 5-3.4V5.25l-5 3.4z"/></svg></span></div></div><div class="header-rect header-rect-tools"><div class="font-size-wrap"><button type="button" class="header-tool-btn" data-tooltip="Уменьшить шрифт" title="Уменьшить шрифт" aria-label="Уменьшить шрифт"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="12" height="12" viewBox="0 0 12 12"><path fill="currentColor" d="M1 5.25h10v1.5H1z"/></svg></button><span class="font-size-value">9</span><button type="button" class="header-tool-btn" data-tooltip="Увеличить шрифт" title="Увеличить шрифт" aria-label="Увеличить шрифт"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="12" height="12" viewBox="0 0 12 12"><path fill="currentColor" d="M5.25 5.25V1h1.5v4.25H11v1.5H6.75V11h-1.5V6.75H1v-1.5z"/></svg></button></div></div><div class="header-rect header-rect-tools"><button type="button" class="header-tool-btn" data-tooltip="Жирный" title="Жирный"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16"><path fill="currentColor" d="M7.85 1.5q1.198 0 2.106.163.926.163 1.544.545.618.381.926.999.327.6.327 1.453 0 1.271-.654 1.98-.655.708-1.798.998-.245.06-.505.106.615.072 1.123.203 1.126.29 1.707.962.58.672.581 1.834 0 1.018-.4 1.743a3.2 3.2 0 0 1-1.144 1.163q-.726.436-1.707.654-.98.2-2.143.2H3.4V1.5zM5.798 8.818v3.668h2.324q.78 0 1.362-.163.6-.181.926-.58.345-.419.345-1.108 0-.672-.309-1.072-.308-.4-.925-.563-.618-.182-1.58-.182zm0-2.015H8.03q.69 0 1.198-.2.528-.2.818-.582.308-.4.308-1.016 0-.58-.253-.89-.255-.327-.746-.454a5 5 0 0 0-1.198-.127h-2.36z"/></svg></button><button type="button" class="header-tool-btn" data-tooltip="Курсив" title="Курсив"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16"><path fill="currentColor" d="M8.512 3.001H6v-1.5h6.5v1.5h-2.45L7.779 13H10v1.5H3.5V13h2.74z"/></svg></button><button type="button" class="header-tool-btn" data-tooltip="Подчёркивание" title="Подчёркивание"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" d="M3.25 1.5V8c0 1.295.435 2.433 1.25 3.25.817.815 1.955 1.25 3.25 1.25h.5c1.295 0 2.433-.435 3.25-1.25.815-.817 1.25-1.955 1.25-3.25V1.5h-1.5V8c0 .955-.315 1.692-.812 2.188-.496.497-1.233.812-2.188.812h-.5c-.955 0-1.692-.315-2.188-.812C5.065 9.692 4.75 8.955 4.75 8V1.5zM2 15.5h12V14H2z"/></svg></button><button type="button" class="header-tool-btn" data-tooltip="Зачёркивание" title="Зачёркивание"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" d="M7.838 14.682a9.3 9.3 0 0 1-1.761-.164 7.4 7.4 0 0 1-1.507-.454 4 4 0 0 1-1.072-.672v-1.634q.454.399 1.162.708.727.31 1.562.49a7.6 7.6 0 0 0 1.616.182 5.3 5.3 0 0 0 1.308-.145q.58-.145.962-.418.4-.271.6-.672.218-.417.218-.926 0-.472-.146-.799a1.33 1.33 0 0 0-.472-.581q-.326-.254-.926-.454a16 16 0 0 0-1.357-.41H1v-1.5h3.513l-.004-.004H9q.008 0 .014.003H15v1.5h-3.037q.066.076.125.157.328.4.454.908.145.49.145 1.107 0 .709-.218 1.308a3.1 3.1 0 0 1-.617 1.053q-.4.454-.999.781a5.2 5.2 0 0 1-1.344.472 8 8 0 0 1-1.67.164M3.807 6.201l.01.028h2.206l-.091-.064a1.7 1.7 0 0 1-.49-.581 1.9 1.9 0 0 1-.146-.763q0-.49.182-.854a1.6 1.6 0 0 1 .58-.617q.383-.254.963-.363.6-.127 1.38-.127.745 0 1.38.108.636.091 1.181.291.544.2.999.509V2.133a5.8 5.8 0 0 0-1.108-.454 7.4 7.4 0 0 0-1.162-.272q-.6-.09-1.29-.091-1.161 0-2.07.236-.89.236-1.507.69-.6.436-.908 1.108t-.309 1.543q0 .727.2 1.308"/></svg></button><button type="button" class="header-tool-btn" data-tooltip="Цвет текста" title="Цвет текста"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg></button><div class="split-btn"><button type="button" class="header-tool-btn split-btn-main" id="fillColorBtn" data-tooltip="Заливка" title="Заливка" aria-label="Заливка"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" fill-rule="evenodd" d="m3.575 1-.78 1.276L4.832 3.45 1.094 9.922l.002.001c-.474.943.853 2.685 3.004 3.926 2.184 1.26 4.39 1.527 4.928.595a1 1 0 0 0 .049-.097l4.406-7.628zm6.858 8H3.359l2.77-4.794 5.304 3.062z" clip-rule="evenodd"/><path fill="currentColor" d="M13.25 15c.966 0 1.75-.715 1.75-1.596 0-1.349-1.604-3.07-1.604-3.07h-.292s-1.604 1.74-1.604 3.07c0 .881.784 1.596 1.75 1.596"/></svg></button><button type="button" class="header-tool-btn split-btn-arrow" id="fillArrowBtn" aria-label="Цвет заливки"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="12" height="12" viewBox="0 0 12 12"><path fill="currentColor" d="M1 5.348V3.446l5 3.303 5-3.4V5.25l-5 3.4z"/></svg></button></div><div class="split-btn-menu" id="fillMenu"><button class="split-btn-menu-item" id="fillYellow"><span class="split-btn-color-dot" style="background:#fff176"></span>Жёлтый</button><button class="split-btn-menu-item" id="fillClear"><span class="split-btn-color-dot" style="background:#fff"></span>Без заливки</button></div></div><div class="header-rect header-rect-tools"><button type="button" class="header-tool-btn" data-tooltip="Границы" title="Границы"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h18v18H3z"/><path d="M3 9h18"/><path d="M3 15h18"/><path d="M9 3v18"/><path d="M15 3v18"/></svg></button><button type="button" class="header-tool-btn" data-tooltip="По левому краю" title="По левому краю"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" d="M1 2.5h14V1H1zm9 4.167H1v-1.5h9zm-9 4.167h14v-1.5H1zM1 15h9v-1.5H1z"/></svg></button><button type="button" class="header-tool-btn" data-tooltip="По центру" title="По центру"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" d="M1 2.5h14V1H1zm11.5 4.167h-9v-1.5h9zM1 10.834h14v-1.5H1zM3.5 15h9v-1.5h-9z"/></svg></button><button type="button" class="header-tool-btn" data-tooltip="По правому краю" title="По правому краю"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" d="M15 2.502H1v-1.5h14zM6 6.668h9v-1.5H6zm9 4.166H1v-1.5h14zM15 15H6v-1.5h9z"/></svg></button><button type="button" class="header-tool-btn" data-tooltip="По верху" title="По верху"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 21V3"/><path d="M12 12H3"/><path d="M18 21V3"/></svg></button><button type="button" class="header-tool-btn" data-tooltip="По середине" title="По середине"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 21V3"/><path d="M12 12H3"/><path d="M18 21V3"/></svg></button><button type="button" class="header-tool-btn" data-tooltip="По низу" title="По низу"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3v18"/><path d="M12 12H3"/><path d="M18 3v18"/></svg></button></div><div class="header-rect header-rect-tools"><div class="split-btn"><button type="button" class="header-tool-btn split-btn-main" id="filterBtn" data-tooltip="Фильтр" title="Фильтр" aria-label="Фильтр"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" fill-rule="evenodd" d="m6.5 14.053 3-1.133V7.798a3 3 0 0 1 .75-1.985L13.176 2.5H2.825l2.924 3.313A3 3 0 0 1 6.5 7.8zM1 2.699V1h14v1.698l-3.625 4.108a1.5 1.5 0 0 0-.375.992v6.159l-5.323 2.01A.5.5 0 0 1 5 15.5V7.8a1.5 1.5 0 0 0-.375-.993z" clip-rule="evenodd"/></svg></button><button type="button" class="header-tool-btn split-btn-arrow" id="filterArrowBtn" aria-label="Параметры фильтра"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="12" height="12" viewBox="0 0 12 12"><path fill="currentColor" d="M1 5.348V3.446l5 3.303 5-3.4V5.25l-5 3.4z"/></svg></button></div><div class="split-btn-menu" id="filterMenu"><button class="split-btn-menu-item" id="filterApply">Применить фильтр</button><button class="split-btn-menu-item" id="filterClear">Очистить фильтры</button></div><button type="button" class="header-tool-btn" data-tooltip="Ссылка" title="Ссылка"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="16" height="16" viewBox="0 0 16 16"><g clip-path="url(#link-outline-sm__a)"><path fill="currentColor" fill-rule="evenodd" d="M8.706 1.99a3.75 3.75 0 0 1 5.304 5.303l-1.301 1.3-1.06-1.06 1.3-1.3A2.25 2.25 0 1 0 9.767 3.05l-2.43 2.43a2.314 2.314 0 0 0 0 3.272l.309.309-1.06 1.06-.31-.308a3.814 3.814 0 0 1 0-5.394zm.708 3.889.308.308a3.814 3.814 0 0 1 0 5.393l-2.43 2.43A3.75 3.75 0 0 1 1.99 8.707l1.3-1.301 1.062 1.06L3.05 9.769a2.25 2.25 0 1 0 3.182 3.182l2.43-2.43a2.314 2.314 0 0 0 0-3.272l-.31-.309z" clip-rule="evenodd"/></g><defs><clipPath id="link-outline-sm__a"><path fill="#fff" d="M0 0h16v16H0z"/></clipPath></defs></svg></button><button type="button" class="header-tool-btn" data-tooltip="Сумма" title="Сумма"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" d="M3.135 15v-1.451l4.627-5.784L3.331 2.47V1h9.274v1.569H6.507q-.607 0-.921-.02l4.02 4.765v.53L5.153 13.43h1.432q.705-.02 1.49-.02h4.765V15z"/></svg></button><button type="button" class="header-tool-btn" data-tooltip="Диаграмма" title="Диаграмма"><svg xmlns="http://www.w3.org/2000/svg" fill="none" width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" fill-rule="evenodd" d="M1 6.1c0-1.964 0-2.946.442-3.667a3 3 0 0 1 .99-.99C3.155 1 4.137 1 6.1 1h3.8c1.964 0 2.946 0 3.668.442a3 3 0 0 1 .99.99C15 3.155 15 4.137 15 6.1v3.8c0 1.964 0 2.946-.442 3.668a3 3 0 0 1-.99.99C12.846 15 11.864 15 9.9 15H6.1c-1.964 0-2.946 0-3.667-.442a3 3 0 0 1-.99-.99C1 12.846 1 11.864 1 9.9zm5.1-3.6h3.8c1.011 0 1.664.002 2.158.049.471.044.64.12.726.172a1.5 1.5 0 0 1 .495.495c.052.086.128.255.172.726.047.494.049 1.147.049 2.158v1.15h-2.75v-2h-5.5v3.5H2.5V6.1c0-1.011.002-1.664.049-2.158.044-.471.12-.64.172-.726a1.5 1.5 0 0 1 .495-.495c.086-.052.255-.128.726-.172C4.436 2.502 5.09 2.5 6.1 2.5m-3.6 7.75c.001.816.007 1.374.049 1.808.044.471.12.64.172.726a1.5 1.5 0 0 0 .495.495c.086.052.255.128.726.172.34.033.754.044 1.308.047V10.25zm4.25 3.25h2.5V6.75h-2.5zm4-.002a16 16 0 0 0 1.308-.046c.471-.045.64-.12.726-.173a1.5 1.5 0 0 0 .495-.495c.052-.086.128-.255.172-.726.047-.494.049-1.147.049-2.158V8.75h-2.75z" clip-rule="evenodd"/></svg></button></div><div class="header-rect header-rect-tools"><button type="button" class="header-tool-btn" data-tooltip="Обновить" title="Обновить"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M21 21v-5h-5"/></svg></button><button type="button" class="header-tool-btn" data-tooltip="Таблица" title="Таблица"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M4 9h16"/><path d="M4 15h16"/></svg></button></div></div></header>
+
+    <!-- WORKSPACE: formula bar + grid + selection sidebar -->
+    <div class="app-workspace" id="appWorkspace">
+      <div class="workspace-main">
+        <div class="formula-bars">
+          <div class="formula-bar" id="formulaBar" style="display:none">
+            <div class="fb-variant">Вариант 1</div>
+            <div class="fb-cell">A1</div>
+            <div class="fb-fx">fx</div>
+            <div class="fb-input" id="fbInput" contenteditable="true" spellcheck="false" role="textbox" aria-label="Формула"></div>
+          </div>
+          <div class="formula-bar" id="formulaBar2">
+            <!-- <div class="fb-variant">Вариант 2</div> -->
+            <div class="fb-cell">A1</div>
+            <div class="fb-fx">fx</div>
+            <div class="fb-input" id="fbInput2" contenteditable="true" spellcheck="false" role="textbox" aria-label="Формула"></div>
+          </div>
+        </div>
+        <div class="grid-scroll" id="grid-scroll"></div>
+      </div>
+    </div>
+
+    <!-- SHEETS BAR -->
+    <div class="sheets-bar" id="sheetsBar">
+      <button class="tab-nav">☰</button>
+      <button class="tab-btn active" data-sheet="source">Лист 1</button>
+      <button class="tab-add">＋</button>
+    </div>
+
+  </div>
+
+  <script>
+    const DATA = [
+      ['Город', 'Категория', 'Товар', 'Количество', 'Цена за ед.'],
+      ['Новосибирск', 'Молочные продукты', 'Молоко', 5, 89],
+      ['Москва', 'Хлеб и выпечка', 'Хлеб ржаной', 12, 55],
+      ['Москва', 'Молочные продукты', 'Йогурт', 10, 49],
+      ['Москва', 'Бакалея', 'Макароны', 2, 85],
+      ['Новосибирск', 'Хлеб и выпечка', 'Хлеб ржаной', 10, 55],
+      ['Москва', 'Молочные продукты', 'Йогурт', 12, 49],
+      ['Москва', 'Снеки', 'Крекеры', 8, 89],
+      ['Москва', 'Снеки', 'Сухарики', 13, 59],
+      ['Екатеринбург', 'Хлеб и выпечка', 'Батон', 5, 69],
+      ['Екатеринбург', 'Хлеб и выпечка', 'Хлеб ржаной', 2, 55],
+      ['Москва', 'Молочные продукты', 'Творог', 6, 95],
+      ['Москва', 'Напитки', 'Лимонад', 12, 79],
+      ['Москва', 'Бакалея', 'Мука', 15, 79],
+      ['Новосибирск', 'Бакалея', 'Макароны', 5, 85],
+      ['Новосибирск', 'Снеки', 'Сухарики', 4, 59],
+      ['Новосибирск', 'Молочные продукты', 'Молоко', 4, 89],
+      ['Москва', 'Напитки', 'Сок апельсиновый', 14, 109],
+      ['Екатеринбург', 'Молочные продукты', 'Творог', 8, 95],
+      ['Екатеринбург', 'Напитки', 'Вода', 6, 39],
+      ['Новосибирск', 'Хлеб и выпечка', 'Булочка', 15, 35],
+      ['Новосибирск', 'Молочные продукты', 'Йогурт', 3, 49],
+      ['Москва', 'Снеки', 'Орехи', 8, 199],
+      ['Новосибирск', 'Бакалея', 'Гречка', 12, 119],
+      ['Новосибирск', 'Снеки', 'Орехи', 6, 199],
+      ['Москва', 'Молочные продукты', 'Кефир', 13, 75],
+      ['Екатеринбург', 'Напитки', 'Чай в бутылке', 2, 59],
+      ['Москва', 'Хлеб и выпечка', 'Булочка', 11, 35],
+      ['Новосибирск', 'Бакалея', 'Овсянка', 8, 69],
+      ['Москва', 'Хлеб и выпечка', 'Булочка', 4, 35],
+      ['Новосибирск', 'Снеки', 'Сухарики', 10, 59],
+      ['Екатеринбург', 'Бакалея', 'Мука', 6, 79],
+      ['Новосибирск', 'Хлеб и выпечка', 'Хлеб ржаной', 8, 55],
+      ['Москва', 'Молочные продукты', 'Молоко', 3, 89],
+      ['Новосибирск', 'Хлеб и выпечка', 'Батон', 2, 69],
+      ['Новосибирск', 'Бакалея', 'Овсянка', 8, 69],
+      ['Новосибирск', 'Снеки', 'Сухарики', 14, 59],
+      ['Новосибирск', 'Молочные продукты', 'Молоко', 15, 89],
+      ['Новосибирск', 'Снеки', 'Сухарики', 6, 59],
+      ['Екатеринбург', 'Молочные продукты', 'Сметана', 3, 65],
+      ['Новосибирск', 'Бакалея', 'Макароны', 15, 85],
+      ['Новосибирск', 'Напитки', 'Вода', 15, 39],
+      ['Новосибирск', 'Молочные продукты', 'Сметана', 9, 65],
+      ['Москва', 'Снеки', 'Орехи', 6, 199],
+      ['Новосибирск', 'Хлеб и выпечка', 'Батон', 6, 45],
+      ['Москва', 'Бакалея', 'Макароны', 15, 85],
+      ['Москва', 'Напитки', 'Лимонад', 1, 79],
+      ['Москва', 'Хлеб и выпечка', 'Батон', 12, 45],
+      ['Новосибирск', 'Бакалея', 'Макароны', 13, 85],
+      ['Новосибирск', 'Хлеб и выпечка', 'Хлеб ржаной', 8, 55],
+      ['Екатеринбург', 'Снеки', 'Орехи', 9, 199],
+      ['Москва', 'Снеки', 'Крекеры', 15, 89],
+      ['Новосибирск', 'Снеки', 'Орехи', 5, 199],
+      ['Екатеринбург', 'Бакалея', 'Гречка', 15, 119],
+      ['Москва', 'Снеки', 'Крекеры', 4, 89],
+      ['Екатеринбург', 'Хлеб и выпечка', 'Батон', 1, 45],
+      ['Новосибирск', 'Снеки', 'Орехи', 4, 199],
+      ['Новосибирск', 'Молочные продукты', 'Молоко', 11, 89],
+      ['Москва', 'Молочные продукты', 'Кефир', 15, 75],
+      ['Москва', 'Молочные продукты', 'Сметана', 9, 65],
+      ['Новосибирск', 'Хлеб и выпечка', 'Булочка', 8, 35],
+      ['Новосибирск', 'Хлеб и выпечка', 'Хлеб ржаной', 15, 55],
+      ['Москва', 'Снеки', 'Крекеры', 13, 89],
+      ['Москва', 'Бакалея', 'Овсянка', 2, 69],
+      ['Екатеринбург', 'Молочные продукты', 'Творог', 7, 95],
+      ['Новосибирск', 'Бакалея', 'Овсянка', 1, 69],
+      ['Екатеринбург', 'Молочные продукты', 'Молоко', 12, 89],
+      ['Москва', 'Напитки', 'Сок апельсиновый', 4, 109],
+      ['Москва', 'Хлеб и выпечка', 'Батон', 7, 69],
+      ['Екатеринбург', 'Хлеб и выпечка', 'Булочка', 4, 35],
+      ['Новосибирск', 'Молочные продукты', 'Творог', 2, 95],
+      ['Москва', 'Молочные продукты', 'Йогурт', 2, 49],
+      ['Екатеринбург', 'Хлеб и выпечка', 'Хлеб ржаной', 8, 55],
+      ['Екатеринбург', 'Бакалея', 'Рис', 15, 99],
+      ['Екатеринбург', 'Молочные продукты', 'Кефир', 1, 75],
+      ['Екатеринбург', 'Бакалея', 'Гречка', 5, 119],
+      ['Новосибирск', 'Бакалея', 'Мука', 12, 79],
+      ['Москва', 'Бакалея', 'Рис', 5, 99],
+      ['Новосибирск', 'Хлеб и выпечка', 'Батон', 12, 45],
+      ['Новосибирск', 'Снеки', 'Чипсы', 6, 129],
+      ['Новосибирск', 'Молочные продукты', 'Молоко', 8, 89],
+      ['Москва', 'Снеки', 'Орехи', 9, 199],
+      ['Москва', 'Молочные продукты', 'Кефир', 10, 75],
+      ['Екатеринбург', 'Молочные продукты', 'Кефир', 2, 75],
+      ['Новосибирск', 'Снеки', 'Орехи', 10, 199],
+      ['Москва', 'Молочные продукты', 'Йогурт', 7, 49],
+      ['Екатеринбург', 'Снеки', 'Сухарики', 4, 59],
+      ['Екатеринбург', 'Напитки', 'Вода', 7, 39],
+      ['Екатеринбург', 'Хлеб и выпечка', 'Булочка', 6, 35],
+      ['Екатеринбург', 'Молочные продукты', 'Молоко', 10, 89],
+      ['Москва', 'Снеки', 'Чипсы', 9, 129],
+    ];
+
+    const FIELDS = [
+      { id: 'f0', name: 'Город', col: 0, type: 'text', color: '#90caf9' },
+      { id: 'f1', name: 'Категория', col: 1, type: 'text', color: '#fff59d' },
+      { id: 'f2', name: 'Товар', col: 2, type: 'text', color: '#ffcc80' },
+      { id: 'f3', name: 'Количество', col: 3, type: 'number', color: '#80cbc4' },
+      { id: 'f4', name: 'Цена за ед.', col: 4, type: 'number', color: '#b0bec5' },
+    ];
+    const TYPE_ICON = { date: '📅', text: 'Аа', number: '#', mixed: '⚠' };
+    const COLS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+
+    /* ====== RENDER SHEET ====== */
+    function renderSheet() {
+      renderSourceGrid(document.getElementById('grid-scroll'));
+      requestAnimationFrame(selectDefaultCell);
+    }
+
+    function renderSourceGrid(c) {
+      const nc = 26, tr = 50;
+      let h = '<table class="grid"><thead><tr><th class="rn"></th>';
+      for (let i = 0; i < nc; i++) h += `<th style="min-width:${i === 0 ? 80 : i <= 1 ? 100 : i === 2 ? 130 : 90}px">${COLS[i]}</th>`;
+      h += '</tr></thead><tbody>';
+      for (let r = 0; r < tr; r++) {
+        h += '<tr>'; h += `<td class="rn">${r + 1}</td>`;
+        const row = DATA[r];
+        for (let c = 0; c < nc; c++) {
+          const v = row && row[c] !== undefined ? row[c] : ''; const isN = typeof v === 'number';
+          h += `<td class="${isN ? 'num' : ''}" style="${r === 0 ? 'font-weight:700' : ''}">${isN ? v.toLocaleString('ru-RU') : v}</td>`;
+        }
+        h += '</tr>';
+      }
+      h += '</tbody></table>'; c.innerHTML = h;
+    }
+
+
+
+
+
+
+
+
+
+    /* ====== RANGE SELECTION ====== */
+    const SEL_GREEN = '#1a73e8';
+    let selStartRow = 0, selStartCol = 0, selEndRow = 0, selEndCol = 0;
+    let selActiveCellRow = 0, selActiveCellCol = 0;
+    let selDragging = false;
+    let selSvgEl = null, selRangeEl = null, selActiveEl = null, selHandleEl = null, fxPickRectEl = null, fxRefHoverEl = null;
+
+    function initGridSvg() {
+      const gs = document.getElementById('grid-scroll');
+      if (!gs) return;
+      const existing = gs.querySelector('.grid-sel-svg');
+      if (existing) existing.remove();
+      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svg.className = 'grid-sel-svg';
+      svg.style.cssText = 'position:absolute;top:0;left:0;pointer-events:none;overflow:visible;width:1px;height:1px;z-index:5;';
+      const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+      const pat = document.createElementNS('http://www.w3.org/2000/svg', 'pattern');
+      pat.setAttribute('id', 'gErrPat'); pat.setAttribute('width', '8'); pat.setAttribute('height', '8'); pat.setAttribute('patternUnits', 'userSpaceOnUse');
+      const pr1 = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      pr1.setAttribute('width', '4'); pr1.setAttribute('height', '4'); pr1.setAttribute('fill', '#EF4444'); pr1.setAttribute('fill-opacity', '0.1');
+      const pr2 = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      pr2.setAttribute('width', '4'); pr2.setAttribute('height', '4'); pr2.setAttribute('x', '4'); pr2.setAttribute('y', '4'); pr2.setAttribute('fill', '#EF4444'); pr2.setAttribute('fill-opacity', '0.1');
+      pat.append(pr1, pr2); defs.append(pat); svg.append(defs);
+      const rangeRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      rangeRect.setAttribute('x', '0'); rangeRect.setAttribute('y', '0'); rangeRect.setAttribute('width', '0'); rangeRect.setAttribute('height', '0');
+      const activeRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      activeRect.setAttribute('x', '0'); activeRect.setAttribute('y', '0'); activeRect.setAttribute('width', '0'); activeRect.setAttribute('height', '0');
+      activeRect.style.display = 'none';
+      const handleDot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      handleDot.setAttribute('r', '4'); handleDot.setAttribute('fill', '#1a8a40');
+      handleDot.style.display = 'none';
+      const fxPickRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      fxPickRect.setAttribute('x', '0'); fxPickRect.setAttribute('y', '0');
+      fxPickRect.setAttribute('width', '0'); fxPickRect.setAttribute('height', '0');
+      fxPickRect.setAttribute('fill', 'none'); fxPickRect.setAttribute('stroke-width', '2');
+      fxPickRect.setAttribute('stroke-dasharray', '5,3'); fxPickRect.style.display = 'none';
+      const fxRefHover = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      fxRefHover.setAttribute('x', '0'); fxRefHover.setAttribute('y', '0');
+      fxRefHover.setAttribute('width', '0'); fxRefHover.setAttribute('height', '0');
+      fxRefHover.setAttribute('fill', 'none');
+      fxRefHover.setAttribute('stroke', '#42A5F5');
+      fxRefHover.setAttribute('stroke-width', '2');
+      fxRefHover.style.display = 'none';
+      svg.append(rangeRect, activeRect, handleDot, fxPickRect, fxRefHover);
+      gs.appendChild(svg);
+      selSvgEl = svg; selRangeEl = rangeRect; selActiveEl = activeRect; selHandleEl = handleDot; fxPickRectEl = fxPickRect; fxRefHoverEl = fxRefHover;
+    }
+
+    function getCellCoords(td) {
+      const row = td.parentElement;
+      const tbody = row.parentElement;
+      const rowIndex = [...tbody.children].indexOf(row);
+      const cells = [...row.querySelectorAll('td')].filter(t => !t.classList.contains('rn'));
+      const colIndex = cells.indexOf(td);
+      return { r: rowIndex, c: colIndex };
+    }
+
+    function getSelRect(r1, c1, r2, c2) {
+      const gs = document.getElementById('grid-scroll');
+      const table = gs && gs.querySelector('.grid');
+      if (!table || !gs) return null;
+      const rows = table.querySelectorAll('tbody tr');
+      const tr1 = rows[r1], tr2 = rows[r2];
+      if (!tr1 || !tr2) return null;
+      const cells1 = [...tr1.querySelectorAll('td')].filter(t => !t.classList.contains('rn'));
+      const cells2 = [...tr2.querySelectorAll('td')].filter(t => !t.classList.contains('rn'));
+      const cell1 = cells1[c1], cell2 = cells2[c2];
+      if (!cell1 || !cell2) return null;
+      const gsR = gs.getBoundingClientRect();
+      const c1R = cell1.getBoundingClientRect();
+      const c2R = cell2.getBoundingClientRect();
+      return { x: c1R.left - gsR.left + gs.scrollLeft, y: c1R.top - gsR.top + gs.scrollTop, w: c2R.right - c1R.left, h: c2R.bottom - c1R.top };
+    }
+
+    function selRangeLabel(r1, c1, r2, c2) {
+      const cols = c2 - c1 + 1, rows = r2 - r1 + 1;
+      const colL = String.fromCharCode(65 + c1), colR = String.fromCharCode(65 + c2);
+      const range = cols === 1 && rows === 1 ? colL + (r1 + 1) : colL + (r1 + 1) + ':' + colR + (r2 + 1);
+      return { range, cols, rows };
+    }
+
+
+    function selApplyGreen() {
+      if (!selRangeEl || !selActiveEl) return;
+      selRangeEl.setAttribute('stroke', SEL_GREEN); selRangeEl.setAttribute('stroke-width', '1');
+      selRangeEl.setAttribute('stroke-dasharray', 'none'); selRangeEl.setAttribute('fill', 'none');
+      // Active cell
+      const ACT_COLOR = '#1a8a40';
+      selActiveEl.style.display = 'block';
+      selActiveEl.setAttribute('stroke', ACT_COLOR); selActiveEl.setAttribute('stroke-width', '2');
+      selActiveEl.setAttribute('fill', 'none'); selActiveEl.setAttribute('stroke-dasharray', 'none');
+      const ar = getSelRect(selActiveCellRow, selActiveCellCol, selActiveCellRow, selActiveCellCol);
+      if (ar) {
+        selActiveEl.setAttribute('x', ar.x + 0.5); selActiveEl.setAttribute('y', ar.y + 0.5);
+        selActiveEl.setAttribute('width', ar.w); selActiveEl.setAttribute('height', ar.h);
+        if (selHandleEl) {
+          selHandleEl.style.display = 'block';
+          selHandleEl.setAttribute('cx', ar.x + ar.w + 0.5);
+          selHandleEl.setAttribute('cy', ar.y + ar.h + 0.5);
+        }
+      }
+    }
+
+
+    function selRender() {
+      const r1 = Math.min(selStartRow, selEndRow), c1 = Math.min(selStartCol, selEndCol);
+      const r2 = Math.max(selStartRow, selEndRow), c2 = Math.max(selStartCol, selEndCol);
+      if (!selRangeEl) return;
+      const rect = getSelRect(r1, c1, r2, c2);
+      if (rect) { selRangeEl.setAttribute('x', rect.x + 0.5); selRangeEl.setAttribute('y', rect.y + 0.5); selRangeEl.setAttribute('width', rect.w); selRangeEl.setAttribute('height', rect.h); }
+      selApplyGreen();
+      const { range: fbActiveName } = selRangeLabel(selActiveCellRow, selActiveCellCol, selActiveCellRow, selActiveCellCol);
+      document.querySelectorAll('.fb-cell').forEach(c => { c.textContent = fbActiveName; });
+      fbEditorSetValue(DATA[selActiveCellRow] && DATA[selActiveCellRow][selActiveCellCol] !== undefined ? DATA[selActiveCellRow][selActiveCellCol] : '');
+    }
+
+    function selReset() {
+      selStartRow = 0; selStartCol = 0; selEndRow = 0; selEndCol = 0;
+      if (selRangeEl) { selRangeEl.setAttribute('width', '0'); selRangeEl.setAttribute('height', '0'); }
+      if (selActiveEl) selActiveEl.style.display = 'none';
+      document.querySelectorAll('.fb-cell').forEach(c => { c.textContent = 'A1'; });
+      fbEditorSetValue('');
+    }
+
+    document.getElementById('grid-scroll').addEventListener('mousedown', function(e) {
+      const td = e.target.closest('td');
+      if (!td || td.classList.contains('rn')) return;
+      const { r, c } = getCellCoords(td);
+      if (r < 0 || c < 0) return;
+      e.preventDefault();
+
+      if (fxInputMode) {
+        fxPickDragging = true;
+        fxPickAnchor = { r, c };
+        fxInsertRef(fxCellRef(r, c));
+        return;
+      }
+
+      selActiveCellRow = r; selActiveCellCol = c;
+      selApplyGreen();
+      const { range: fbName } = selRangeLabel(r, c, r, c);
+      document.querySelectorAll('.fb-cell').forEach(c => { c.textContent = fbName; });
+      fbEditorSetValue(DATA[r] && DATA[r][c] !== undefined ? DATA[r][c] : '');
+      selStartRow = r; selStartCol = c; selEndRow = r; selEndCol = c;
+      selDragging = true;
+      const rectC = getSelRect(r, c, r, c);
+      if (rectC && selRangeEl) { selRangeEl.setAttribute('x', rectC.x + 0.5); selRangeEl.setAttribute('y', rectC.y + 0.5); selRangeEl.setAttribute('width', rectC.w); selRangeEl.setAttribute('height', rectC.h); }
+    });
+
+    document.addEventListener('mousemove', function(e) {
+      if (fxPickDragging && fxInputMode) {
+        const el = document.elementFromPoint(e.clientX, e.clientY);
+        const td = el && el.closest('td');
+        if (!td || td.classList.contains('rn')) return;
+        const { r, c } = getCellCoords(td);
+        if (r < 0 || c < 0) return;
+        fxInsertRef(fxRangeRef(fxPickAnchor.r, fxPickAnchor.c, r, c));
+        return;
+      }
+      if (!selDragging) return;
+      const el = document.elementFromPoint(e.clientX, e.clientY);
+      const td = el && el.closest('td');
+      if (!td || td.classList.contains('rn')) return;
+      const { r, c } = getCellCoords(td);
+      if (r < 0 || c < 0) return;
+      selEndRow = r; selEndCol = c;
+      selRender();
+    });
+
+    document.addEventListener('mouseup', function() {
+      if (fxPickDragging) {
+        fxPickDragging = false;
+        const el = document.getElementById('fbInput');
+        if (el) el.focus();
+        return;
+      }
+      if (!selDragging) return;
+      selDragging = false;
+      selRender();
+    });
+
+
+    function selectDefaultCell() {
+      initGridSvg();
+      selStartRow = 0; selStartCol = 0; selEndRow = 0; selEndCol = 0;
+      selActiveCellRow = 0; selActiveCellCol = 0;
+      selRender();
+    }
+
+
+    /* ====== FILL SPLIT-BUTTON ====== */
+    (function() {
+      const fillColorBtn = document.getElementById('fillColorBtn');
+      const fillArrowBtn = document.getElementById('fillArrowBtn');
+      const fillMenu     = document.getElementById('fillMenu');
+      const fillYellow   = document.getElementById('fillYellow');
+      const fillClear    = document.getElementById('fillClear');
+      if (!fillColorBtn || !fillArrowBtn || !fillMenu) return;
+
+      function applyFill(color) {
+        const cell = document.querySelector('td.selected');
+        if (cell) cell.style.background = color;
+        fillMenu.classList.remove('open');
+      }
+
+      fillColorBtn.addEventListener('click', function() {
+        applyFill('#fff176');
+      });
+
+      fillArrowBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const r = fillArrowBtn.getBoundingClientRect();
+        fillMenu.style.left = r.left + 'px';
+        fillMenu.style.top  = (r.bottom + 4) + 'px';
+        fillMenu.classList.toggle('open');
+      });
+
+      fillYellow.addEventListener('click', function(e) {
+        e.stopPropagation();
+        applyFill('#fff176');
+      });
+
+      fillClear.addEventListener('click', function(e) {
+        e.stopPropagation();
+        applyFill('');
+      });
+
+      document.addEventListener('click', function() {
+        fillMenu.classList.remove('open');
+      });
+    })();
+
+    /* ====== FILTER SPLIT-BUTTON ====== */
+    (function() {
+      const filterArrowBtn = document.getElementById('filterArrowBtn');
+      const filterMenu     = document.getElementById('filterMenu');
+      if (!filterArrowBtn || !filterMenu) return;
+
+      filterArrowBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const r = filterArrowBtn.getBoundingClientRect();
+        filterMenu.style.left = r.left + 'px';
+        filterMenu.style.top  = (r.bottom + 4) + 'px';
+        filterMenu.classList.toggle('open');
+      });
+
+      filterMenu.querySelectorAll('.split-btn-menu-item').forEach(function(item) {
+        item.addEventListener('click', function(e) {
+          e.stopPropagation();
+          filterMenu.classList.remove('open');
+        });
+      });
+
+      document.addEventListener('click', function() {
+        filterMenu.classList.remove('open');
+      });
+    })();
+
+    /* ====== FORMULA EDITOR ====== */
+    const FX_PALETTE   = ['#2F69C7','#C13737','#724ACD','#0D9467','#BF3A99','#C46709','#0592AA'];
+    const FX_NUM_COLOR = '#235097';   // фиксированный цвет: числа
+    const FX_STR_COLOR = '#0A6F4D';   // фиксированный цвет: текст в кавычках
+    const CYR_TO_LAT = new Map([
+      ['А','A'],['а','a'],['В','B'],['в','b'],['С','C'],['с','c'],
+      ['Е','E'],['е','e'],['Н','H'],['н','h'],['К','K'],['к','k'],
+      ['М','M'],['м','m'],['О','O'],['о','o'],['Р','P'],['р','p'],
+      ['Т','T'],['т','t'],['У','Y'],['у','y'],['Х','X'],['х','x'],
+    ]);
+    function fxNormalize(str) {
+      let out = '';
+      for (let i = 0; i < str.length; i++) out += CYR_TO_LAT.get(str[i]) ?? str[i];
+      return out;
+    }
+    function fxEsc(s) {
+      return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+    // Левосторонний токенизатор: 'ref' | 'num' | 'str' | 'paren'
+    const _REF_RE = /^@?\$?[A-Za-z]{1,3}\$?\d{1,5}(?:\s*:\s*\$?[A-Za-z]{1,3}\$?\d{1,5})?/;
+    const _NUM_RE = /^\d+\.?\d*(?:[eE][+-]?\d+)?/;
+    function fxTokenize(body) {
+      const norm = fxNormalize(body);
+      const tokens = [];
+      let i = 0;
+      while (i < body.length) {
+        const ch = body[i];
+        if (ch === '"') {                                          // строка
+          let j = i + 1;
+          while (j < body.length && body[j] !== '"') j++;
+          if (j < body.length) j++;
+          tokens.push({ type: 'str', start: i, end: j }); i = j; continue;
+        }
+        if (ch === '(' || ch === ')') {                           // скобка
+          tokens.push({ type: 'paren', start: i, end: i + 1 }); i++; continue;
+        }
+        if (!/[A-Za-z]/.test(body[i - 1] ?? '')) {               // ссылка (+ @/$)
+          const m = norm.slice(i).match(_REF_RE);
+          if (m) { tokens.push({ type: 'ref', start: i, end: i + m[0].length }); i += m[0].length; continue; }
+        }
+        if (/\d/.test(ch)) {                                      // число
+          const m = body.slice(i).match(_NUM_RE);
+          if (m) { tokens.push({ type: 'num', start: i, end: i + m[0].length }); i += m[0].length; continue; }
+        }
+        i++;
+      }
+      return tokens;
+    }
+    function fxFindRefs(body) { return fxTokenize(body).filter(t => t.type === 'ref'); }
+    function fxRefKey(text) {
+      return fxNormalize(text.replace(/\s/g, '').toUpperCase());
+    }
+    function fxBuildColorMap(refs, body) {
+      const map = new Map();
+      let idx = 0;
+      refs.forEach(ref => {
+        const key = fxRefKey(body.slice(ref.start, ref.end));
+        if (!map.has(key)) map.set(key, FX_PALETTE[idx++ % FX_PALETTE.length]);
+      });
+      return map;
+    }
+    function fxBuildHTML(plain, withFill) {
+      if (!plain) return '';
+      if (!plain.startsWith('=')) return fxEsc(plain);
+      const body = plain.slice(1);
+      const tokens = fxTokenize(body);
+      const colorMap = fxBuildColorMap(tokens.filter(t => t.type === 'ref'), body);
+      let html = `<span class="fxeq">=</span>`, pos = 0;
+      for (const tok of tokens) {
+        if (tok.start > pos) html += fxEsc(body.slice(pos, tok.start));
+        const text = fxEsc(body.slice(tok.start, tok.end));
+        if (tok.type === 'ref') {
+          const color = colorMap.get(fxRefKey(body.slice(tok.start, tok.end)));
+          const bg = withFill ? `;background:${hexToRgba(color,0.08)};border:1px solid ${hexToRgba(color,0.20)};border-radius:4px;padding:0px 2px;margin:0 1px;display:inline-block;line-height:1.4;` : '';
+          html += `<span class="fb-ref" style="color:${color}${bg}">${text}</span>`;
+        } else if (tok.type === 'num') {
+          html += `<span style="color:${FX_NUM_COLOR}">${text}</span>`;
+        } else if (tok.type === 'str') {
+          html += `<span style="color:${FX_STR_COLOR}">${text}</span>`;
+        } else if (tok.type === 'paren') {
+          html += `<span class="fx-paren" data-ppos="${tok.start + 1}">${text}</span>`;
+        }
+        pos = tok.end;
+      }
+      if (pos < body.length) html += fxEsc(body.slice(pos));
+      return html;
+    }
+    function fxApplyBothBars(plain, activeEl) {
+      const el1 = document.getElementById('fbInput');
+      const el2 = document.getElementById('fbInput2');
+      if (el1 && el1 !== activeEl) el1.innerHTML = fxBuildHTML(plain, false);
+      if (el2 && el2 !== activeEl) el2.innerHTML = fxBuildHTML(plain, true);
+    }
+    function fxSaveCursor(el) {
+      const sel = window.getSelection();
+      if (!sel?.rangeCount || !el.contains(sel.anchorNode)) return null;
+      const range = document.createRange();
+      range.selectNodeContents(el);
+      range.setEnd(sel.getRangeAt(0).startContainer, sel.getRangeAt(0).startOffset);
+      return range.toString().length;
+    }
+    function fxRestoreCursor(el, offset) {
+      if (offset === null) return;
+      const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+      let pos = 0, node;
+      while ((node = walker.nextNode())) {
+        const len = node.textContent.length;
+        if (pos + len >= offset) {
+          try {
+            const sel = window.getSelection();
+            const r = document.createRange();
+            r.setStart(node, Math.min(offset - pos, len));
+            r.collapse(true);
+            sel.removeAllRanges();
+            sel.addRange(r);
+          } catch (_) {}
+          return;
+        }
+        pos += len;
+      }
+      fxCursorToEnd(el);
+    }
+    function fxCursorToEnd(el) {
+      try {
+        const sel = window.getSelection();
+        const r = document.createRange();
+        r.selectNodeContents(el);
+        r.collapse(false);
+        sel.removeAllRanges();
+        sel.addRange(r);
+      } catch (_) {}
+    }
+    /* ====== BRACKET MATCHING (КП 6) ====== */
+    function fxFindMatchingParen(plain, cursorOffset) {
+      if (!plain.startsWith('=') || cursorOffset <= 1) return null;
+      const body = plain.slice(1);
+      const bodyPos = cursorOffset - 1;          // смещение в body
+      const ch = body[bodyPos - 1];              // символ слева от каретки
+      if (ch !== '(' && ch !== ')') return null;
+      const targetPos = bodyPos - 1;
+      const parens = fxTokenize(body)
+        .filter(t => t.type === 'paren')
+        .map(t => ({ p: t.start, c: body[t.start] }));
+      if (ch === ')') {
+        let depth = 0;
+        for (let i = parens.length - 1; i >= 0; i--) {
+          if (parens[i].p > targetPos) continue;
+          parens[i].c === ')' ? depth++ : depth--;
+          if (depth === 0) return { a: targetPos + 1, b: parens[i].p + 1 };
+        }
+      } else {
+        let depth = 0;
+        for (let i = 0; i < parens.length; i++) {
+          if (parens[i].p < targetPos) continue;
+          parens[i].c === '(' ? depth++ : depth--;
+          if (depth === 0) return { a: targetPos + 1, b: parens[i].p + 1 };
+        }
+      }
+      return null; // непарная — не подсвечиваем
+    }
+    function fxUpdateBracketHighlight(el) {
+      el.querySelectorAll('.fx-paren.hl').forEach(s => s.classList.remove('hl'));
+      const plain = (el.innerText || '').replace(/\n/g, '');
+      if (!plain.startsWith('=')) return;
+      const offset = fxSaveCursor(el);
+      if (offset === null) return;
+      const match = fxFindMatchingParen(plain, offset);
+      if (!match) return;
+      el.querySelectorAll('.fx-paren').forEach(span => {
+        const p = parseInt(span.dataset.ppos, 10);
+        if (p === match.a || p === match.b) span.classList.add('hl');
+      });
+    }
+
+    function fxRefToCoords(refText) {
+      const norm = fxNormalize(refText.replace(/\$/g,'').toUpperCase());
+      const m = norm.match(/^([A-Z]{1,3})(\d{1,5})$/);
+      if (!m) return null;
+      let col = 0;
+      for (let i = 0; i < m[1].length; i++) col = col * 26 + (m[1].charCodeAt(i) - 64);
+      col--;
+      return { row: parseInt(m[2], 10) - 1, col };
+    }
+    function fxParseRange(refText) {
+      const parts = refText.split(':');
+      const start = fxRefToCoords(parts[0].trim());
+      const end = parts[1] ? fxRefToCoords(parts[1].trim()) : start;
+      return start && end ? { start, end } : null;
+    }
+    let _fxSvgRects = [];      // variant 1: dashed border only
+    let _fxSvgFillRects = [];  // variant 2: fill + dashed border
+    let _fxActiveRefKey = null; // ref key whose border is solid (clicked in formula bar)
+    function hexToRgba(hex, alpha) {
+      const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+      return `rgba(${r},${g},${b},${alpha})`;
+    }
+    function fxMakeSvgRect(fill, fillOpacity) {
+      const el = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      el.setAttribute('fill', fill); el.setAttribute('fill-opacity', fillOpacity);
+      el.setAttribute('stroke-width', '1.5'); el.setAttribute('stroke-dasharray', '4,3');
+      el.style.display = 'none';
+      return el;
+    }
+    function fxHighlightCells(refs, body) {
+      _fxSvgRects.forEach(r => { r.style.display = 'none'; });
+      _fxSvgFillRects.forEach(r => { r.style.display = 'none'; });
+      if (!refs.length) return;
+      const colorMap = fxBuildColorMap(refs, body);
+      refs.forEach((ref, i) => {
+        const refText = body.slice(ref.start, ref.end);
+        const color = colorMap.get(fxRefKey(refText));
+        const range = fxParseRange(refText);
+        if (!range || !selSvgEl) return;
+        const r1 = Math.min(range.start.row, range.end.row), r2 = Math.max(range.start.row, range.end.row);
+        const c1 = Math.min(range.start.col, range.end.col), c2 = Math.max(range.start.col, range.end.col);
+        const rect = getSelRect(r1, c1, r2, c2);
+        if (!rect) return;
+        const isActive = _fxActiveRefKey !== null && fxRefKey(refText) === _fxActiveRefKey;
+        const dash = isActive ? 'none' : '4,3';
+        // Variant 1 — border only
+        if (!_fxSvgRects[i]) { const el = fxMakeSvgRect('none', '0'); selSvgEl.appendChild(el); _fxSvgRects.push(el); }
+        const sr = _fxSvgRects[i];
+        sr.setAttribute('stroke', color);
+        sr.setAttribute('stroke-dasharray', dash);
+        sr.setAttribute('x', rect.x+1); sr.setAttribute('y', rect.y+1);
+        sr.setAttribute('width', rect.w-2); sr.setAttribute('height', rect.h-2);
+        sr.style.display = 'block';
+        // Variant 2 — fill + border
+        if (!_fxSvgFillRects[i]) { const el = fxMakeSvgRect('none', '0.05'); selSvgEl.appendChild(el); _fxSvgFillRects.push(el); }
+        const sf = _fxSvgFillRects[i];
+        sf.setAttribute('stroke', color); sf.setAttribute('fill', color);
+        sf.setAttribute('stroke-dasharray', dash);
+        sf.setAttribute('x', rect.x+1); sf.setAttribute('y', rect.y+1);
+        sf.setAttribute('width', rect.w-2); sf.setAttribute('height', rect.h-2);
+        sf.style.display = isActive ? 'block' : 'none';
+      });
+    }
+    function fxJumpToRef(refText) {
+      _fxActiveRefKey = fxRefKey(refText.replace(/^@/, ''));
+      const plain = _fbLastPlain;
+      if (plain.startsWith('=')) fxHighlightCells(fxFindRefs(plain.slice(1)), plain.slice(1));
+    }
+    function fxClearRefHover() { _fxActiveRefKey = null; }
+
+    let _fbLastPlain = '';
+    let _fbComposing = false;
+
+    /* ====== FORMULA CELL PICK ====== */
+    let fxInputMode = false;
+    let fxVariant = 1;         // which formula bar is active (1 or 2)
+    let fxPendingRefStart = null;
+    let fxPendingRefEnd = null;
+    let fxPickDragging = false;
+    let fxPickAnchor = null;
+
+    function fxCellRef(r, c) { return String.fromCharCode(65 + c) + (r + 1); }
+    function fxRangeRef(r1, c1, r2, c2) {
+      const a = fxCellRef(Math.min(r1,r2), Math.min(c1,c2));
+      const b = fxCellRef(Math.max(r1,r2), Math.max(c1,c2));
+      return a === b ? a : a + ':' + b;
+    }
+    function fxGetCursorOffset(el) {
+      const sel = window.getSelection();
+      if (!sel?.rangeCount || !el.contains(sel.anchorNode)) return (el.innerText || '').length;
+      const r = document.createRange();
+      r.selectNodeContents(el);
+      r.setEnd(sel.getRangeAt(0).startContainer, sel.getRangeAt(0).startOffset);
+      return r.toString().length;
+    }
+    function fxActiveEl() { return document.getElementById(fxVariant === 2 ? 'fbInput2' : 'fbInput'); }
+    function fxOtherEl()  { return document.getElementById(fxVariant === 2 ? 'fbInput' : 'fbInput2'); }
+
+    function fxInsertRef(refText) {
+      const el = fxActiveEl();
+      if (!el) return;
+      let plain = (el.innerText || '').replace(/\n/g, '');
+      if (fxPendingRefStart !== null) {
+        plain = plain.slice(0, fxPendingRefStart) + refText + plain.slice(fxPendingRefEnd);
+        fxPendingRefEnd = fxPendingRefStart + refText.length;
+      } else {
+        const cur = fxGetCursorOffset(el);
+        plain = plain.slice(0, cur) + refText + plain.slice(cur);
+        fxPendingRefStart = cur;
+        fxPendingRefEnd = cur + refText.length;
+      }
+      _fbLastPlain = '';
+      _fbLastPlain = plain;
+      el.innerHTML = fxBuildHTML(plain, fxVariant === 2);
+      fxApplyBothBars(plain, el);
+      fxRestoreCursor(el, fxPendingRefEnd);
+      if (plain.startsWith('=')) fxHighlightCells(fxFindRefs(plain.slice(1)), plain.slice(1));
+      document.querySelectorAll('.fb-cell').forEach(c => { c.textContent = refText; });
+    }
+    function fxEnterMode(v) { fxInputMode = true; fxVariant = v; }
+    function fxExitMode() {
+      fxInputMode = false;
+      fxPendingRefStart = null; fxPendingRefEnd = null;
+      fxPickDragging = false; fxPickAnchor = null;
+      fxClearRefHover();
+      fxHighlightCells([], '');
+    }
+    function fbEditorRecolor(el, v) {
+      if (!el) return;
+      const plain = (el.innerText || '').replace(/\n/g, '');
+      if (plain === _fbLastPlain && v === fxVariant) return;
+      _fbLastPlain = plain; fxVariant = v;
+      const offset = fxSaveCursor(el);
+      el.innerHTML = fxBuildHTML(plain, v === 2);
+      fxApplyBothBars(plain, el);
+      fxRestoreCursor(el, offset);
+      if (plain.startsWith('=')) fxHighlightCells(fxFindRefs(plain.slice(1)), plain.slice(1));
+      else fxHighlightCells([], '');
+    }
+    function fbEditorSetValue(plain) {
+      const s = String(plain);
+      if (s === _fbLastPlain) return;
+      _fbLastPlain = s;
+      const el1 = document.getElementById('fbInput'), el2 = document.getElementById('fbInput2');
+      if (el1) el1.innerHTML = fxBuildHTML(s, false);
+      if (el2) el2.innerHTML = fxBuildHTML(s, true);
+      fxHighlightCells([], '');
+    }
+    function initFormulaEditor() {
+      [
+        { id: 'fbInput',  v: 1 },
+        { id: 'fbInput2', v: 2 },
+      ].forEach(({ id, v }) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.addEventListener('focus', () => {
+          fxVariant = v;
+          const plain = (el.innerText || '').replace(/\n/g, '');
+          if (plain.startsWith('=')) fxEnterMode(v);
+          // re-apply highlights for this variant
+          if (plain.startsWith('=')) fxHighlightCells(fxFindRefs(plain.slice(1)), plain.slice(1));
+        });
+        el.addEventListener('input', () => {
+          if (_fbComposing) return;
+          fxPendingRefStart = null; fxPendingRefEnd = null;
+          fbEditorRecolor(el, v);
+          const plain = (el.innerText || '').replace(/\n/g, '');
+          if (plain.startsWith('=')) fxEnterMode(v); else fxExitMode();
+        });
+        el.addEventListener('paste', e => {
+          e.preventDefault();
+          const text = (e.clipboardData.getData('text/plain') || '').replace(/\n/g, '');
+          document.execCommand('insertText', false, text);
+        });
+        el.addEventListener('keydown', e => {
+          if (e.key === 'Enter') { e.preventDefault(); fxExitMode(); el.blur(); }
+          if (e.key === 'Escape') { e.preventDefault(); fxExitMode(); el.blur(); }
+        });
+        el.addEventListener('compositionstart', () => { _fbComposing = true; });
+        el.addEventListener('compositionend', () => { _fbComposing = false; fbEditorRecolor(el, v); });
+        el.addEventListener('blur', () => { if (!fxPickDragging) fxExitMode(); });
+        el.addEventListener('click', e => {
+          const ref = e.target.closest('.fb-ref');
+          if (ref) fxJumpToRef(ref.textContent); else fxClearRefHover();
+        });
+      });
+      document.addEventListener('selectionchange', () => {
+        const active = document.activeElement;
+        if (active?.id === 'fbInput' || active?.id === 'fbInput2') {
+          fxUpdateBracketHighlight(active);
+        }
+      });
+    }
+
+    /* ====== INIT ====== */
+    renderSheet(); initFormulaEditor();
+  </script>
+</body>
+
+</html>
