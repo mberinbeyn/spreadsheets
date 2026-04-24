@@ -1,0 +1,591 @@
+const { useState, useMemo } = React;
+
+
+const PALETTES = {
+  v1: {
+    light: [
+      ["#000000","#29282D","#4D4E60","#696B7F","#86889C","#D9DCE5","#FFFFFF"],
+      ["#600F23","#801624","#9F1E25","#C02725","#DE3024","#ED7169","#EB3222"],
+      ["#63300D","#874416","#A95B1F","#CC7429","#EF8E33","#F6C272","#FCEDC0"],
+      ["#7A4414","#985F1E","#A56D24","#D5A036","#F5C544","#FBE573","#FEFF52"],
+      ["#215626","#2C6930","#409242","#5BB866","#74C983","#95DAA0","#74FB4D"],
+      ["#09234C","#13336E","#2256B1","#3374F7","#639EF8","#B2DBFD","#76F9FE"],
+      ["#130E4A","#1F166B","#4626AF","#7B38F4","#9969F5","#D7B6FA","#EA33F4"],
+    ],
+    dark: [
+      ["#000000","#28282C","#4D4E5F","#696C7E","#86899B","#D9DCE5","#FEFFFE"],
+      ["#610F23","#7F1725","#A11D25","#BF2725","#DE3025","#EB726A","#EA3222"],
+      ["#63300E","#864416","#A95A21","#CC7329","#EF8D35","#F6C270","#FCEDC1"],
+      ["#7B4314","#995E21","#A76C25","#D69F36","#F5C543","#F9E672","#FEFE52"],
+      ["#235527","#2E6831","#409241","#5BB766","#75C982","#94DAA0","#75FA4C"],
+      ["#0A2349","#14336E","#2156B2","#3474F6","#649DF7","#B2DBFC","#77F9FE"],
+      ["#120F49","#20156C","#4626B1","#7A38F6","#9968F7","#D7B6FB","#EA33F5"],
+    ],
+  },
+  v2: {
+    light: [
+      ["#000000","#252429","#6C6C77","#868994","#B4B7BF","#D3D4D9","#FFFFFF"],
+      ["#5D2221","#95282A","#C13637","#EF4344","#F9B4B4","#FBDAD9","#FA0100"],
+      ["#5C3309","#934C07","#C56608","#E56A00","#FBCC9D","#FEE5CE","#E56A00"],
+      ["#483804","#614907","#997204","#FEC006","#FED86A","#FFEBB3","#B29F00"],
+      ["#124A28","#147638","#1A9D4C","#22C55E","#A7E7BD","#D2F2DE","#00B142"],
+      ["#25385A","#235097","#2E68C6","#3A82F5","#B0CDFC","#D6E5FD","#3180FC"],
+      ["#422E70","#5837A3","#714ACD","#A07DF6","#D1BEFC","#E8DEFD","#9233FE"],
+    ],
+    dark: [
+      ["#42424A","#5D5D67","#797C85","#979AA3","#B4B7C0","#E2E3E6","#F3F4F6"],
+      ["#5D2222","#C13637","#EF4343","#F26869","#F8B5B4","#FBDAD8","#FE6666"],
+      ["#5C3309","#C46607","#F67F0C","#F8983C","#FACC9F","#FDE5CE","#E56A00"],
+      ["#604A06","#CB9A05","#FDC009","#FDCD38","#FEE59B","#FEF2CC","#B1A000"],
+      ["#124A28","#1A9D4A","#22C55D","#4DD07D","#A6E8BE","#D3F2DD","#00B242"],
+      ["#25395A","#2F68C7","#3982F4","#639AF8","#B0CDFC","#D7E5FD","#669FFD"],
+      ["#422E71","#714ACE","#8A5CF6","#A07DF8","#D1BEFA","#E8DEFE","#AD65FE"],
+    ],
+  },
+};
+
+// WCAG contrast calculations
+function hexToRgb(hex) {
+  const h = hex.replace("#", "");
+  return [
+    parseInt(h.slice(0, 2), 16),
+    parseInt(h.slice(2, 4), 16),
+    parseInt(h.slice(4, 6), 16),
+  ];
+}
+
+function relLum([r, g, b]) {
+  const srgb = [r, g, b].map((v) => {
+    const c = v / 255;
+    return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+  });
+  return 0.2126 * srgb[0] + 0.7152 * srgb[1] + 0.0722 * srgb[2];
+}
+
+function contrast(c1, c2) {
+  const l1 = relLum(hexToRgb(c1));
+  const l2 = relLum(hexToRgb(c2));
+  const lighter = Math.max(l1, l2);
+  const darker = Math.min(l1, l2);
+  return (lighter + 0.05) / (darker + 0.05);
+}
+
+function PalettePrototype() {
+  const [theme, setTheme] = useState("light");
+  const [variant, setVariant] = useState("v1");
+
+  // Две таблицы: textTable (каждая ячейка — цвет текста из палитры на её позиции)
+  // и fillTable (каждая ячейка — заливка из палитры на её позиции)
+  const buildTextDefaults = () => {
+    const styles = {};
+    for (let r = 0; r < 7; r++) {
+      for (let c = 0; c < 7; c++) {
+        styles[`${r}-${c}`] = { textSlot: { row: r, col: c }, fillSlot: null };
+      }
+    }
+    return styles;
+  };
+  const buildFillDefaults = () => {
+    const styles = {};
+    for (let r = 0; r < 7; r++) {
+      for (let c = 0; c < 7; c++) {
+        styles[`${r}-${c}`] = { textSlot: null, fillSlot: { row: r, col: c } };
+      }
+    }
+    return styles;
+  };
+
+  const [textTable, setTextTable] = useState(buildTextDefaults);
+  const [fillTable, setFillTable] = useState(buildFillDefaults);
+  const [selectedCell, setSelectedCell] = useState(null); // { table: "text"|"fill", id: "r-c" }
+  const [pickerMode, setPickerMode] = useState(null);
+  const [showFail, setShowFail] = useState(true);
+
+  const palette = PALETTES[variant][theme];
+  const pageBg = theme === "light" ? "#FFFFFF" : "#141417";
+  const defaultText = theme === "light" ? "#000000" : "#FFFFFF";
+  const borderColor = theme === "light" ? "#E5E5E5" : "#2E2E33";
+  const panelBg = theme === "light" ? "#F7F7F8" : "#1C1C20";
+  const mutedText = theme === "light" ? "#6B6B74" : "#9A9AA3";
+
+  const cellId = (r, c) => `${r}-${c}`;
+
+  // Слот → HEX через текущую активную палитру
+  const resolveSlot = (slot) => {
+    if (!slot) return null;
+    return palette[slot.row][slot.col];
+  };
+
+  const getTableStyles = (table) => (table === "text" ? textTable : fillTable);
+  const getSetter = (table) => (table === "text" ? setTextTable : setFillTable);
+
+  const getCellColors = (table, id) => {
+    const style = getTableStyles(table)[id];
+    if (!style) return { color: null, backgroundColor: null };
+    return {
+      color: resolveSlot(style.textSlot),
+      backgroundColor: resolveSlot(style.fillSlot),
+    };
+  };
+
+  const applySlot = (type, slot) => {
+    if (!selectedCell) return;
+    const setter = getSetter(selectedCell.table);
+    setter((prev) => {
+      const current = prev[selectedCell.id] || { textSlot: null, fillSlot: null };
+      const next = { ...current };
+      if (type === "text") next.textSlot = slot;
+      if (type === "fill") next.fillSlot = slot;
+      return { ...prev, [selectedCell.id]: next };
+    });
+    setPickerMode(null);
+  };
+
+  const resetCell = () => {
+    if (!selectedCell) return;
+    const setter = getSetter(selectedCell.table);
+    setter((prev) => ({
+      ...prev,
+      [selectedCell.id]: { textSlot: null, fillSlot: null },
+    }));
+    setPickerMode(null);
+  };
+
+  const resetAll = () => {
+    setTextTable(buildTextDefaults());
+    setFillTable(buildFillDefaults());
+    setPickerMode(null);
+    setSelectedCell(null);
+  };
+
+  // Compute per-cell contrast & status
+  const cellStatus = (table, r, c) => {
+    const id = cellId(r, c);
+    const { color, backgroundColor } = getCellColors(table, id);
+    const textColor = color || defaultText;
+    const fillColor = backgroundColor || pageBg;
+    const cr = contrast(textColor, fillColor);
+    if (cr >= 4.5) return { cr, level: "PASS" };
+    if (cr >= 3.0) return { cr, level: "LG" };
+    return { cr, level: "FAIL" };
+  };
+
+  const computeStats = (table) => {
+    let pass = 0, lg = 0, fail = 0;
+    for (let r = 0; r < 7; r++) {
+      for (let c = 0; c < 7; c++) {
+        const { level } = cellStatus(table, r, c);
+        if (level === "PASS") pass++;
+        else if (level === "LG") lg++;
+        else fail++;
+      }
+    }
+    const pct = (n) => Math.round((n / 49) * 100);
+    return { pass: pct(pass), lg: pct(lg), fail: pct(fail) };
+  };
+
+  const textStats = useMemo(() => computeStats("text"), [textTable, theme, variant]); // eslint-disable-line
+  const fillStats = useMemo(() => computeStats("fill"), [fillTable, theme, variant]); // eslint-disable-line
+
+  // Segmented control style
+  const segment = (active) => ({
+    padding: "6px 14px",
+    fontSize: 13,
+    borderRadius: 6,
+    cursor: "pointer",
+    border: "none",
+    background: active ? (theme === "light" ? "#FFFFFF" : "#2E2E33") : "transparent",
+    color: active ? (theme === "light" ? "#000" : "#FFF") : mutedText,
+    fontWeight: active ? 500 : 400,
+    boxShadow: active ? "0 1px 2px rgba(0,0,0,0.06)" : "none",
+    transition: "all 0.15s ease",
+  });
+
+  const segGroup = {
+    display: "inline-flex",
+    background: panelBg,
+    padding: 3,
+    borderRadius: 8,
+    border: `1px solid ${borderColor}`,
+  };
+
+  return (
+    <div
+      style={{
+        minHeight: "100vh",
+        background: pageBg,
+        color: defaultText,
+        fontFamily:
+          "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif",
+        padding: 32,
+        transition: "background 0.2s ease, color 0.2s ease",
+      }}
+    >
+      {/* Top controls */}
+      <div style={{ display: "flex", gap: 16, marginBottom: 32, alignItems: "center", flexWrap: "wrap" }}>
+        <div style={segGroup}>
+          <button style={segment(theme === "light")} onClick={() => setTheme("light")}>
+            Светлый
+          </button>
+          <button style={segment(theme === "dark")} onClick={() => setTheme("dark")}>
+            Тёмный
+          </button>
+        </div>
+
+        <div style={segGroup}>
+          <button style={segment(variant === "v1")} onClick={() => setVariant("v1")}>
+            Вариант 1
+          </button>
+          <button style={segment(variant === "v2")} onClick={() => setVariant("v2")}>
+            Вариант 2
+          </button>
+        </div>
+
+        <button
+          onClick={resetAll}
+          style={{
+            padding: "7px 14px",
+            fontSize: 13,
+            borderRadius: 8,
+            border: `1px solid ${borderColor}`,
+            background: "transparent",
+            color: mutedText,
+            cursor: "pointer",
+            fontWeight: 400,
+          }}
+        >
+          Сбросить всё
+        </button>
+
+        <label
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 8,
+            fontSize: 13,
+            color: defaultText,
+            cursor: "pointer",
+            userSelect: "none",
+          }}
+        >
+          <input
+            type="checkbox"
+            checked={showFail}
+            onChange={(e) => setShowFail(e.target.checked)}
+            style={{
+              width: 14,
+              height: 14,
+              accentColor: "#D14343",
+              cursor: "pointer",
+              margin: 0,
+            }}
+          />
+          Показывать FAIL
+        </label>
+      </div>
+
+      {/* Two tables layout */}
+      <div style={{ display: "flex", gap: 32, alignItems: "flex-start", flexWrap: "wrap" }}>
+        {/* LEFT COLUMN: two tables stacked */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+          {/* Table 1 — Текст */}
+          <div>
+            <div style={{ fontSize: 13, fontWeight: 500, marginBottom: 8, color: defaultText }}>
+              Цвет текста
+            </div>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(7, 100px)",
+                border: `1px solid ${borderColor}`,
+                borderRadius: 4,
+                overflow: "hidden",
+              }}
+            >
+              {Array.from({ length: 7 }).map((_, r) =>
+                Array.from({ length: 7 }).map((__, c) => {
+                  const id = cellId(r, c);
+                  const { color, backgroundColor } = getCellColors("text", id);
+                  const isSelected = selectedCell?.table === "text" && selectedCell?.id === id;
+                  const { level } = cellStatus("text", r, c);
+                  const isFail = showFail && level === "FAIL" && (color || backgroundColor);
+                  return (
+                    <div
+                      key={id}
+                      onClick={() => {
+                        setSelectedCell({ table: "text", id });
+                        setPickerMode(null);
+                      }}
+                      style={{
+                        width: 100,
+                        height: 20,
+                        padding: "0 8px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "flex-end",
+                        fontSize: 12,
+                        fontVariantNumeric: "tabular-nums",
+                        color: color || defaultText,
+                        backgroundColor: backgroundColor || "transparent",
+                        borderRight: c < 6 ? `1px solid ${borderColor}` : "none",
+                        borderBottom: r < 6 ? `1px solid ${borderColor}` : "none",
+                        outline: isSelected
+                          ? `2px solid ${theme === "light" ? "#0B6BCB" : "#4A9EFF"}`
+                          : isFail
+                          ? `2px solid #D14343`
+                          : "none",
+                        outlineOffset: -2,
+                        cursor: "pointer",
+                        userSelect: "none",
+                        position: "relative",
+                        zIndex: isSelected ? 2 : isFail ? 1 : 0,
+                        transition: "outline 0.15s ease",
+                      }}
+                    >
+                      3 020 800
+                    </div>
+                  );
+                })
+              )}
+            </div>
+            {/* Stats for text table */}
+            <div
+              style={{
+                marginTop: 10,
+                fontSize: 12,
+                color: mutedText,
+              }}
+            >
+              <span style={{ color: "#22A06B", fontWeight: 500 }}>AA 4.5+: {textStats.pass}%</span>
+              <span style={{ margin: "0 8px" }}>•</span>
+              <span style={{ color: theme === "light" ? "#B88217" : "#E5A412", fontWeight: 500 }}>AA-lg: {textStats.lg}%</span>
+              <span style={{ margin: "0 8px" }}>•</span>
+              <span style={{ color: "#D14343", fontWeight: 500 }}>FAIL: {textStats.fail}%</span>
+            </div>
+          </div>
+
+          {/* Table 2 — Заливка */}
+          <div>
+            <div style={{ fontSize: 13, fontWeight: 500, marginBottom: 8, color: defaultText }}>
+              Заливка
+            </div>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(7, 100px)",
+                border: `1px solid ${borderColor}`,
+                borderRadius: 4,
+                overflow: "hidden",
+              }}
+            >
+              {Array.from({ length: 7 }).map((_, r) =>
+                Array.from({ length: 7 }).map((__, c) => {
+                  const id = cellId(r, c);
+                  const { color, backgroundColor } = getCellColors("fill", id);
+                  const isSelected = selectedCell?.table === "fill" && selectedCell?.id === id;
+                  const { level } = cellStatus("fill", r, c);
+                  const isFail = showFail && level === "FAIL" && (color || backgroundColor);
+                  return (
+                    <div
+                      key={id}
+                      onClick={() => {
+                        setSelectedCell({ table: "fill", id });
+                        setPickerMode(null);
+                      }}
+                      style={{
+                        width: 100,
+                        height: 20,
+                        padding: "0 8px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "flex-end",
+                        fontSize: 12,
+                        fontVariantNumeric: "tabular-nums",
+                        color: color || defaultText,
+                        backgroundColor: backgroundColor || "transparent",
+                        borderRight: c < 6 ? `1px solid ${borderColor}` : "none",
+                        borderBottom: r < 6 ? `1px solid ${borderColor}` : "none",
+                        outline: isSelected
+                          ? `2px solid ${theme === "light" ? "#0B6BCB" : "#4A9EFF"}`
+                          : isFail
+                          ? `2px solid #D14343`
+                          : "none",
+                        outlineOffset: -2,
+                        cursor: "pointer",
+                        userSelect: "none",
+                        position: "relative",
+                        zIndex: isSelected ? 2 : isFail ? 1 : 0,
+                        transition: "outline 0.15s ease",
+                      }}
+                    >
+                      3 020 800
+                    </div>
+                  );
+                })
+              )}
+            </div>
+            {/* Stats for fill table */}
+            <div
+              style={{
+                marginTop: 10,
+                fontSize: 12,
+                color: mutedText,
+              }}
+            >
+              <span style={{ color: "#22A06B", fontWeight: 500 }}>AA 4.5+: {fillStats.pass}%</span>
+              <span style={{ margin: "0 8px" }}>•</span>
+              <span style={{ color: theme === "light" ? "#B88217" : "#E5A412", fontWeight: 500 }}>AA-lg: {fillStats.lg}%</span>
+              <span style={{ margin: "0 8px" }}>•</span>
+              <span style={{ color: "#D14343", fontWeight: 500 }}>FAIL: {fillStats.fail}%</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Side panel */}
+        <div
+          style={{
+            minWidth: 280,
+            padding: 16,
+            background: panelBg,
+            borderRadius: 12,
+            border: `1px solid ${borderColor}`,
+          }}
+        >
+          <div style={{ fontSize: 13, fontWeight: 500, marginBottom: 4 }}>
+            {selectedCell
+              ? `${selectedCell.table === "text" ? "Текст" : "Заливка"} · ячейка ${parseInt(selectedCell.id.split("-")[0]) + 1}:${parseInt(selectedCell.id.split("-")[1]) + 1}`
+              : "Выберите ячейку"}
+          </div>
+          <div style={{ fontSize: 12, color: mutedText, marginBottom: 16 }}>
+            {selectedCell ? "Примените цвет к выбранной ячейке" : "Кликните на любую ячейку"}
+          </div>
+
+          {selectedCell && (
+            <>
+              <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
+                <button
+                  onClick={() => setPickerMode(pickerMode === "text" ? null : "text")}
+                  style={{
+                    flex: 1,
+                    padding: "8px 12px",
+                    fontSize: 13,
+                    borderRadius: 6,
+                    border: `1px solid ${pickerMode === "text" ? (theme === "light" ? "#0B6BCB" : "#4A9EFF") : borderColor}`,
+                    background: pickerMode === "text" ? (theme === "light" ? "#E8F1FB" : "#1E3048") : "transparent",
+                    color: defaultText,
+                    cursor: "pointer",
+                    fontWeight: 500,
+                  }}
+                >
+                  Текст
+                </button>
+                <button
+                  onClick={() => setPickerMode(pickerMode === "fill" ? null : "fill")}
+                  style={{
+                    flex: 1,
+                    padding: "8px 12px",
+                    fontSize: 13,
+                    borderRadius: 6,
+                    border: `1px solid ${pickerMode === "fill" ? (theme === "light" ? "#0B6BCB" : "#4A9EFF") : borderColor}`,
+                    background: pickerMode === "fill" ? (theme === "light" ? "#E8F1FB" : "#1E3048") : "transparent",
+                    color: defaultText,
+                    cursor: "pointer",
+                    fontWeight: 500,
+                  }}
+                >
+                  Заливка
+                </button>
+              </div>
+
+              <button
+                onClick={resetCell}
+                style={{
+                  width: "100%",
+                  padding: "8px 12px",
+                  fontSize: 13,
+                  borderRadius: 6,
+                  border: `1px solid ${borderColor}`,
+                  background: "transparent",
+                  color: mutedText,
+                  cursor: "pointer",
+                  marginBottom: 16,
+                }}
+              >
+                Сбросить ячейку
+              </button>
+
+              {pickerMode && (
+                <div
+                  style={{
+                    padding: 12,
+                    background: theme === "light" ? "#FFFFFF" : "#0F0F12",
+                    borderRadius: 8,
+                    border: `1px solid ${borderColor}`,
+                  }}
+                >
+                  <button
+                    onClick={() => applySlot(pickerMode, null)}
+                    style={{
+                      width: "100%",
+                      padding: "6px 8px",
+                      fontSize: 12,
+                      borderRadius: 4,
+                      border: `1px solid ${borderColor}`,
+                      background: "transparent",
+                      color: defaultText,
+                      cursor: "pointer",
+                      marginBottom: 10,
+                      textAlign: "left",
+                    }}
+                  >
+                    ⊘ Убрать цвет
+                  </button>
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "repeat(7, 1fr)",
+                      gap: 4,
+                    }}
+                  >
+                    {palette.map((rowArr, rowIdx) =>
+                      rowArr.map((hex, colIdx) => {
+                        const tableStyles = getTableStyles(selectedCell.table);
+                        const currentStyle = tableStyles[selectedCell.id] || {};
+                        const activeSlot = pickerMode === "text" ? currentStyle.textSlot : currentStyle.fillSlot;
+                        const isActive = activeSlot && activeSlot.row === rowIdx && activeSlot.col === colIdx;
+                        const isLightHex = ["#ffffff", "#feffff", "#fffffe", "#f3f4f6"].includes(hex.toLowerCase());
+                        return (
+                          <button
+                            key={`${rowIdx}-${colIdx}`}
+                            onClick={() => applySlot(pickerMode, { row: rowIdx, col: colIdx })}
+                            title={`К${colIdx + 1} (${hex})`}
+                            style={{
+                              width: 28,
+                              height: 28,
+                              borderRadius: "50%",
+                              border: isLightHex ? `1px solid ${borderColor}` : "none",
+                              outline: isActive
+                                ? `2px solid ${theme === "light" ? "#0B6BCB" : "#4A9EFF"}`
+                                : "none",
+                              outlineOffset: 2,
+                              backgroundColor: hex,
+                              cursor: "pointer",
+                              padding: 0,
+                            }}
+                          />
+                        );
+                      })
+                    )}
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const root = ReactDOM.createRoot(document.getElementById("root"));
+root.render(<PalettePrototype />);
